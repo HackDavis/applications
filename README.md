@@ -27,7 +27,8 @@ pip3 install -r requirements.txt (or) make install
 ## Running
 
 ```bash
-export FLASK_APP=app.py && flask run (or) make
+set FLASK_APP=app.py && flask run (or) make run-windows (Windows)
+export FLASK_APP=app.py && flask run (or) make (Other)
 ```
 
 ## Formatting

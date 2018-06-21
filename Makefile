@@ -1,6 +1,9 @@
 all:
 	export FLASK_APP=app.py && flask run
 
+run-windows:
+	set FLASK_APP=app.py && flask run
+
 install:
 	pip3 install -r requirements.txt
 

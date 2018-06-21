@@ -6,7 +6,7 @@ commands = {
     'run-windows': "set FLASK_APP=app.py && flask run",
     'install': "pip3 install -r requirements.txt && cd applications-frontend && npm install && cd ..",
     'format': "autopep8 --in-place --aggressive --aggressive *.py",
-    'deploy': "pm2 start start.sh",
+    'deploy': "pm2 start deploy.sh",
     'publish-deps': 'pip3 freeze > requirements.txt'
 }
 
@@ -19,3 +19,4 @@ if __name__ == "__main__":
         subprocess.run(commands[args.command], shell=True)
     except:
         pass # hush
+

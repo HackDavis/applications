@@ -41,6 +41,6 @@ autopep8 --in-place --aggressive --aggressive *.py (or) python3 start.py format
 
 ```bash
 # Need to install pm2 for this: http://pm2.keymetrics.io/docs/usage/quick-start/#installation
-pm2 start start.sh (or) python3 start.py deploy
+pm2 start deploy.sh (or) python3 start.py deploy
 ```
 

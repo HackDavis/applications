@@ -1,9 +1,9 @@
-import os
+import subprocess
 import argparse
 
 commands = {
-    'all': "export FLASK_APP=app.py; flask run",
-    'run-windows': "set FLASK_APP=app.py; flask run",
+    'all': "export FLASK_APP=app.py && flask run",
+    'run-windows': "set FLASK_APP=app.py && flask run",
     'install': "pip3 install -r requirements.txt",
     'format': "autopep8 --in-place --aggressive --aggressive *.py",
     'deploy': "pm2 start start.sh",
@@ -15,4 +15,7 @@ parser.add_argument("command", help="[all | install | run-windows | format | dep
 
 if __name__ == "__main__":
     args = parser.parse_args()
-    os.system(commands[args.command])
+    try:
+        subprocess.run(commands[args.command], shell=True)
+    except:
+        pass # hush

@@ -4,7 +4,7 @@ import argparse
 commands = {
     'all': "export FLASK_APP=app.py && flask run",
     'run-windows': "set FLASK_APP=app.py && flask run",
-    'install': "pip3 install -r requirements.txt",
+    'install': "pip3 install -r requirements.txt && cd applications-frontend && npm install && cd ..",
     'format': "autopep8 --in-place --aggressive --aggressive *.py",
     'deploy': "pm2 start start.sh",
     'publish-deps': 'pip3 freeze > requirements.txt'

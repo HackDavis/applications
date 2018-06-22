@@ -19,10 +19,11 @@ def exit_with_error(error_message):
 commands = {
     'run-windows': "set FLASK_APP=app.py && flask run",
     'run-other': "export FLASK_APP=app.py && flask run",
-    'install': "pip3 install -r requirements.txt && cd applications-frontend && npm install && cd ..",
+    'install': "pip3 install -r requirements.txt",
     'format': "autopep8 --in-place --aggressive --aggressive *.py",
     'deploy': "pm2 start deploy.sh",
-    'save-deps': 'pip3 freeze > requirements.txt'}
+    'save-deps': 'pip3 freeze > requirements.txt',
+    'install-npm': "cd applications-frontend && npm install && cd .."}
 
 parser = argparse.ArgumentParser(description='Manage the Flask App')
 parser.add_argument(

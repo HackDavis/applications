@@ -15,6 +15,8 @@ pip3 install virtualenv
 virtualenv -p python3 venv
 venv\Scripts\activate (Windows)
 source venv/bin/activate (Other)
+cd applications-frontend
+npm install
 
 # Use "deactivate" to exit virtual environment
 ```

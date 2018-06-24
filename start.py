@@ -42,5 +42,5 @@ if __name__ == "__main__":
 
     try:
         subprocess.run(commands[args.command], shell=True)
-    except BaseException:
+    except KeyboardInterrupt:
         pass  # hush

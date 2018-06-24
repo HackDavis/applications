@@ -23,7 +23,7 @@ commands = {
     'format': "autopep8 --in-place --aggressive --aggressive *.py",
     'deploy': "pm2 start deploy.sh",
     'save-deps': 'pip3 freeze > requirements.txt',
-    'install-npm': "cd applications-frontend && npm install && cd .."}
+    'install-client': "cd applications-frontend && npm install && cd .."}
 
 parser = argparse.ArgumentParser(description='Manage the Flask App')
 parser.add_argument(

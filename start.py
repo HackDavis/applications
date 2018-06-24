@@ -34,13 +34,13 @@ parser.add_argument(
 
 if __name__ == "__main__":
     args = parser.parse_args()
-    command = args.command.strip()  # strip all whitespace
+    command = args.command
 
     # check if command is a valid option
     if command not in commands:
         exit_with_error(f"command {command} is not valid!")
 
     try:
-        subprocess.run(commands[args.command], shell=True)
+        subprocess.run(commands[command], shell=True)
     except KeyboardInterrupt:
         pass  # hush

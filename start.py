@@ -17,29 +17,31 @@ def exit_with_error(error_message):
 
 
 commands = {
+    'run-other': "export FLASK_APP=app.py && flask run",
     'run-windows': "set FLASK_APP=app.py && flask run",
     'run-other': "export FLASK_APP=app.py && flask run",
     'install': "pip3 install -r requirements.txt",
     'format': "autopep8 --in-place --aggressive --aggressive *.py",
     'deploy': "pm2 start deploy.sh",
-    'save-deps': 'pip3 freeze > requirements.txt',
-    'install-client': "cd applications-frontend && npm install && cd .."}
+    'save-deps': 'pip3 freeze > requirements.txt'}
 
 parser = argparse.ArgumentParser(description='Manage the Flask App')
 parser.add_argument(
-    "command",
-    help="[run-windows | run-other | install | format | deploy | save-deps]",
-    type=str)
+    "-c",
+    "--command",
+    default="run-other",
+    help="[run-other | run-windows | install | format | deploy | save-deps]",
+    type=str)  # optional, default is 'run-other'
 
 if __name__ == "__main__":
     args = parser.parse_args()
-    command = args.command.strip()  # strip all whitespace
+    command = args.command
 
     # check if command is a valid option
     if command not in commands:
         exit_with_error(f"command {command} is not valid!")
 
     try:
-        subprocess.run(commands[args.command], shell=True)
-    except BaseException:
+        subprocess.run(commands[command], shell=True)
+    except KeyboardInterrupt:
         pass  # hush

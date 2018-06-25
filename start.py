@@ -19,7 +19,8 @@ def exit_with_error(error_message):
 commands = {
     'run-other': "export FLASK_APP=app.py && flask run",
     'run-windows': "set FLASK_APP=app.py && flask run",
-    'install': "pip3 install -r requirements.txt && cd applications-frontend && npm install && cd ..",
+    'run-other': "export FLASK_APP=app.py && flask run",
+    'install': "pip3 install -r requirements.txt",
     'format': "autopep8 --in-place --aggressive --aggressive *.py",
     'deploy': "pm2 start deploy.sh",
     'save-deps': 'pip3 freeze > requirements.txt'}

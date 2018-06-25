@@ -23,26 +23,26 @@ npm install
 
 Step 3:
 ```bash
-python3 start.py install
+python3 start.py -c install
 ```
 
 ## Running
 
 ```bash
-python3 start.py run-windows (Windows)
-python3 start.py run-other (Other)
+python3 start.py -c run-windows (Windows)
+python3 start.py (Other)
 ```
 
 ## Formatting
 
 ```bash
-python3 start.py format
+python3 start.py -c format
 ```
 
 ## Deployment
 
 ```bash
 # Need to install pm2 for this: http://pm2.keymetrics.io/docs/usage/quick-start/#installation
-python3 start.py deploy
+python3 start.py -c deploy
 ```
 

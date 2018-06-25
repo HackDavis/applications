@@ -11,7 +11,7 @@ class ApplicationsModel:
         pass
 
 
-def setApplicationsModel(fieldNames):
+def set_applications_model(fieldnames):
     """
     sets up a global table for applications
     
@@ -19,6 +19,6 @@ def setApplicationsModel(fieldNames):
     """
     pass
 
-def getApplicationsModel():
+def get_applications_model():
     """just returns an instance of ApplicationsModel"""
     return None

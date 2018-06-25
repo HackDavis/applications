@@ -21,26 +21,26 @@ source venv/bin/activate (Other)
 
 Step 3:
 ```bash
-pip3 install -r requirements.txt (or) python3 start.py install
+python3 start.py -c install
 ```
 
 ## Running
 
 ```bash
-set FLASK_APP=app.py && flask run (or) python3 start.py run-windows (Windows)
-export FLASK_APP=app.py && flask run (or) python3 start.py all (Other)
+python3 start.py -c run-windows (Windows)
+python3 start.py (Other)
 ```
 
 ## Formatting
 
 ```bash
-autopep8 --in-place --aggressive --aggressive *.py (or) python3 start.py format
+python3 start.py -c format
 ```
 
 ## Deployment
 
 ```bash
 # Need to install pm2 for this: http://pm2.keymetrics.io/docs/usage/quick-start/#installation
-pm2 start start.sh (or) python3 start.py deploy
+python3 start.py -c deploy
 ```
 

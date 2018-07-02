@@ -13,7 +13,7 @@ let auth = {
 let router = new Router({
   routes: [
     {
-      path: 'applicants/:id',
+      path: '/review',
       component: Applicant,
       meta: {
         requiresAuth: true

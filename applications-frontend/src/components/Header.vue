@@ -1,19 +1,27 @@
 <template>
-    <div class="container">
-        <nav class="navbar has-shadow is-spaced" role="navigation" aria-label="main navigation">
+    <nav class="navbar has-shadow" role="navigation" aria-label="main navigation">
+        <div class="container">
             <div class="navbar-brand">
                 <router-link class="navbar-item" to="/">
-                    <img src="@/assets/logo.png">
+                    <img class="image is-32x32" src="@/assets/logo.png">
                 </router-link>
-
+                <h1 class="navbar-item is-size-2">Heck<b>Davis</b></h1>
                 <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
                 <span aria-hidden="true"></span>
                 <span aria-hidden="true"></span>
                 <span aria-hidden="true"></span>
                 </a>
             </div>
-        </nav>
-    </div>
+            <div class="navbar-menu">
+                <div class="navbar-start">
+                    <router-link class="navbar-item is-size-5" to="/review">Review</router-link>
+                </div>
+                <div class="navbar-end">
+                    <a href="/login" class="navbar-item is-size-5">Login</a>
+                </div>
+            </div>
+        </div>
+    </nav>
 </template>
 
 <script>
@@ -48,6 +56,8 @@ export default {
 }
 </script>
 
-<style>
-
+<style scoped>
+nav.navbar {
+    margin-bottom: 1.5rem;
+}
 </style>

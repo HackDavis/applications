@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Applicant from './components/Applicant'
+import Home from './components/Home'
 
 Vue.use(Router)
 
@@ -18,6 +19,10 @@ let router = new Router({
       meta: {
         requiresAuth: true
       }
+    },
+    {
+      path: '/',
+      component: Home
     }
   ],
   mode: 'history'

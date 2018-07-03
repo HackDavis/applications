@@ -27,6 +27,7 @@
 <script>
 export default {
     created() {
+        // the folling section of code was taken from bulma.io to manage the collapsible burger button
         document.addEventListener('DOMContentLoaded', function () {
 
             // Get all "navbar-burger" elements

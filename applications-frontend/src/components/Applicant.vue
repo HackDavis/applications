@@ -42,7 +42,8 @@ export default {
         }
     },
     beforeRouteEnter(to, from, next) {
-        next();
+        next(() => {
+        });
     }
 }
 </script>

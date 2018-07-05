@@ -14,7 +14,7 @@ Step 2:
 pip3 install virtualenv
 virtualenv -p python3 venv
 venv\Scripts\activate (Windows)
-source venv/bin/activate (Other)
+source venv/bin/activate (Unix-like)
 cd applications-frontend
 npm install
 
@@ -29,8 +29,7 @@ python3 start.py -c install
 ## Running
 
 ```bash
-python3 start.py -c run-windows (Windows)
-python3 start.py (Other)
+python3 start.py
 ```
 
 ## Formatting

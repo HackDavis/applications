@@ -17,9 +17,7 @@ def exit_with_error(error_message):
 
 
 commands = {
-    'run-other': "export FLASK_APP=app.py && flask run",
-    'run-windows': "set FLASK_APP=app.py && flask run",
-    'run-other': "export FLASK_APP=app.py && flask run",
+    'run': "flask run",
     'install': "pip3 install -r requirements.txt",
     'format': "autopep8 --in-place --aggressive --aggressive *.py",
     'deploy': "pm2 start deploy.sh",
@@ -29,8 +27,8 @@ parser = argparse.ArgumentParser(description='Manage the Flask App')
 parser.add_argument(
     "-c",
     "--command",
-    default="run-other",
-    help="[run-other | run-windows | install | format | deploy | save-deps]",
+    default="run",
+    choices=list(commands.keys()),
     type=str)  # optional, default is 'run-other'
 
 if __name__ == "__main__":

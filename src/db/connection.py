@@ -21,5 +21,6 @@ def execute_query(query):
 
     cursor.execute(query)
 
+    conn.commit()
     return_connection(conn)
     return cursor

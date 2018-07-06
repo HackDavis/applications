@@ -19,7 +19,9 @@ def upload_csv(csv_file):
     """
     reader = csv.DictReader(csv_file)
 
-    models.set_applications_model(reader.fieldnames) # reset the database
+    models.set_applications_model(reader) # reset the database
+
+    reader = csv.DictReader(csv_file) # reset reader
     
     for row in reader:
         _store_csv_row(row)

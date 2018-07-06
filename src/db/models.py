@@ -1,5 +1,5 @@
 from . import connection
-import ast
+import psycopg2.sql as sql
 
 class ApplicationsModel:
     TableName = "applications"
@@ -7,50 +7,47 @@ class ApplicationsModel:
 
     @classmethod
     def setModel(cls, fieldnames, sample_data):
-        for i in len(fieldnames):
-            try:
-                field_type = type(ast.literal_eval(sample_data[i]))
-            except ValueError:
-                field_type = type(str)
-            cls.Model[fieldnames[i]] = field_type
+        for field in fieldnames:
+            cls.Model[field] = str # force everything into string, deal with on client
         
-        cls.Model["score"] = type(int)
+        cls.Model["score"] = int
         
         conn = connection.get_connection()
         cursor = conn.cursor()
+        try:
+            cursor.execute('DROP TABLE IF EXISTS %s' % ApplicationsModel.TableName)
+            cursor.execute('CREATE TABLE %s ()' % ApplicationsModel.TableName)
+            
+            for name, data_type in cls.Model.items():
+                if data_type is str:
+                    postgre_type = "TEXT"
+                if data_type is int:
+                    postgre_type = "SMALLINT"
+                if data_type is float:
+                    postgre_type = "real"
+                cursor.execute('ALTER TABLE %s ADD COLUMN "%s" %s' % (cls.TableName, name, postgre_type))
 
-        cursor.execute('DROP TABLE "%s"' % ApplicationsModel.TableName)
-        cursor.execute('CREATE TABLE "%s"' % ApplicationsModel.TableName)
-        cursor.execute('ALTER TABLE "%s' % ApplicationsModel.TableName)
-        
-        for name, data_type in cls.Model.items():
-            if data_type is type(str):
-                postgre_type = "TEXT"
-            if data_type is type(int):
-                postgre_type = "SMALLINT"
-            if data_type is type(float):
-                postgre_type = "real"
-            postgre_type = data_type
-            cursor.execute('ADD COLUMN "%s" %s' % (name, postgre_type))
-
-        conn.commit()
-        conn.close()
+            conn.commit()
+        except Exception as e:
+            print(e)
+        finally:    
+            cursor.close()
+            conn.close()
 
 
     def store(self, row):
         """ does an INSERT INTO with the data in the row """
-        keys_string = ""
-        values_string = ""
-        for key, value in row.items():
-            keys_string += key
-            keys_string += ","
-            values_string += value
-            values_string += ","
+        keys = []
+        values = []
+        for value in row.values():
+            values.append(value)
         
-        keys_string += "score"
-        values_string += "0"
-        query_string = 'INSERT INTO "%s" (%s) VALUES (%s)' % (self.TableName, keys_string, values_string)
-        connection.execute_query(query_string)
+        values.append(0)
+        query = sql.SQL("INSERT INTO {} VALUES ({})").format(
+            sql.Identifier(self.TableName),
+            sql.SQL(', ').join(sql.Placeholder() * len(values))
+        )
+        connection.execute_query(query, values)
 
 
 def set_applications_model(reader):

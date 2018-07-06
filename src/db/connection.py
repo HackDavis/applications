@@ -1,4 +1,5 @@
 import psycopg2
+import psycopg2.pool
 import os
 pool = None
 def get_connection():
@@ -14,12 +15,12 @@ def return_connection(conn):
         raise Exception("connection not initialized")
     pool.putconn(conn)
 
-def execute_query(query):
+def execute_query(query, vars=None):
     """returns a cursor from the executed query"""
     conn = get_connection()
     cursor = conn.cursor()
 
-    cursor.execute(query)
+    cursor.execute(query, vars)
 
     conn.commit()
     return_connection(conn)

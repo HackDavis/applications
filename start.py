@@ -18,6 +18,9 @@ def exit_with_error(error_message):
 
 commands = {
     'run': "flask run",
+    'unit-test': "pytest test/unit",
+    # needs server to be running
+    'integ-test': "pytest test/integ --tavern-global-cfg test/config/common.yaml",
     'install': "pip3 install -r requirements.txt",
     'format': "autopep8 --in-place --aggressive --aggressive *.py",
     'deploy': "pm2 start deploy.sh",

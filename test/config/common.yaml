@@ -1,0 +1,6 @@
+---
+name: Common Tavern test config
+
+variables:
+  host: http://localhost:5000
+

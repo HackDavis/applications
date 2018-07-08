@@ -1,0 +1,33 @@
+---
+test_name: POST request should return 405
+
+stages:
+  - name: POST request
+    request:
+      url: "{host}/"
+      method: POST
+    response:
+      status_code: 405
+
+---
+test_name: GET request to nonexistent path should return 404
+
+stages:
+  - name: GET request
+    request:
+      url: "{host}/nonexistent"
+      method: GET
+    response:
+      status_code: 404
+
+---
+test_name: GET request should be successful
+
+stages:
+  - name: GET request
+    request:
+      url: "{host}/"
+      method: GET
+    response:
+      status_code: 200
+

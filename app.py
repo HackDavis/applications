@@ -1,8 +1,7 @@
 from flask import Flask
 from dotenv import load_dotenv
-from review.routes import review_blueprint
+from src.review.routes import review_blueprint
 import os
-import src.controller.routes
 
 load_dotenv()
 

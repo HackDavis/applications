@@ -1,15 +1,6 @@
 from ..db import models
 import csv
 
-def _store_csv_row(row):
-    """ 
-    Read a line from the CSV and store it in the database using the model 
-
-    row -- a python dictionary defining the data in the row
-    """
-    applications_entry = models.get_applications_model()
-    applications_entry.store(row)
-
 def upload_csv(csv_file):
     """
     Read a csv row by row to store into the database 
@@ -19,7 +10,12 @@ def upload_csv(csv_file):
     """
     reader = csv.DictReader(csv_file)
 
-    models.set_applications_model(reader.fieldnames) # reset the database
+    models.set_applications_model(reader) # reset the database
+
+    csv_file.seek(0) # reset to first row
+    next(reader) # skip the header
+
+    applications_entry = models.get_applications_model()
     
     for row in reader:
-        _store_csv_row(row)
+        applications_entry.store(row)

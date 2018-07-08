@@ -26,6 +26,17 @@ Step 3:
 python3 start.py -c install
 ```
 
+Step 4: Set .env with these default values
+```
+PORT=5000
+FLASK_APP=app.py
+FLASK_ENV=development
+DB_NAME=<complete this>
+DB_USER=<complete this>
+DB_HOSTNAME=localhost
+DB_PASSWORD=<complete this>
+```
+
 ## Running
 
 ```bash

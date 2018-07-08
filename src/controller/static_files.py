@@ -1,14 +1,14 @@
 from flask import abort, Blueprint, send_from_directory
 import os
 
-routes = Blueprint('routes', __name__)
+static_files = Blueprint('static_files', __name__)
 
 static_path = os.path.join('applications-frontend', 'dist') # get directory of static path
 
-@routes.route('/', defaults={'path': 'index.html'}) # redirect initial homepage requests to static files controller
+@static_files.route('/', methods=['GET'], defaults={'path': 'index.html'}) # redirect initial homepage requests to static files controller
 
 # return any requested static files
-@routes.route('/<path:path>', methods=['GET'])
+@static_files.route('/<path:path>', methods=['GET'])
 def static_file(path):
     full_path = os.path.join(static_path, path)
     if not os.path.exists(full_path):

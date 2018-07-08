@@ -1,12 +1,13 @@
 from . import connection
 import psycopg2.sql as sql
+import csv
 
 class ApplicationsModel:
     TableName = "applications"
     Model = {}
 
     @classmethod
-    def setModel(cls, fieldnames, sample_data):
+    def setModel(cls, fieldnames, sample_data): # use sample_data later for type inference
         for field in fieldnames:
             cls.Model[field] = str # force everything into string, deal with on client
         
@@ -15,17 +16,17 @@ class ApplicationsModel:
         conn = connection.get_connection()
         cursor = conn.cursor()
         try:
-            cursor.execute('DROP TABLE IF EXISTS %s' % ApplicationsModel.TableName)
-            cursor.execute('CREATE TABLE %s ()' % ApplicationsModel.TableName)
+            cursor.execute('DROP TABLE IF EXISTS "%s"' % ApplicationsModel.TableName)
+            cursor.execute('CREATE TABLE "%s" ()' % ApplicationsModel.TableName)
             
             for name, data_type in cls.Model.items():
-                if data_type is str:
-                    postgre_type = "TEXT"
                 if data_type is int:
                     postgre_type = "SMALLINT"
-                if data_type is float:
+                elif data_type is float:
                     postgre_type = "real"
-                cursor.execute('ALTER TABLE %s ADD COLUMN "%s" %s' % (cls.TableName, name, postgre_type))
+                else:
+                    postgre_type = "TEXT"
+                cursor.execute('ALTER TABLE "%s" ADD COLUMN "%s" %s' % (cls.TableName, name, postgre_type))
 
             conn.commit()
         except Exception as e:
@@ -33,6 +34,7 @@ class ApplicationsModel:
         finally:    
             cursor.close()
             conn.close()
+            connection.return_connection(conn)
 
 
     def store(self, row):
@@ -54,8 +56,11 @@ def set_applications_model(reader):
     """
     sets up a global table for applications
     
-    fieldNames -- a list of strings for the fields in the typeform CSV
+    reader -- instance of csv.DictReader from which to get the field names and a row of data
     """
+    if not isinstance(reader, csv.DictReader):
+        raise TypeError("reader is not a Dict Reader")
+
     row = next(reader)
     ApplicationsModel.setModel(reader.fieldnames, row)
 

@@ -19,9 +19,13 @@ def execute_query(query, vars=None):
     """returns a cursor from the executed query"""
     conn = get_connection()
     cursor = conn.cursor()
+    try:
+        cursor.execute(query, vars)
 
-    cursor.execute(query, vars)
-
-    conn.commit()
-    return_connection(conn)
+        conn.commit()
+    
+    except Exception as e:
+        print(e)
+    finally:
+        return_connection(conn)
     return cursor

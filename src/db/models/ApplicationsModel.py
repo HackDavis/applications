@@ -1,41 +1,26 @@
-from . import connection
 import psycopg2.sql as sql
 import csv
+from .BaseModel import BaseModel
+from .UserModel import UserModel
+from .. import connection
 
-class ApplicationsModel:
+class ApplicationsModel(BaseModel):
     TableName = "applications"
     Model = {}
 
     @classmethod
-    def setModel(cls, fieldnames, sample_data): # use sample_data later for type inference
+    def setModel(cls, fieldnames, sample_data):
         for field in fieldnames:
             cls.Model[field] = str # force everything into string, deal with on client
         
         cls.Model["score"] = int
         
-        conn = connection.get_connection()
-        cursor = conn.cursor()
-        try:
-            cursor.execute('DROP TABLE IF EXISTS "%s"' % ApplicationsModel.TableName)
-            cursor.execute('CREATE TABLE "%s" ()' % ApplicationsModel.TableName)
-            
-            for name, data_type in cls.Model.items():
-                if data_type is int:
-                    postgre_type = "SMALLINT"
-                elif data_type is float:
-                    postgre_type = "real"
-                else:
-                    postgre_type = "TEXT"
-                cursor.execute('ALTER TABLE "%s" ADD COLUMN "%s" %s' % (cls.TableName, name, postgre_type))
+        cls.dropTable()
+        cls.createTable()
 
-            conn.commit()
-        except Exception as e:
-            print(e)
-        finally:    
-            cursor.close()
-            conn.close()
-            connection.return_connection(conn)
+        cls.Model['user_editing'] = int
 
+        connection.execute_query('ALTER TABLE "%s" ADD COLUMN user_editing INTEGER REFERENCES "%s"(id)' % (cls.TableName, UserModel.TableName))
 
     def store(self, row):
         """ does an INSERT INTO with the data in the row """
@@ -44,13 +29,14 @@ class ApplicationsModel:
         for value in row.values():
             values.append(value)
         
-        values.append(0)
+        values.append(0) # score
+        values.append(None) # user_editing
+
         query = sql.SQL("INSERT INTO {} VALUES ({})").format(
             sql.Identifier(self.TableName),
             sql.SQL(', ').join(sql.Placeholder() * len(values))
         )
         connection.execute_query(query, values)
-
 
 def set_applications_model(reader):
     """
@@ -67,3 +53,4 @@ def set_applications_model(reader):
 def get_applications_model():
     """just returns an instance of ApplicationsModel"""
     return ApplicationsModel()
+

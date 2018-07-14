@@ -1,4 +1,4 @@
-from ..db import models
+from ..db.models import ApplicationsModel
 import csv
 
 def upload_csv(csv_file):
@@ -10,12 +10,12 @@ def upload_csv(csv_file):
     """
     reader = csv.DictReader(csv_file)
 
-    models.set_applications_model(reader) # reset the database
+    ApplicationsModel.set_applications_model(reader) # reset the database
 
     csv_file.seek(0) # reset to first row
     next(reader) # skip the header
 
-    applications_entry = models.get_applications_model()
+    applications_entry = ApplicationsModel.get_applications_model()
     
     for row in reader:
         applications_entry.store(row)

@@ -96,7 +96,7 @@ class ApplicationsModel(BaseModel):
         return row
 
     def scoreApplicant(self, id, user, score):
-        query = sql.SQL("UPDATE {} SET 'score'={}, 'user_editing'=NULL WHERE 'id'={} AND 'user_editing'={}").format(
+        query = sql.SQL("""UPDATE {} SET "score"={}, "user_editing"=NULL WHERE "id"={} AND "user_editing"={}""").format(
             sql.Identifier(ApplicationsModel.TableName),
             sql.Placeholder(),
             sql.Placeholder(),
@@ -106,7 +106,7 @@ class ApplicationsModel(BaseModel):
         connection.execute_query(query, (score, id, user))
         
     def skipApplicant(self, user):
-        query = sql.SQL("UPDATE {} SET 'user_editing'=NULL WHERE user_editing'={}").format(
+        query = sql.SQL("""UPDATE {} SET "user_editing"=NULL WHERE "user_editing"={}""").format(
             sql.Identifier(ApplicationsModel.TableName),
             sql.Placeholder()
         )

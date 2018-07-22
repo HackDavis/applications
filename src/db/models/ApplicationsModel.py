@@ -73,7 +73,7 @@ class ApplicationsModel(BaseModel):
 
         conn = connection.get_connection()
 
-        query = sql.SQL("""SELECT {} FROM {} WHERE "score"=0 AND ("user_editing" is null  OR now() - "last_modified" > interval '2 hours') LIMIT 1 FOR UPDATE""").format(
+        query = sql.SQL("""SELECT {} FROM {} TABLESAMPLE SYSTEM (20) WHERE "score"=0 AND ("user_editing" is null  OR now() - "last_modified" > interval '2 hours') LIMIT 1 FOR UPDATE""").format(
             sql.SQL(', ').join([sql.Identifier(column) for column in columns_to_return]),
             sql.Identifier(ApplicationsModel.TableName)
         )

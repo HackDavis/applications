@@ -18,9 +18,6 @@ def upload_csv(csv_file):
     next(reader) # skip the header
 
     applications_entry = ApplicationsModel.get_applications_model()
-
-    rows = [row for row in reader]
-    shuffle(rows)
     
-    for row in rows:
+    for row in reader:
         applications_entry.store(row)

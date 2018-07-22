@@ -17,7 +17,7 @@ def doCSV():
 def getApplicant():
     model = ApplicationsModel.get_applications_model()
     try:
-        data = model.getLockedApplicantRow(1)
+        data = model.getLockedApplicantRowForUser(1)
         if data is None:
             data = model.getNewLockedApplicantRow(1)
     except Exception as e:

@@ -16,7 +16,7 @@ class BaseModel(abc.ABC):
             raise(e)
         finally:
             cursor.close()
-            conn.close()
+            connection.return_connection(conn)
 
     @classmethod
     def createTable(cls):
@@ -41,4 +41,4 @@ class BaseModel(abc.ABC):
             raise(e)
         finally:
             cursor.close()
-            conn.close()
+            connection.return_connection(conn)

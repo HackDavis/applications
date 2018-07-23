@@ -3,15 +3,13 @@ import subprocess
 import sys
 
 
-'''
-exit_with_error prints an error to stderr and exits
-
-Parameters
-    error_message(str)
-'''
-
-
 def exit_with_error(error_message):
+    '''
+    exit_with_error prints an error to stderr and exits
+
+    Parameters
+        error_message(str)
+    '''
     print(error_message, file=sys.stderr)
     exit(1)
 
@@ -22,16 +20,14 @@ commands = {
     # needs server to be running
     'integ-test': "pytest test/integ --tavern-global-cfg test/config/common.yaml",
     'install': "pip3 install -r requirements.txt",
-    'format': "autopep8 --in-place --aggressive --aggressive *.py",
+    'format': "yapf --recursive -i -vv ./src *.py",
     'deploy': "pm2 start deploy.sh",
-    'save-deps': 'pip3 freeze > requirements.txt'}
+    'save-deps': 'pip3 freeze > requirements.txt'
+}
 
 parser = argparse.ArgumentParser(description='Manage the Flask App')
 parser.add_argument(
-    "-c",
-    "--command",
-    default="run",
-    choices=list(commands.keys()),
+    "-c", "--command", default="run", choices=list(commands.keys()),
     type=str)  # optional, default is 'run-other'
 
 if __name__ == "__main__":

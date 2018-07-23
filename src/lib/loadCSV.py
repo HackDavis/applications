@@ -1,4 +1,5 @@
 from ..db.models import ApplicationsModel
+from random import shuffle
 import csv
 
 def upload_csv(csv_file):
@@ -8,6 +9,7 @@ def upload_csv(csv_file):
 
     csvFile -- file opened by the controller
     """
+
     reader = csv.DictReader(csv_file)
 
     ApplicationsModel.set_applications_model(reader) # reset the database

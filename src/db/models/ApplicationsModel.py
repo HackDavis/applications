@@ -9,6 +9,14 @@ from .. import connection
 class ApplicationsModel(BaseModel):
     TableName = "applications"
     Model = {}
+    count_query = sql.SQL("""SELECT COUNT("score") FROM %s WHERE "score">0""" % TableName)
+    total_count_query = sql.SQL("""SELECT COUNT("score") FROM %s """ % TableName) 
+
+    done_count = 0
+    total_count = 0
+
+    class ApplicationsCategoryModel(BaseModel):
+        Model = {}
 
     @classmethod
     def setModel(cls, fieldnames, sample_data):
@@ -73,7 +81,8 @@ class ApplicationsModel(BaseModel):
 
         conn = connection.get_connection()
 
-        query = sql.SQL("""SELECT {} FROM {} TABLESAMPLE SYSTEM (20) WHERE "score"=0 AND ("user_editing" is null  OR now() - "last_modified" > interval '1 hour') LIMIT 1 FOR UPDATE""").format(
+        query = sql.SQL("""WITH open_rows AS (SELECT {} FROM {} WHERE "score"=0 AND ("user_editing" is null  OR now() - "last_modified" > interval '1 hour') LIMIT 50)
+                            SELECT * FROM open_rows ORDER BY random() LIMIT 1 FOR UPDATE""").format(
             sql.SQL(', ').join([sql.Identifier(column) for column in columns_to_return]),
             sql.Identifier(ApplicationsModel.TableName)
         )
@@ -96,14 +105,22 @@ class ApplicationsModel(BaseModel):
         return row
 
     def scoreApplicant(self, id, user, score):
-        query = sql.SQL("""UPDATE {} SET "score"={}, "user_editing"=NULL WHERE "id"={} AND "user_editing"={}""").format(
+        query = sql.SQL("""UPDATE {} SET "score"={} WHERE "id"={} AND "user_editing"={}""").format(
             sql.Identifier(ApplicationsModel.TableName),
             sql.Placeholder(),
             sql.Placeholder(),
             sql.Placeholder()
         )
 
-        connection.execute_query(query, (score, id, user))
+        conn = connection.get_connection()
+        cursor = conn.cursor()
+        cursor.execute(query, (score, id, user))
+        
+        ApplicationsModel.done_count = cursor.execute(ApplicationsModel.count_query).fetchone()[0]
+
+        conn.commit()
+        connection.return_connection(conn)
+
         
     def skipApplicant(self, user):
         query = sql.SQL("""UPDATE {} SET "user_editing"=NULL WHERE "user_editing"={}""").format(
@@ -124,6 +141,8 @@ def set_applications_model(reader):
 
     row = next(reader)
     ApplicationsModel.setModel(reader.fieldnames, row)
+    ApplicationsModel.total_count = connection.execute_query(ApplicationsModel.total_count_query).fetchone()[0]
+    ApplicationsModel.done_count = 0
 
 def get_applications_model():
     """just returns an instance of ApplicationsModel"""
@@ -162,3 +181,6 @@ def initialize_applications_model():
         ApplicationsModel.Model[row[3]] = data_type
 
     results.close()
+
+    ApplicationsModel.done_count = connection.execute_query(ApplicationsModel.count_query).fetchone()[0]
+    ApplicationsModel.total_count = connection.execute_query(ApplicationsModel.total_count_query).fetchone()[0]

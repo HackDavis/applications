@@ -4,6 +4,41 @@
 
 // 2. Set your own initial variables
 $navbar-item-img-max-height: 3rem;
+
+.columns {
+	border-radius: 64px;
+	padding: 8px;
+}
+
+.column {
+	margin: 8px;
+	border-radius: 8px;
+}
+
+.profile-picture {	
+    border-radius: 50%;
+    margin-top: 32px;
+}
+
+.break {
+    display: block;    
+    height: 2px;
+    border: 0;
+    border-top: 1px solid #ccc;
+    margin: 1em 0;    
+    color: black;
+    margin-right: 32px;
+    margin-left: 32px;
+}
+
+.pad {
+    padding-top: 32px;
+}
+
+.pad-light {
+    padding-top: 4px;
+}
+
 // 3. Set the derived variables
 
 // 4. Setup your Custom Colors
@@ -15,3 +50,4 @@ $navbar-item-img-max-height: 3rem;
 @import "~bulma";
 
 @import "flex";
+

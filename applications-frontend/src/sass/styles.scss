@@ -1,53 +1,134 @@
-// 1. Import the initial variables
+@import "flex";
+@import "~bulma";
+@import "~bulma/sass/utilities/derived-variables";
 @import "~bulma/sass/utilities/initial-variables";
 @import "~bulma/sass/utilities/functions";
 
-// 2. Set your own initial variables
 $navbar-item-img-max-height: 3rem;
 
 .columns {
-	border-radius: 64px;
-	padding: 8px;
+	border-radius: 1em;
+	padding: 1em;
 }
-
 .column {
-	margin: 8px;
-	border-radius: 8px;
+	margin: 2em;
+	border-radius: 0.75em;
 }
-
 .profile-picture {	
     border-radius: 50%;
-    margin-top: 32px;
+    margin-top: 2em;
 }
-
 .break {
     display: block;    
-    height: 2px;
+    height: 0.1em;
     border: 0;
-    border-top: 1px solid #ccc;
+    border-top: 0.5em solid #ccc;
     margin: 1em 0;    
     color: black;
-    margin-right: 32px;
-    margin-left: 32px;
+    margin-right: 1em;
+    margin-left: 1em;
 }
-
 .pad {
-    padding-top: 32px;
+    padding-top: 2em;
 }
-
 .pad-light {
-    padding-top: 4px;
+    padding-top: 2em;
 }
 
-// 3. Set the derived variables
+.control {
+    font-size: 25px;
+    position: relative;
+    display: block;
+    margin-bottom: 10px;
+    padding-left: 50px;
+    cursor: pointer;
+}
 
-// 4. Setup your Custom Colors
+.control input {
+    position: absolute;
+    z-index: -1;
+    opacity: 0;
+}
 
-// 5. Add new color variables to the color map.
-@import "~bulma/sass/utilities/derived-variables";
+.control__indicator {
+    position: absolute;
+    top: 4px;
+    left: 0;
+    width: 30px;
+    height: 30px;
+    background: #e6e6e6;
+}
 
-// 6. Import the rest of Bulma
-@import "~bulma";
+.control--radio .control__indicator {
+    border-radius: 50%;
+}
 
-@import "flex";
+
+
+/* Hover and focus states */
+.control:hover input ~ .control__indicator,
+.control input:focus ~ .control__indicator {
+    background: #ccc;
+}
+
+/* Checked state */
+.control input:checked ~ .control__indicator {
+    background: #2aa1c0;
+}
+
+/* Hover state whilst checked */
+.control:hover input:not([disabled]):checked ~ .control__indicator,
+.control input:checked:focus ~ .control__indicator {
+    background: #0e647d;
+}
+
+/* Disabled state */
+.control input:disabled ~ .control__indicator {
+    pointer-events: none;
+    opacity: .6;
+    background: #e6e6e6;
+}
+
+/* Check mark */
+.control__indicator:after {
+    position: absolute;
+    display: none;
+    content: '';
+}
+
+/* Show check mark */
+.control input:checked ~ .control__indicator:after {
+    display: block;
+}
+
+/* Checkbox tick */
+.control--checkbox .control__indicator:after {
+    top: 4px;
+    left: 8px;
+    width: 3px;
+    height: 8px;
+    transform: rotate(45deg);
+    border: solid #fff;
+    border-width: 0 2px 2px 0;
+}
+
+/* Disabled tick colour */
+.control--checkbox input:disabled ~ .control__indicator:after {
+    border-color: #7b7b7b;
+}
+
+/* Radio button inner circle */
+.control--radio .control__indicator:after {
+    top: 25%;
+    left: 25%;
+    width: 50%;
+    height: 50%;
+    border-radius: 50%;
+    background: #fff;
+}
+
+/* Disabled circle colour */
+.control--radio input:disabled ~ .control__indicator:after {
+    background: #7b7b7b;
+}
 

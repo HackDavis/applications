@@ -10,7 +10,7 @@ $navbar-item-img-max-height: 3rem;
 	border-radius: 1em;
 	padding: 1em;
 }
-.column {
+.section-column {
 	margin: 2em;
 	border-radius: 0.75em;
 }
@@ -40,7 +40,6 @@ $navbar-item-img-max-height: 3rem;
     position: relative;
     display: block;
     margin-bottom: 10px;
-    padding-left: 50px;
     cursor: pointer;
 }
 
@@ -51,12 +50,10 @@ $navbar-item-img-max-height: 3rem;
 }
 
 .control__indicator {
-    position: absolute;
-    top: 4px;
-    left: 0;
     width: 30px;
     height: 30px;
     background: #e6e6e6;
+    position: relative;
 }
 
 .control--radio .control__indicator {

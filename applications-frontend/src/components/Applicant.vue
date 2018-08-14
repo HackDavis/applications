@@ -3,7 +3,7 @@
 	<div class="columns">
 
 		<!-- Control panel -->
-		<div class="column has-background-white is-3">		
+		<div class="column section-column has-background-white is-3">		
 			<center>
 	
 
@@ -16,29 +16,29 @@
 				<!-- Rating control -->
 				<div class="subtitle is-4" style="margin: 1em;">Rating</div>
 
-				<div class="control-group">
+				<div class="control-group columns">
 
-				<label class="control control--radio" >1
+				<label class="control control--radio column  is-flex is-align-center is-flex-column-reverse" >1
 				<input type="radio" name="radio" checked="checked"/>
 				<div class="control__indicator"></div>
 				</label>
 
-				<label class="control control--radio">2
+				<label class="control control--radio column is-flex is-align-center is-flex-column-reverse">2
 				<input type="radio" name="radio" checked="checked"/>
 				<div class="control__indicator"></div>
 				</label>	
 
-				<label class="control control--radio" >3
+				<label class="control control--radio column is-flex is-align-center is-flex-column-reverse" >3
 				<input type="radio" name="radio" checked="checked"/>
 				<div class="control__indicator"></div>
 				</label>
 
-				<label class="control control--radio">4
+				<label class="control control--radio column is-flex is-align-center is-flex-column-reverse">4
 				<input type="radio" name="radio" checked="checked"/>
 				<div class="control__indicator"></div>
 				</label>	
 
-				<label class="control control--radio" >5
+				<label class="control control--radio column is-flex is-align-center is-flex-column-reverse" >5
 				<input type="radio" name="radio" checked="checked"/>
 				<div class="control__indicator"></div>
 				</label>											

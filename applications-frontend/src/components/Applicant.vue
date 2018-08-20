@@ -16,35 +16,43 @@
 				<!-- Rating control -->
 				<div class="subtitle is-4" style="margin: 1em;">Rating</div>
 
-				<div class="control-group columns">
+				<div class="columns has-background-light">									
+					<div class="column is-3">						
+						<label class="control control--radio column  is-flex is-align-center is-flex-column-reverse" >1
+						<input type="radio" name="radio" checked="checked"/>
+						<div class="control__indicator"></div>
+						</label>							
+					</div>	
 
-				<label class="control control--radio column  is-flex is-align-center is-flex-column-reverse" >1
-				<input type="radio" name="radio" checked="checked"/>
-				<div class="control__indicator"></div>
-				</label>
+					<div class="column is-3">
+						<label class="control control--radio column  is-flex is-align-center is-flex-column-reverse" >2
+						<input type="radio" name="radio" checked="checked"/>
+						<div class="control__indicator"></div>
+						</label>	
+					</div>	
 
-				<label class="control control--radio column is-flex is-align-center is-flex-column-reverse">2
-				<input type="radio" name="radio" checked="checked"/>
-				<div class="control__indicator"></div>
-				</label>	
+					<div class="column is-3">
+						<label class="control control--radio column  is-flex is-align-center is-flex-column-reverse" >3
+						<input type="radio" name="radio" checked="checked"/>
+						<div class="control__indicator"></div>
+						</label>	
+					</div>	
 
-				<label class="control control--radio column is-flex is-align-center is-flex-column-reverse" >3
-				<input type="radio" name="radio" checked="checked"/>
-				<div class="control__indicator"></div>
-				</label>
+					<div class="column is-3">
+						<label class="control control--radio column  is-flex is-align-center is-flex-column-reverse" >4
+						<input type="radio" name="radio" checked="checked"/>
+						<div class="control__indicator"></div>
+						</label>	
+					</div>	
 
-				<label class="control control--radio column is-flex is-align-center is-flex-column-reverse">4
-				<input type="radio" name="radio" checked="checked"/>
-				<div class="control__indicator"></div>
-				</label>	
-
-				<label class="control control--radio column is-flex is-align-center is-flex-column-reverse" >5
-				<input type="radio" name="radio" checked="checked"/>
-				<div class="control__indicator"></div>
-				</label>											
-
+<!-- 					<div class="column is-3">
+						<label class="control control--radio column  is-flex is-align-center is-flex-column-reverse" >5
+						<input type="radio" name="radio" checked="checked"/>
+						<div class="control__indicator"></div>
+						</label>	
+					</div>	 -->						
 				</div>
-
+				
 				<!-- Next applicant button -->
 				<a class="button is-primary is-medium" style="margin-top: 3em;">Next applicant</a>
 				<div class="pad"></div>			
@@ -52,7 +60,7 @@
 		</div>
 
 		<!-- Information panel -->
-		<div class="column has-background-light">
+		<div class="column has-background-light" style="border-radius: 1%;">
 
 			<!-- Major -->
 			<div class="title" style="margin: 1em;">Major</div>	

@@ -35,6 +35,10 @@ $navbar-item-img-max-height: 3rem;
     padding-top: 2em;
 }
 
+
+
+
+
 .control {
     font-size: 25px;
     position: relative;
@@ -44,7 +48,7 @@ $navbar-item-img-max-height: 3rem;
 }
 
 .control input {
-    position: absolute;
+    position: relative;
     z-index: -1;
     opacity: 0;
 }
@@ -88,7 +92,7 @@ $navbar-item-img-max-height: 3rem;
 
 /* Check mark */
 .control__indicator:after {
-    position: absolute;
+    position: relative;
     display: none;
     content: '';
 }

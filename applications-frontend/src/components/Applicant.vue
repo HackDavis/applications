@@ -1,107 +1,98 @@
 <template>
 <div class="container">
-	<div class="columns">
+	<div class="columns is-multiline">
 
 		<!-- Control panel -->
-		<div class="column section-column has-background-white is-3">		
+		<div class="column section-column has-background-white is-4">		
 			<center>
 	
-
-				<!-- Person's name -->			
-				<div class="subtitle is-4" style="margin: 1em;">Full-name</div>
-
-				<!-- Break for looking good :D -->								
-				<div class="pad-light"></div>
-
 				<!-- Rating control -->
-				<div class="subtitle is-4" style="margin: 1em;">Rating</div>
+				<div class="subtitle is-3">Rating</div>
 
-				<div class="columns has-background-light">									
-					<div class="column is-3">						
+				<div class="columns is-mobile is-multiline has-background-light is-gapless">
+					<div class="column">						
 						<label class="control control--radio column  is-flex is-align-center is-flex-column-reverse" >1
 						<input type="radio" name="radio" checked="checked"/>
 						<div class="control__indicator"></div>
 						</label>							
 					</div>	
 
-					<div class="column is-3">
+					<div class="column">
 						<label class="control control--radio column  is-flex is-align-center is-flex-column-reverse" >2
 						<input type="radio" name="radio" checked="checked"/>
 						<div class="control__indicator"></div>
 						</label>	
 					</div>	
 
-					<div class="column is-3">
+					<div class="column">
 						<label class="control control--radio column  is-flex is-align-center is-flex-column-reverse" >3
 						<input type="radio" name="radio" checked="checked"/>
 						<div class="control__indicator"></div>
 						</label>	
 					</div>	
 
-					<div class="column is-3">
+					<div class="column">
 						<label class="control control--radio column  is-flex is-align-center is-flex-column-reverse" >4
 						<input type="radio" name="radio" checked="checked"/>
 						<div class="control__indicator"></div>
 						</label>	
 					</div>	
 
-<!-- 					<div class="column is-3">
+					<div class="column">
 						<label class="control control--radio column  is-flex is-align-center is-flex-column-reverse" >5
 						<input type="radio" name="radio" checked="checked"/>
 						<div class="control__indicator"></div>
 						</label>	
-					</div>	 -->						
+					</div>					
 				</div>
 				
 				<!-- Next applicant button -->
-				<a class="button is-primary is-medium" style="margin-top: 3em;">Next applicant</a>
-				<div class="pad"></div>			
+				<a class="button is-primary is-medium" style="margin-top: 1em;">Next applicant</a>				
 			</center>		
 		</div>
 
 		<!-- Information panel -->
-		<div class="column has-background-light" style="border-radius: 1%;">
+		<div class="column has-background-light" style="border-radius: 1em;">
 
-			<!-- Major -->
-			<div class="title" style="margin: 1em;">Major</div>	
-			<div class="subtitle is-4" style="margin: 1em;">{{major}}</div>
-			<!-- <div class="pad-light"></div>		 -->
+			<div class="columns is-centered is-multiline">
+				<div class="column is-narrow">
+					<div class="subtitle is-4">John Smith</div>
+				</div>
+				<div class="column is-narrow">
+					<div class="subtitle is-4">Sophmore</div>
+				</div>
+				<div class="column is-narrow">
+					<div class="subtitle is-4">Computer Engineering</div>
+				</div>
+			</div>
+	
+			<center>
+				<div class="subtitle is-4">Direct links</div>	
+			</center>
+			
+			<div class="columns is-mobile is-centered is-multiline">
+				<div class="column is-narrow">
+					<a class="button is-primary is-medium">Resume</a>		
+				</div>
 
-			<!-- Year -->
-			<div class="title" style="margin: 1em;">College year</div>	
-			<div class="subtitle is-4" style="margin: 1em;">{{year}}</div>	
-			<!-- <div class="pad-light"></div>	 -->
+				<div class="column is-narrow">
+					<a class="button is-primary is-medium">Github</a>		
+				</div>
 
-			<!-- Essays -->
-			<div class="title" style="margin: 1em;">Text information</div>	
-			<div class="subtitle is-4" style="margin: 1em;">REPLACE ME</div>	
-			<!-- <div class="pad"></div>		 -->
-
-			<!-- Resume -->
-			<div class="title" style="margin: 1em; margin-bottom: 0em;">Resume</div>															
-			<iframe src="http://josharnoldjosh.github.io" width="80%" height="250em" style="overflow:auto; margin-top: 1em;"></iframe>
-			<!-- <div class="pad"></div> -->
-
-			<div class="title" style="margin: 1em;">Direct links</div>
-			<!-- Resume -->
-			<a class="button is-primary is-medium" style="margin-left: 1em;">Resume</a>	
-
-			<!-- Github -->			
-			<a class="button is-primary is-medium" style="margin-left: 1em;">Github</a>			
-
-			<!-- LinkedIn -->			
-			<a class="button is-primary is-medium" style="margin-left: 1em;">LinkedIn</a>							
-						
-			<div class="pad"></div>		
+				<div class="column is-narrow">
+					<a class="button is-primary is-medium">LinkedIn</a>		
+				</div>
+			</div>												
 		</div>
 	</div>
 </div>
 </template>
 
 <script>  
-export default {
-
+export default {		
 }
 </script>
+
+
 
 

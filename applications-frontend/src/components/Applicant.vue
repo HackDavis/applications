@@ -95,7 +95,7 @@ export default {
 		name: "John Smith",
 		year: "Freshman",
 		major:"Computer Science",
-		current_rating: 1
+		current_rating: 5
 		}
 	},
 

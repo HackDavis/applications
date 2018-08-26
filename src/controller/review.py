@@ -1,13 +1,10 @@
-from flask import Blueprint, current_app, flash, redirect, url_for
-from flask_dance.consumer import oauth_authorized, oauth_error
-from flask_login import login_required, login_user, logout_user
-from sqlalchemy.orm.exc import NoResultFound
-import os
+from flask import abort, Blueprint, jsonify, request, Response
+from flask_login import current_user, login_required
 
+from src.models.Answer import Answer
+from src.models.Application import Application
+from src.models.lib.Serializer import Serializer
 from src.shared import Shared
-from src.models.User import User
-from src.models.OAuth import OAuth
-from src.models.enums.Role import Role
 
 review = Blueprint('review', __name__)
 
@@ -16,93 +13,54 @@ google = Shared.google
 login_manager = Shared.login_manager
 
 
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
+@review.route('/review', methods=['GET'])
+@login_required
+def get_application():
+    """Get application for user"""
+    application = Application.get_application(current_user.get_id())
+    if application is None:
+        return Response('No more applications left to score', 200)
+
+    answers = Answer.get_answers(application.id)
+    response = {'application': application, 'answers': answers}
+    return jsonify(Serializer.serialize_value(response))
 
 
-# create/login local user on successful OAuth login
-@oauth_authorized.connect_via(google)
-def google_logged_in(google, token):
-    if not token:
-        flash('Failed to log in with Google.', category='error')
-        return False
-    resp = google.session.get(current_app.config['GOOGLE_USER_INFO_PATH'])
-    if not resp.ok:
-        flash("Failed to fetch user info from Google.", category="error")
-        return False
+@review.route('/review/skip', methods=['GET'])
+@login_required
+def skip_application():
+    """Skip application for user"""
+    past_application = Application.skip_application(current_user.get_id())
+    if past_application is None:
+        abort(400, 'User is not currently assigned an application')
 
-    google_info = resp.json()
+    application = Application.get_application(current_user.get_id())
+    if application is None:
+        return Response('No more applications left to score', 200)
 
-    if not google_info['hd'] or google_info['hd'] != current_app.config['DOMAIN']:
-        flash("User not in domain", category="error")
-        return False
+    answers = Answer.get_answers(application.id)
+    response = {'application': application, 'answers': answers}
+    return jsonify(Serializer.serialize_value(response))
 
-    google_user_id = str(google_info["id"])
 
-    # find this OAuth token in the database, or create it
-    query = OAuth.query.filter_by(
-        provider=google.name,
-        provider_user_id=google_user_id,
-    )
+@review.route('/review/score', methods=['POST'])
+@login_required
+def score_application():
+    """Score application"""
+    score_str = request.args.get('score')
+    if score_str is None:
+        abort(400, 'score not provided')
+
     try:
-        oauth = query.one()
-    except NoResultFound:
-        oauth = OAuth(
-            provider=google.name,
-            provider_user_id=google_user_id,
-            token=token,
-        )
+        score = int(score_str)
+    except ValueError:
+        abort(400, 'score not an integer')
 
-    if oauth.user:
-        # TODO: update user row with new information if applicable
-        login_user(oauth.user)
-    else:
-        # create a new local user account for this user
-        user = User(
-            email=google_info['email'],
-            first_name=google_info['given_name'],
-            last_name=google_info['family_name'],
-            picture=google_info['picture'],
-            role=Role.user)
-        # associate the new local user account with the OAuth token
-        oauth.user = user
-        # save and commit our database models
-        db.session.add_all([user, oauth])
-        db.session.commit()
-        # login the new local user account
-        login_user(user)
+    if score < 1 or score > 5:
+        abort(400, 'score not between 1 and 5')
 
-    flash("Successfully signed in with Google.")
-    # disable Flask-Dance's default behavior for saving the OAuth token
-    return False
+    application = Application.update_score(current_user.get_id(), score)
+    if application is None:
+        abort(400, 'User is not currently assigned an application')
 
-
-# notify on OAuth provider error
-@oauth_error.connect_via(google)
-def google_error(google, error, error_description=None, error_uri=None):
-    msg = ("OAuth error from {name}! "
-           "error={error} description={description} uri={uri}").format(
-               name=google.name,
-               error=error,
-               description=error_description,
-               uri=error_uri,
-           )
-    flash(msg, category="error")
-
-
-@review.route("/logout")
-@login_required
-def logout():
-    logout_user()
-    flash("You have logged out")
-    return redirect(url_for("google.login"))
-
-
-@review.route('/configure/upload_csv')
-@login_required
-def doCSV():
-    """Upload CSV file."""
-    with open(os.path.join(_dirname, "../lib/sample.csv"), encoding="utf-8") as data:
-        loadCSV.upload_csv(data)
-    return Response(status=201)
+    return jsonify(Serializer.serialize_value(application))

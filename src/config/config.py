@@ -1,7 +1,5 @@
 import os
 
-url = 'postgresql://{}:{}@{}:{}/{}'
-
 
 class Config:
     SECRET_KEY = os.getenv('SECRET_KEY')
@@ -12,9 +10,13 @@ class Config:
     DB_NAME = os.getenv('DB_NAME')
     GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
     GOOGLE_CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET')
+    GOOGLE_SCOPES = [
+        'https://www.googleapis.com/auth/userinfo.email',
+        'https://www.googleapis.com/auth/userinfo.profile'
+    ]
     GOOGLE_USER_INFO_PATH = '/oauth2/v2/userinfo'
     DOMAIN = 'hackdavis.io'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SQLALCHEMY_DATABASE_URI = url.format(DB_USER, DB_PASSWORD, DB_HOSTNAME, DB_PORT, DB_NAME)
-    OAUTHLIB_INSECURE_TRANSPORT = 1
+    SQLALCHEMY_DATABASE_URI = 'postgresql://{}:{}@{}:{}/{}'.format(DB_USER, DB_PASSWORD,
+                                                                   DB_HOSTNAME, DB_PORT, DB_NAME)
     USE_SESSION_FOR_NEXT = 1

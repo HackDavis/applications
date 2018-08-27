@@ -57,8 +57,6 @@
 			<div class="columns is-centered is-multiline">
 				<div class="column is-narrow">
 					<div class="subtitle is-4">{{name}}</div>
-				</div>
-				<div class="column is-narrow">
 					<div class="subtitle is-4">{{year}}</div>
 				</div>
 				<div class="column is-narrow">

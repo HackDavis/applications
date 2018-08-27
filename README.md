@@ -28,13 +28,17 @@ python3 start.py -c install
 
 Step 4: Set .env with these default values
 ```
-PORT=5000
 FLASK_APP=app.py
 FLASK_ENV=development
-DB_NAME=<complete this>
+SECRET_KEY=<complete this>
+OAUTHLIB_INSECURE_TRANSPORT=1
 DB_USER=<complete this>
 DB_HOSTNAME=localhost
+DB_PORT=5432
 DB_PASSWORD=<complete this>
+DB_NAME=<complete this>
+GOOGLE_CLIENT_ID=<complete this>
+GOOGLE_CLIENT_SECRET=<complete this>
 ```
 
 ## Running

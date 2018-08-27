@@ -15,6 +15,10 @@ def doCSV():
 
 @review.route('/review')
 def getApplicant():
+
+    if ApplicationsModel.ApplicationsModel.total_count == ApplicationsModel.ApplicationsModel.done_count:
+        return Response(status=300)
+
     model = ApplicationsModel.get_applications_model()
     try:
         data = model.getLockedApplicantRowForUser(1)

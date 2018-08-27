@@ -3,7 +3,7 @@
 	<div class="columns is-multiline">
 
 		<!-- Control panel -->
-		<div class="column section-column has-background-white is-4">		
+		<div id="ratings-column" class="column section-column has-background-white is-4">		
 			<center>
 	
 				<!-- Rating control -->
@@ -53,14 +53,15 @@
 
 		<!-- Information panel -->
 		<div class="column has-background-light" style="border-radius: 1em;">
-
+			<div class="subtitle is-3 has-text-centered">Applicant Information</div>
+			<div class="container is-fluid has-background-light">
+			<div class="subtitle is-4">{{name}}:</div>
 			<div class="columns is-centered is-multiline">
-				<div class="column is-narrow">
-					<div class="subtitle is-4">{{name}}</div>
-					<div class="subtitle is-4">{{year}}</div>
+				<div class="column">
+					<div class="is-4">{{year}}</div>
 				</div>
-				<div class="column is-narrow">
-					<div class="subtitle is-4">{{major}}</div>
+				<div class="column">
+					<div class="is-4">{{major}}</div>
 				</div>
 			</div>
 	
@@ -80,7 +81,8 @@
 				<div class="column is-narrow">
 					<a v-on:click="greet" class="button is-primary is-medium">LinkedIn</a>		
 				</div>
-			</div>												
+			</div>	
+			</div>											
 		</div>
 	</div>
 </div>
@@ -108,6 +110,12 @@ export default {
 	}
 }
 </script>
+<style scoped>
+	#ratings-column {
+		margin-top: 0;
+	}
+</style>
+
 
 
 

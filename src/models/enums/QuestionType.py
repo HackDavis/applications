@@ -1,7 +1,7 @@
-import enum
+from enum import auto, Enum
 
 
-class QuestionType(enum.Enum):
-    ignore = 'ignore'
-    essay = 'essay'
-    multiple_choice = 'multipleChoice'
+class QuestionType(Enum):
+    ignore = auto()
+    essay = auto()
+    multiple_choice = auto()

@@ -24,3 +24,4 @@ from src.controller.logger import logger
 app.register_blueprint(auth)
 app.register_blueprint(review)
 app.register_blueprint(static_files)
+app.register_blueprint(logger)

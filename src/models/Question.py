@@ -33,6 +33,7 @@ class Question(db.Model, ModelUtils, Serializer):
     def convert_questions_to_rows(questions):
         """Convert questions into rows to insert into database"""
         return [
+            # question_tuple[0] is the counter, question_tuple[1] is the question
             Question.convert_question_to_row(question_tuple[0] + 1, question_tuple[1])
             for question_tuple in enumerate(questions)
         ]

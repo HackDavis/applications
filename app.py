@@ -20,5 +20,8 @@ from src.controller.review import review
 from src.controller.static_files import static_files
 from src.controller.logger import logger
 
+# register controllers
+app.register_blueprint(auth)
 app.register_blueprint(review)
 app.register_blueprint(static_files)
+app.register_blueprint(logger)

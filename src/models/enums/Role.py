@@ -1,6 +1,6 @@
-import enum
+from enum import auto, Enum
 
 
-class Role(enum.Enum):
-    user = 'user'
-    admin = 'admin'
+class Role(Enum):
+    user = auto()
+    admin = auto()

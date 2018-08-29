@@ -63,4 +63,4 @@ def score_application():
     if application is None:
         abort(400, 'User is not currently assigned an application')
 
-    return jsonify(Serializer.serialize_value(application))
+    return Response('Updated score for application', 200)

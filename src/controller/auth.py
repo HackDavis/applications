@@ -1,4 +1,4 @@
-from flask import abort, Blueprint, current_app, redirect, url_for
+from flask import abort, Blueprint, current_app, redirect, url_for, request, session
 from flask_dance.consumer import oauth_authorized, oauth_error
 from flask_login import login_required, login_user, logout_user
 from sqlalchemy.orm.exc import NoResultFound
@@ -74,6 +74,11 @@ def google_logged_in(google, token):
     # login the user account
     login_user(user, remember=True)
 
+    redirect_url = session.get('redirect_url')
+
+    if redirect_url is not None:
+        return redirect(redirect_url)
+
     # disable Flask-Dance's default behavior for saving the OAuth token
     return False
 
@@ -88,6 +93,13 @@ def google_error(google, error, error_description=None, error_uri=None):
     )
     abort(503, message)
 
+@auth.route('/login', methods=['GET'])
+def login():
+    redirect_url = request.args.get('redirect')
+    if redirect_url is not None and redirect_url is not "":
+        session['redirect_url'] = redirect_url
+
+    return redirect(url_for('google.login'))    
 
 @auth.route('/logout', methods=['GET'])
 @login_required

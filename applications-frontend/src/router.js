@@ -56,9 +56,8 @@ router.beforeEach((to, from, next) => {
     // this route requires auth, check if logged in
     // if not, redirect to login page.
     if (!auth.loggedIn()) {
-      location.href = "http://localhost:5000/login?redirect=http://localhost:8080"+to.fullPath;
       next({
-        path: '/google',
+        path: '/login',
         query: { redirect: to.fullPath }
       })
     } else {

@@ -9,7 +9,6 @@ static_path = os.path.join('applications-frontend', 'dist') # get directory of s
 @static_files.route('/', methods=['GET'], defaults={'path': 'index.html'}) # redirect initial homepage requests to static files controller
 
 @static_files.route('/<path:path>', methods=['GET'])
-@login_required
 def static_file(path):
     """Return any requested static files"""
     full_path = os.path.join(static_path, path)

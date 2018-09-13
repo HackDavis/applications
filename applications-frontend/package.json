@@ -5,7 +5,8 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "fix": "eslint --ext .js,.vue --fix ./"
   },
   "dependencies": {
     "bulma": "^0.7.1",
@@ -17,7 +18,10 @@
     "@vue/cli-plugin-babel": "^3.0.0-beta.15",
     "@vue/cli-plugin-eslint": "^3.0.0-beta.15",
     "@vue/cli-service": "^3.0.0-beta.15",
+    "eslint-config-prettier": "3.0.1",
+    "eslint-plugin-prettier": "2.6.2",
     "node-sass": "^4.9.0",
+    "prettier": "1.14.2",
     "sass-loader": "^7.0.3",
     "vue-template-compiler": "^2.5.16"
   },
@@ -28,13 +32,18 @@
     },
     "extends": [
       "plugin:vue/essential",
+      "plugin:prettier/recommended",
       "eslint:recommended"
     ],
-    "rules": {},
+    "rules": {
+      "vue/html-indent": ["error", 4],
+      "no-trailing-spaces": "error"
+    },
     "parserOptions": {
       "parser": "babel-eslint"
     }
   },
+  "eslintIgnore": ["/dist/*"],
   "postcss": {
     "plugins": {
       "autoprefixer": {}

@@ -13,7 +13,7 @@ google = Shared.google
 login_manager = Shared.login_manager
 
 
-@review.route('/review', methods=['GET'])
+@review.route('/api/review', methods=['GET'])
 @login_required
 def get_application():
     """Get application for user"""
@@ -26,7 +26,7 @@ def get_application():
     return jsonify(Serializer.serialize_value(response))
 
 
-@review.route('/review/skip', methods=['GET'])
+@review.route('/api/review/skip', methods=['GET'])
 @login_required
 def skip_application():
     """Skip application for user"""
@@ -43,7 +43,7 @@ def skip_application():
     return jsonify(Serializer.serialize_value(response))
 
 
-@review.route('/review/score', methods=['POST'])
+@review.route('/api/review/score', methods=['POST'])
 @login_required
 def score_application():
     """Score application"""

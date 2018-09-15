@@ -29,7 +29,8 @@ class Application(db.Model, ModelUtils, Serializer):
     @staticmethod
     def get_applications_from_csv(csv_file):
         """Get applications from CSV file"""
-        return list(csv.reader(csv_file))
+        applications = list(csv.reader(csv_file))
+        return applications[1:]
 
     @staticmethod
     def convert_applications_to_rows(applications):

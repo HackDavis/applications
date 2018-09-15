@@ -39,6 +39,26 @@ class Question(db.Model, ModelUtils, Serializer):
         ]
 
     @staticmethod
-    def convert_question_to_row(index, question):
+    def convert_question_to_row(index, question_with_type):
         """Convert question into row to insert into database"""
-        return Question(question=question, question_type=QuestionType.essay, index=index)
+        question_with_type_list = question_with_type.split('|')
+        if len(question_with_type_list) < 2:
+            raise ValueError(
+                'question or question type not provided for: {question_with_type}'.format(
+                    question_with_type=question_with_type))
+        elif len(question_with_type_list) > 2:
+            raise ValueError(
+                'only question and question type should be provided for: {question_with_type}'.
+                format(question_with_type=question_with_type))
+
+        raw_question, raw_question_type_string = question_with_type_list
+        question = raw_question.strip()
+        question_type_string = raw_question_type_string.strip()
+
+        try:
+            question_type = QuestionType[question_type_string]
+        except KeyError:
+            raise ValueError('question type not recognized for: {question_with_type}'.format(
+                question_with_type=question_with_type))
+
+        return Question(question=question, question_type=question_type, index=index)

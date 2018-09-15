@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import Vue from 'vue'
 import Router from 'vue-router'
 import Applicant from './components/Applicant'
@@ -9,47 +10,61 @@ import VueCookie from 'vue-cookie'
 Vue.use(VueCookie)
 Vue.use(VueResource)
 Vue.use(Router)
+=======
+import Vue from "vue";
+import Router from "vue-router";
+import Applicant from "./components/Applicant";
+import Home from "./components/Home";
+import Error from "./Error";
+import VueResource from "vue-resource";
+
+Vue.use(VueResource);
+
+Vue.use(Router);
+>>>>>>> master
 
 Vue.http.interceptors.push(function() {
   return function(response) {
-    if(response.status >= 400) {
-      this.$router.push({name:"error",
-      params: {
-        id: response.status,
-        message: response.body  
-      }});
+    if (response.status >= 400) {
+      this.$router.push({
+        name: "error",
+        params: {
+          id: response.status,
+          message: response.body
+        }
+      });
     }
-  }
-})
+  };
+});
 
 let auth = {
   loggedIn() {
     return Vue.cookie.get('remember_token') != undefined
   }
-}
+};
 
 let router = new Router({
   routes: [
     {
-      path: '/review',
+      path: "/review",
       component: Applicant,
       meta: {
         requiresAuth: true
       }
     },
     {
-      path: '/',
+      path: "/",
       component: Home
     },
     {
-      path:"/error/:id?/:message?",
+      path: "/error/:id?/:message?",
       name: "error",
       component: Error,
       props: true
     }
   ],
-  mode: 'history'
-})
+  mode: "history"
+});
 
 router.beforeEach((to, from, next) => {
   if (to.matched.some(record => record.meta.requiresAuth)) {
@@ -58,11 +73,11 @@ router.beforeEach((to, from, next) => {
     if (!auth.loggedIn()) {
       location.href = "/login"
     } else {
-      next()
+      next();
     }
   } else {
-    next() // make sure to always call next()!
+    next(); // make sure to always call next()!
   }
-})
+});
 
-export default router
+export default router;

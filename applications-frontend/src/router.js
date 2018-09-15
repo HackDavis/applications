@@ -58,7 +58,7 @@ router.beforeEach((to, from, next) => {
     // this route requires auth, check if logged in
     // if not, redirect to login page.
     if (!auth.loggedIn()) {
-      location.href = "/login";
+      location.href = "/login?next=" + to.fullPath;
     } else {
       next();
     }

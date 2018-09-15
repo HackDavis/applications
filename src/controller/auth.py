@@ -8,6 +8,8 @@ from src.models.User import User
 from src.models.enums.Role import Role
 from src.shared import Shared
 
+import os
+
 auth = Blueprint('auth', __name__)
 
 db = Shared.db
@@ -74,9 +76,13 @@ def google_logged_in(google, token):
     # login the user account
     login_user(user, remember=True)
 
-    redirect_url = session.get('redirect_url')
+    redirect_url = session.get('next')
+    print(redirect_url)
 
     if redirect_url is not None:
+        session['next'] = None
+        if os.environ.get('FLASK_ENV') == "development":
+            redirect_url = "http://localhost:8080" + redirect_url
         return redirect(redirect_url)
 
     # disable Flask-Dance's default behavior for saving the OAuth token
@@ -95,7 +101,11 @@ def google_error(google, error, error_description=None, error_uri=None):
 
 @auth.route('/login', methods=['GET'])
 def login():
-    return redirect(url_for('google.login'))    
+    redirect_url = request.args.get('next')
+    if redirect_url is not None:
+        session['next'] = redirect_url
+
+    return redirect(url_for('google.login'))
 
 @auth.route('/logout', methods=['GET'])
 @login_required

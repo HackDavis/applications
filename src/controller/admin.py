@@ -1,4 +1,4 @@
-from flask import Blueprint, Response
+from flask import abort, Blueprint, Response
 from flask_login import login_required
 import os
 
@@ -25,6 +25,9 @@ def reload():
         Question.drop_rows()
 
         # load new rows
-        question_rows = Question.insert(csv_file)
-        Application.insert(csv_file, question_rows)
-        return Response('Reloaded applications from CSV file', 200)
+        try:
+            question_rows = Question.insert(csv_file)
+            Application.insert(csv_file, question_rows)
+            return Response('Reloaded applications from CSV file', 200)
+        except ValueError as e:
+            abort(400, str(e))

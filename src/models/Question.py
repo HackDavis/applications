@@ -19,7 +19,8 @@ class Question(db.Model, ModelUtils, Serializer):
     def insert(csv_file):
         """Insert new rows extracted from csv_file"""
         questions = Question.get_questions_from_csv(csv_file)
-        rows = Question.convert_questions_to_rows(questions)
+        question_types = Question.get_question_types_from_csv(csv_file)
+        rows = Question.convert_questions_to_rows(questions, question_types)
         Question.insert_rows(rows)
         return rows
 
@@ -30,15 +31,28 @@ class Question(db.Model, ModelUtils, Serializer):
         return reader.fieldnames
 
     @staticmethod
-    def convert_questions_to_rows(questions):
-        """Convert questions into rows to insert into database"""
-        return [
-            # question_tuple[0] is the counter, question_tuple[1] is the question
-            Question.convert_question_to_row(question_tuple[0] + 1, question_tuple[1])
-            for question_tuple in enumerate(questions)
-        ]
+    def get_question_types_from_csv(csv_file):
+        """Get question types from CSV file"""
+        reader = csv.reader(csv_file)
+        return next(reader)
 
     @staticmethod
-    def convert_question_to_row(index, question):
+    def convert_questions_to_rows(questions, question_types):
+        """Convert questions into rows to insert into database"""
+        # question_tuple[0] is the counter, question_tuple[1] is the question
+        return list(map(lambda question_tuple, question_type: Question.convert_question_to_row(question_tuple[0] + 1, question_tuple[1], question_type), enumerate(questions), question_types))
+
+    @staticmethod
+    def convert_question_to_row(index, raw_question, raw_question_type_string):
         """Convert question into row to insert into database"""
-        return Question(question=question, question_type=QuestionType.essay, index=index)
+        question = raw_question.strip()
+        question_type_string = raw_question_type_string.strip()
+
+        try:
+            question_type = QuestionType[question_type_string]
+        except KeyError:
+            raise ValueError(
+                'question type {question_type} not recognized for question: {question}'.format(
+                    question_type=question_type_string, question=question))
+
+        return Question(question=question, question_type=question_type, index=index)

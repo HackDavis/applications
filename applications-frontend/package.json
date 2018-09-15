@@ -11,6 +11,7 @@
   "dependencies": {
     "bulma": "^0.7.1",
     "vue": "^2.5.16",
+    "vue-cookie": "^1.1.4",
     "vue-resource": "^1.5.1",
     "vue-router": "^3.0.1"
   },
@@ -36,14 +37,19 @@
       "eslint:recommended"
     ],
     "rules": {
-      "vue/html-indent": ["error", 4],
+      "vue/html-indent": [
+        "error",
+        4
+      ],
       "no-trailing-spaces": "error"
     },
     "parserOptions": {
       "parser": "babel-eslint"
     }
   },
-  "eslintIgnore": ["/dist/*"],
+  "eslintIgnore": [
+    "/dist/*"
+  ],
   "postcss": {
     "plugins": {
       "autoprefixer": {}

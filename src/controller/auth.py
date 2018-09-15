@@ -95,10 +95,6 @@ def google_error(google, error, error_description=None, error_uri=None):
 
 @auth.route('/login', methods=['GET'])
 def login():
-    redirect_url = request.args.get('next')
-    if redirect_url is not None and redirect_url is not "":
-        session['redirect_url'] = redirect_url
-
     return redirect(url_for('google.login'))    
 
 @auth.route('/logout', methods=['GET'])
@@ -106,4 +102,4 @@ def login():
 def logout():
     """Logout user"""
     logout_user()
-    return redirect(url_for('google.login'))
+    return redirect("/")

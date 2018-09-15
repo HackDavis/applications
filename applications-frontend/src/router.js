@@ -1,27 +1,14 @@
-<<<<<<< HEAD
-import Vue from 'vue'
-import Router from 'vue-router'
-import Applicant from './components/Applicant'
-import Home from './components/Home'
-import Error from './Error'
-import VueResource from 'vue-resource'
-import VueCookie from 'vue-cookie'
-
-Vue.use(VueCookie)
-Vue.use(VueResource)
-Vue.use(Router)
-=======
 import Vue from "vue";
 import Router from "vue-router";
 import Applicant from "./components/Applicant";
 import Home from "./components/Home";
 import Error from "./Error";
 import VueResource from "vue-resource";
+import VueCookie from "vue-cookie";
 
+Vue.use(VueCookie);
 Vue.use(VueResource);
-
 Vue.use(Router);
->>>>>>> master
 
 Vue.http.interceptors.push(function() {
   return function(response) {
@@ -39,7 +26,7 @@ Vue.http.interceptors.push(function() {
 
 let auth = {
   loggedIn() {
-    return Vue.cookie.get('remember_token') != undefined
+    return Vue.cookie.get("remember_token") != undefined;
   }
 };
 
@@ -71,7 +58,7 @@ router.beforeEach((to, from, next) => {
     // this route requires auth, check if logged in
     // if not, redirect to login page.
     if (!auth.loggedIn()) {
-      location.href = "/login"
+      location.href = "/login";
     } else {
       next();
     }

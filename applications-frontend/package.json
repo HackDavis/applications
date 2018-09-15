@@ -37,14 +37,19 @@
       "eslint:recommended"
     ],
     "rules": {
-      "vue/html-indent": ["error", 4],
+      "vue/html-indent": [
+        "error",
+        4
+      ],
       "no-trailing-spaces": "error"
     },
     "parserOptions": {
       "parser": "babel-eslint"
     }
   },
-  "eslintIgnore": ["/dist/*"],
+  "eslintIgnore": [
+    "/dist/*"
+  ],
   "postcss": {
     "plugins": {
       "autoprefixer": {}

@@ -12,42 +12,45 @@
                     <div class="columns is-mobile is-multiline has-background-light is-gapless">
                         <div class="column">
                             <label class="control control--radio column  is-flex is-align-center is-flex-column-reverse" >1
-                                <input v-on:click="current_rating = 1" type="radio" name="radio" checked="checked"/>
+                                <input v-model="application.score" value=1 type="radio" name="radio" checked="checked"/>
                                 <div class="control__indicator"></div>
                             </label>
                         </div>
 
                         <div class="column">
                             <label class="control control--radio column  is-flex is-align-center is-flex-column-reverse" >2
-                                <input v-on:click="current_rating = 2" type="radio" name="radio" checked="checked"/>
+                                <input v-model="application.score" value=2 type="radio" name="radio" checked="checked"/>
                                 <div class="control__indicator"></div>
                             </label>
                         </div>
 
                         <div class="column">
                             <label class="control control--radio column  is-flex is-align-center is-flex-column-reverse" >3
-                                <input v-on:click="current_rating = 3" type="radio" name="radio" checked="checked"/>
+                                <input v-model="application.score" value=3 type="radio" name="radio" checked="checked"/>
                                 <div class="control__indicator"></div>
                             </label>
                         </div>
 
                         <div class="column">
                             <label class="control control--radio column  is-flex is-align-center is-flex-column-reverse" >4
-                                <input v-on:click="current_rating = 4" type="radio" name="radio" checked="checked"/>
+                                <input v-model="application.score" value=4 type="radio" name="radio" checked="checked"/>
                                 <div class="control__indicator"></div>
                             </label>
                         </div>
 
                         <div class="column">
                             <label class="control control--radio column  is-flex is-align-center is-flex-column-reverse" >5
-                                <input  v-on:click="current_rating = 5" type="radio" name="radio" checked="checked"/>
+                                <input v-model="application.score" value=5 type="radio" name="radio" checked="checked"/>
                                 <div class="control__indicator"></div>
                             </label>
                         </div>
                     </div>
 
-                    <!-- Next applicant button -->
-                    <a v-on:click="next_applicant" class="button is-primary is-medium" style="margin-top: 1em;">Next applicant</a>
+                    <!-- Submit button -->
+                    <a v-on:click="score" :disabled="isInvalidScore" class="button is-primary is-medium" style="margin-top: 1em;">Submit</a>
+
+                    <!-- Skip button -->
+                    <a v-on:click="skip" class="button is-medium" style="margin-top: 1em;">Skip</a>
                 </center>
             </div>
 
@@ -55,36 +58,35 @@
             <div class="column has-background-light" style="border-radius: 1em;">
                 <div class="subtitle is-3 has-text-centered">Applicant Information</div>
                 <div class="container is-fluid has-background-light">
-                    <div class="subtitle is-4">{{name}}:</div>
-                    <div class="columns is-centered is-multiline">
-                        <div class="column">
-                            <div class="is-4">{{year}}</div>
+                    <div>
+                        <div class="subtitle is-4">Direct links</div>
+
+                        <div class="column is-narrow" v-if="resumeAnswer">
+                            <a :href="resumeAnswer.answer" class="button is-primary is-medium">Resume</a>
                         </div>
-                        <div class="column">
-                            <div class="is-4">{{major}}</div>
+
+                        <div v-for="linkAnswer in linkAnswers" :key="linkAnswer.id">
+                            <div class="column is-narrow">
+                                <a :href="linkAnswer.answer" class="button is-primary is-medium">{{linkAnswer.question.question}}</a>
+                            </div>
                         </div>
                     </div>
+                    <div>
+                        <div class="subtitle is-4">Short answers</div>
 
-                    <center>
-                        <div class="subtitle is-4">Direct links</div>
-                    </center>
-
-                    <div class="columns is-mobile is-centered is-multiline">
-                        <div class="column is-narrow">
-                            <a  v-on:click="greet" class="button is-primary is-medium">Resume</a>
-                        </div>
-
-                        <div class="column is-narrow">
-                            <a  v-on:click="greet" onclick="github" class="button is-primary is-medium">Github</a>
-                        </div>
-
-                        <div class="column is-narrow">
-                            <a v-on:click="greet" class="button is-primary is-medium">LinkedIn</a>
+                        <div v-for="essayAnswer in essayAnswers" :key="essayAnswer.id" class="columns is-centered is-multiline">
+                            <div class="column">
+                                <div class="is-4">{{essayAnswer.question.question}}</div>
+                            </div>
+                            <div class="column">
+                                <div class="is-4">{{essayAnswer.answer}}</div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
     </div>
 </template>
 
@@ -92,24 +94,112 @@
 export default {
   data: function() {
     return {
-      name: "John Smith",
-      year: "Freshman",
-      major: "Computer Science",
-      current_rating: 5
+      answers: [],
+      application: {}
     };
   },
-
-  methods: {
-    next_applicant: function() {
-      alert(
-        "Next applicant! You rated this applicant " +
-          this.current_rating +
-          " out of 5."
+  created: function() {
+    this.next();
+  },
+  computed: {
+    essayAnswers: function() {
+      return this.filterAnswersByQuestionTypes(["essay"]);
+    },
+    linkAnswers: function() {
+      const linkAnswers = this.filterAnswersByQuestionTypes(["link"]);
+      return linkAnswers.filter(linkAnswer =>
+        this.isValidUrl(linkAnswer.answer)
       );
     },
+    resumeAnswer: function() {
+      const resumeAnswers = this.filterAnswersByQuestionTypes(["resumeLink"]);
+      if (resumeAnswers.length == 0) {
+        return null;
+      }
+      return resumeAnswers[0];
+    },
+    isInvalidScore: function() {
+      return !this.isValidScore();
+    }
+  },
+  methods: {
+    filterAnswersByQuestionTypes: function(validQuestionTypes) {
+      return this.answers.filter(answer =>
+        validQuestionTypes.includes(answer.question.question_type)
+      );
+    },
+    isValidUrl: function(url) {
+      try {
+        new URL(url);
+        return true;
+      } catch (err) {
+        return false;
+      }
+    },
+    isValidScore: function() {
+      return this.application.score >= 1 && this.application.score <= 5;
+    },
+    hasNoMoreApplications: function(response) {
+      return response.status == 204;
+    },
+    setData: function(data) {
+      this.answers = data.answers;
+      this.application = data.application;
+    },
+    next: function() {
+      this.$http.get("/api/review").then(
+        response => {
+          if (this.hasNoMoreApplications(response)) {
+            alert("No more applications left!");
+            return;
+          }
 
-    greet: function() {
-      alert("Hello " + this.name + "!");
+          this.setData(response.data);
+        },
+        error => {
+          console.error(error);
+          alert(
+            "Something went wrong. Please contact the HackDavis Technical team for further support."
+          );
+        }
+      );
+    },
+    skip: function() {
+      this.$http.get("/api/review/skip").then(
+        response => {
+          if (this.hasNoMoreApplications(response)) {
+            alert("No more applications left!");
+            return;
+          }
+
+          this.setData(response.data);
+        },
+        error => {
+          console.error(error);
+          alert(
+            "Something went wrong. Please contact the HackDavis Technical team for further support."
+          );
+        }
+      );
+    },
+    score: function() {
+      if (!this.isValidScore()) {
+        return;
+      }
+
+      this.$http
+        .post("/api/review/score", { score: this.application.score })
+        .then(
+          response => {
+            this.next();
+          },
+          error => {
+            console.error(error);
+            alert(
+              "Something went wrong. Please contact the HackDavis Technical team for further support."
+            );
+          }
+        );
     }
   }
 };

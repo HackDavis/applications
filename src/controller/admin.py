@@ -23,8 +23,6 @@ def reload():
         Answer.drop_rows()
         Application.drop_rows()
         Question.drop_rows()
-        #Question.question_enum.drop()
-        #Question.question_enum.create()
 
         # load new rows
         try:

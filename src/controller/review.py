@@ -12,6 +12,7 @@ db = Shared.db
 google = Shared.google
 login_manager = Shared.login_manager
 
+
 @review.route('/api/review', methods=['GET'])
 @login_required
 def get_application():

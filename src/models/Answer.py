@@ -46,11 +46,17 @@ class Answer(db.Model, ModelUtils, Serializer):
     @staticmethod
     def get_answers(application_id):
         """Returns all answers associated with the application ID"""
-        m_list = db.session.query(Answer) \
+        answers = db.session.query(Answer) \
         .filter(Answer.application_id == application_id) \
         .join(Question) \
         .filter(Question.question_type != QuestionType.ignore) \
         .with_entities(Question.question, Question.question_type, Answer.answer) \
         .all()
 
-        return [{"answer": row[2], "question": {"question": row[0], "question_type": row[1]}} for row in m_list]
+        return [{
+            "answer": row[2],
+            "question": {
+                "question": row[0],
+                "question_type": row[1]
+            }
+        } for row in answers]

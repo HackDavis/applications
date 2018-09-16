@@ -145,40 +145,30 @@ export default {
       this.answers = data.answers;
       this.application = data.application;
     },
+    handleResponseSuccess(response) {
+      if (this.hasNoMoreApplications(response)) {
+        alert("No more applications left!");
+        return;
+      }
+
+      this.setData(response.data);
+    },
+    handleResponseFailure(error) {
+      console.error(error);
+      alert(
+        "Something went wrong. Please contact the HackDavis Technical team for further support."
+      );
+    },
     next: function() {
       this.$http.get("/api/review").then(
-        response => {
-          if (this.hasNoMoreApplications(response)) {
-            alert("No more applications left!");
-            return;
-          }
-
-          this.setData(response.data);
-        },
-        error => {
-          console.error(error);
-          alert(
-            "Something went wrong. Please contact the HackDavis Technical team for further support."
-          );
-        }
+        this.handleResponseSuccess,
+        this.handleResponseFailure
       );
     },
     skip: function() {
       this.$http.get("/api/review/skip").then(
-        response => {
-          if (this.hasNoMoreApplications(response)) {
-            alert("No more applications left!");
-            return;
-          }
-
-          this.setData(response.data);
-        },
-        error => {
-          console.error(error);
-          alert(
-            "Something went wrong. Please contact the HackDavis Technical team for further support."
-          );
-        }
+        this.handleResponseSuccess,
+        this.handleResponseFailure
       );
     },
     score: function() {
@@ -189,15 +179,10 @@ export default {
       this.$http
         .post("/api/review/score", { score: this.application.score })
         .then(
-          response => {
+          () => {
             this.next();
           },
-          error => {
-            console.error(error);
-            alert(
-              "Something went wrong. Please contact the HackDavis Technical team for further support."
-            );
-          }
+          this.handleResponseFailure
         );
     }
   }

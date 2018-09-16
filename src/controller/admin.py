@@ -14,7 +14,7 @@ google = Shared.google
 login_manager = Shared.login_manager
 
 
-@admin.route('/api/admin/reload', methods=['POST'])
+@admin.route('/api/admin/reload', methods=['POST', 'GET'])
 @login_required
 def reload():
     """Reload applications from CSV file."""
@@ -23,6 +23,8 @@ def reload():
         Answer.drop_rows()
         Application.drop_rows()
         Question.drop_rows()
+        #Question.question_enum.drop()
+        #Question.question_enum.create()
 
         # load new rows
         try:

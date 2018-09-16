@@ -15,7 +15,7 @@ class Serializer:
         elif isinstance(value, dict):
             return {key: Serializer.serialize_value(value) for key, value in value.items()}
         elif isinstance(value, tuple):
-            return (Serializer.serialize_value(element) for element in value)
+            return [Serializer.serialize_value(element) for element in value]
         elif isinstance(value, Enum):
             return Serializer.serialize_value(value.name)
         elif isinstance(value, Serializer):

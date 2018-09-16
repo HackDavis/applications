@@ -34,13 +34,7 @@ def skip_application():
     if past_application is None:
         abort(400, 'User is not currently assigned an application')
 
-    application = Application.get_application(current_user.get_id())
-    if application is None:
-        return Response(status=204)
-
-    answers = Answer.get_answers(application.id)
-    response = {'application': application, 'answers': answers}
-    return jsonify(Serializer.serialize_value(response))
+    return get_application()
 
 
 @review.route('/api/review/score', methods=['POST'])

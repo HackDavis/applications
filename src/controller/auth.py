@@ -99,6 +99,7 @@ def google_error(google, error, error_description=None, error_uri=None):
     )
     abort(503, message)
 
+
 @auth.route('/login', methods=['GET'])
 def login():
     redirect_url = request.args.get('next')
@@ -106,6 +107,7 @@ def login():
         session['next'] = redirect_url
 
     return redirect(url_for('google.login'))
+
 
 @auth.route('/logout', methods=['GET'])
 @login_required

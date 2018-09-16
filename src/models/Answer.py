@@ -3,6 +3,8 @@ import itertools
 from src.shared import Shared
 from src.models.lib.ModelUtils import ModelUtils
 from src.models.lib.Serializer import Serializer
+from src.models.enums.QuestionType import QuestionType
+from src.models.Question import Question
 
 db = Shared.db
 
@@ -44,4 +46,17 @@ class Answer(db.Model, ModelUtils, Serializer):
     @staticmethod
     def get_answers(application_id):
         """Returns all answers associated with the application ID"""
-        return db.session.query(Answer).filter(Answer.application_id == application_id).all()
+        answers = db.session.query(Answer) \
+        .filter(Answer.application_id == application_id) \
+        .join(Question) \
+        .filter(Question.question_type != QuestionType.ignore) \
+        .with_entities(Question.question, Question.question_type, Answer.answer) \
+        .all()
+
+        return [{
+            "answer": row[2],
+            "question": {
+                "question": row[0],
+                "question_type": row[1]
+            }
+        } for row in answers]

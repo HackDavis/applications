@@ -19,7 +19,7 @@ def get_application():
     """Get application for user"""
     application = Application.get_application(current_user.get_id())
     if application is None:
-        return Response('No more applications left to score', 200)
+        return Response(status=204)
 
     answers = Answer.get_answers(application.id)
     response = {'application': application, 'answers': answers}
@@ -36,7 +36,7 @@ def skip_application():
 
     application = Application.get_application(current_user.get_id())
     if application is None:
-        return Response('No more applications left to score', 200)
+        return Response(status=204)
 
     answers = Answer.get_answers(application.id)
     response = {'application': application, 'answers': answers}
@@ -47,7 +47,9 @@ def skip_application():
 @login_required
 def score_application():
     """Score application"""
-    score_str = request.args.get('score')
+    json = request.get_json(force=True)
+
+    score_str = json.get('score')
     if score_str is None:
         abort(400, 'score not provided')
 

@@ -14,7 +14,7 @@ google = Shared.google
 login_manager = Shared.login_manager
 
 
-@admin.route('/configure/reload', methods=['POST'])
+@admin.route('/api/admin/reload', methods=['POST'])
 @login_required
 def reload():
     """Reload applications from CSV file."""

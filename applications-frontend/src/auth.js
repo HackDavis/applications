@@ -10,7 +10,7 @@ export default {
             return this.$cookie.get("remember_token") != undefined;
         },
         getUserInfo() {
-            this.$http.get("/api/user_info").then(response => {
+            this.$http.get("/api/user").then(response => {
                 this.user = response.body    
             },
             error => {

@@ -17,7 +17,7 @@
                     <router-link class="navbar-item is-size-5" to="/review">Review</router-link>
                 </div>
                 <div class="navbar-end">
-                    <a href="/login" class="navbar-item is-size-5">Login</a>
+                    <header-login></header-login>
                 </div>
             </div>
         </div>
@@ -25,7 +25,12 @@
 </template>
 
 <script>
+import HeaderLogin from './HeaderLogin.vue'
+
 export default {
+  components: {
+      'header-login': HeaderLogin
+  },
   created() {
     // the folling section of code was taken from bulma.io to manage the collapsible burger button
     document.addEventListener("DOMContentLoaded", function() {

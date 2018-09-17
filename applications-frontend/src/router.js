@@ -6,9 +6,9 @@ import Error from "./Error";
 import VueResource from "vue-resource";
 import VueCookie from "vue-cookie";
 
-Vue.use(VueCookie);
 Vue.use(VueResource);
 Vue.use(Router);
+Vue.use(VueCookie)
 
 Vue.http.interceptors.push(function() {
   return function(response) {
@@ -23,12 +23,6 @@ Vue.http.interceptors.push(function() {
     }
   };
 });
-
-let auth = {
-  loggedIn() {
-    return Vue.cookie.get("remember_token") != undefined;
-  }
-};
 
 let router = new Router({
   routes: [
@@ -57,7 +51,7 @@ router.beforeEach((to, from, next) => {
   if (to.matched.some(record => record.meta.requiresAuth)) {
     // this route requires auth, check if logged in
     // if not, redirect to login page.
-    if (!auth.loggedIn()) {
+    if (Vue.cookie.get("remember_token") == undefined) {
       location.href = "/login?next=" + to.fullPath;
     } else {
       next();

@@ -1,12 +1,13 @@
-from flask import abort, Blueprint, current_app, redirect, url_for, request, session
+from flask import abort, Blueprint, current_app, redirect, url_for, request, session, jsonify
 from flask_dance.consumer import oauth_authorized, oauth_error
-from flask_login import login_required, login_user, logout_user
+from flask_login import login_required, login_user, logout_user, current_user
 from sqlalchemy.orm.exc import NoResultFound
 
 from src.models.OAuth import OAuth
 from src.models.User import User
 from src.models.enums.Role import Role
 from src.shared import Shared
+from src.models.lib.Serializer import Serializer
 
 import os
 
@@ -77,13 +78,16 @@ def google_logged_in(google, token):
     login_user(user, remember=True)
 
     redirect_url = session.get('next')
-    print(redirect_url)
 
     if redirect_url is not None:
         session['next'] = None
         if os.environ.get('FLASK_ENV') == "development":
             redirect_url = "http://localhost:8080" + redirect_url
         return redirect(redirect_url)
+    else:
+        if os.environ.get('FLASK_ENV') == "development":
+            redirect_url = "http://localhost:8080"
+            return redirect(redirect_url)
 
     # disable Flask-Dance's default behavior for saving the OAuth token
     return False
@@ -115,3 +119,8 @@ def logout():
     """Logout user"""
     logout_user()
     return redirect("/")
+
+@auth.route('/api/user_info', methods=['GET'])
+@login_required
+def user_info():
+    return jsonify(Serializer.serialize(current_user))

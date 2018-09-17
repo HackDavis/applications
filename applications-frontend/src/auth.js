@@ -16,6 +16,7 @@ export default {
             error => {
                 if(error) {
                     console.error(error)
+                    this.user = null
                 }
             });
         }

@@ -57,8 +57,10 @@ class Application(db.Model, ModelUtils, Serializer):
         if application is None:
             cutoff = datetime.now() - timedelta(hours=1)
             application = db.session.query(Application)\
-                .filter((Application.scoring_user_id == None) | (Application.last_modified < cutoff))\
-                .order_by(func.random())\
+                .filter((Application.scoring_user_id == None) | (Application.last_modified < cutoff)) \
+                .limit(50) \
+                .from_self() \
+                .order_by(func.random()) \
                 .first()
 
             if application is None:

@@ -13,5 +13,3 @@ class QuestionType(Enum):
     resumeSharingOptIn = auto()
     shirtSize = auto()
     checkbox = auto()
-    age = auto()
-    university = auto()

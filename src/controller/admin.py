@@ -1,10 +1,11 @@
 from flask import abort, Blueprint, Response
-from flask_login import login_required
+from flask_login import current_user, login_required
 import os
 
 from src.models.Answer import Answer
 from src.models.Application import Application
 from src.models.Question import Question
+from src.models.enums.Role import Role
 from src.shared import Shared
 
 admin = Blueprint('admin', __name__)
@@ -18,6 +19,11 @@ login_manager = Shared.login_manager
 @login_required
 def reload():
     """Reload applications from CSV file."""
+    """
+    if current_user.role != Role.admin:
+        abort(401, 'User needs to be an admin to access this route')
+    """
+
     with open(os.path.join(os.getcwd(), 'sample.csv'), encoding='utf-8') as csv_file:
         # drop rows
         Answer.drop_rows()
@@ -31,3 +37,17 @@ def reload():
             return Response('Reloaded applications from CSV file', 200)
         except ValueError as e:
             abort(400, str(e))
+
+
+@admin.route('/api/admin/standardize', methods=['POST', 'GET'])
+@login_required
+def standardize():
+    """Calculate and persist standardized scores."""
+    """
+    if current_user.role != Role.admin:
+        abort(401, 'User needs to be an admin to access this route')
+    """
+
+    Application.standardize_scores()
+
+    return Response('Standardized scores', 200)

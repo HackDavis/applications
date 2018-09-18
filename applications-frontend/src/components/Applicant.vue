@@ -73,16 +73,7 @@
                     </div>
                     <div>
                       <div class="subtitle is-4">Interests</div>
-                      <div v-for="interest in interestAnswers" :key="interest.id" class="columns is-centered is-multiline">
-                        <div class="column">
-                            <div class="is-4">{{interest.question.question}}</div>
-                        </div>
-                        <div class="column">
-                            <div class="is-4">{{interest.answer}}</div>
-                        </div>
-                      </div>
-                      <div class="subtitle is-4">Favorite Technologies</div>
-                      <span v-for="interest in interestAnswersBoolean" :key="interest.id" class="is-centered">
+                      <span v-for="interest in interestAnswers" :key="interest.id" class="is-centered">
                         {{interest.answer}}, 
                       </span>
                     </div>
@@ -120,11 +111,7 @@ export default {
       return this.filterAnswersByQuestionTypes(["essay"]);
     },
     interestAnswers: function() {
-      return this.filterAnswersByQuestionTypes(["interest"])
-    },
-    interestAnswersBoolean: function() {
-      let interests = this.filterAnswersByQuestionTypes(["interestYesNo"])
-      return interests.filter(interest => interest.answer != "")
+      return this.filterAnswersByQuestionTypes(["checkbox"]).filter(interest => interest.answer != "")
     },
     linkAnswers: function() {
       const linkAnswers = this.filterAnswersByQuestionTypes(["link"]);

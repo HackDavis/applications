@@ -1,31 +1,44 @@
 <template>
-    <nav class="navbar has-shadow" role="navigation" aria-label="main navigation">
-        <div class="container">
-            <div class="navbar-brand">
-                <router-link class="navbar-item" to="/">
-                    <img class="image is-32x32" src="@/assets/logo.png">
-                </router-link>
-                <h1 class="navbar-item is-size-2">Heck<b>Davis</b></h1>
-                <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
-                    <span aria-hidden="true"></span>
-                    <span aria-hidden="true"></span>
-                    <span aria-hidden="true"></span>
-                </a>
-            </div>
-            <div class="navbar-menu">
-                <div class="navbar-start">
-                    <router-link class="navbar-item is-size-5" to="/review">Review</router-link>
-                </div>
-                <div class="navbar-end">
-                    <header-login></header-login>
-                </div>
-            </div>
+  <nav 
+    class="navbar has-shadow" 
+    role="navigation" 
+    aria-label="main navigation">
+    <div class="container">
+      <div class="navbar-brand">
+        <router-link 
+          class="navbar-item" 
+          to="/">
+          <img 
+            class="image is-32x32" 
+            src="@/assets/logo.png">
+        </router-link>
+        <h1 class="navbar-item is-size-2">Heck<b>Davis</b></h1>
+        <a 
+          role="button" 
+          class="navbar-burger" 
+          aria-label="menu" 
+          aria-expanded="false">
+          <span aria-hidden="true"/>
+          <span aria-hidden="true"/>
+          <span aria-hidden="true"/>
+        </a>
+      </div>
+      <div class="navbar-menu">
+        <div class="navbar-start">
+          <router-link 
+            class="navbar-item is-size-5" 
+            to="/review">Review</router-link>
         </div>
-    </nav>
+        <div class="navbar-end">
+          <header-login/>
+        </div>
+      </div>
+    </div>
+  </nav>
 </template>
 
 <script>
-import HeaderLogin from './HeaderLogin.vue'
+import HeaderLogin from './HeaderLogin.vue';
 
 export default {
   components: {

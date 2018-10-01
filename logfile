@@ -1,0 +1,14 @@
+2018-09-29 17:04:01.234 PDT [73831] LOG:  could not bind IPv6 address "::1": Address already in use
+2018-09-29 17:04:01.234 PDT [73831] HINT:  Is another postmaster already running on port 5432? If not, wait a few seconds and retry.
+2018-09-29 17:04:01.234 PDT [73831] LOG:  could not bind IPv4 address "127.0.0.1": Address already in use
+2018-09-29 17:04:01.234 PDT [73831] HINT:  Is another postmaster already running on port 5432? If not, wait a few seconds and retry.
+2018-09-29 17:04:01.234 PDT [73831] WARNING:  could not create listen socket for "localhost"
+2018-09-29 17:04:01.234 PDT [73831] FATAL:  could not create any TCP/IP sockets
+2018-09-29 17:04:01.234 PDT [73831] LOG:  database system is shut down
+2018-09-29 17:04:03.781 PDT [73834] LOG:  could not bind IPv6 address "::1": Address already in use
+2018-09-29 17:04:03.781 PDT [73834] HINT:  Is another postmaster already running on port 5432? If not, wait a few seconds and retry.
+2018-09-29 17:04:03.781 PDT [73834] LOG:  could not bind IPv4 address "127.0.0.1": Address already in use
+2018-09-29 17:04:03.781 PDT [73834] HINT:  Is another postmaster already running on port 5432? If not, wait a few seconds and retry.
+2018-09-29 17:04:03.781 PDT [73834] WARNING:  could not create listen socket for "localhost"
+2018-09-29 17:04:03.781 PDT [73834] FATAL:  could not create any TCP/IP sockets
+2018-09-29 17:04:03.781 PDT [73834] LOG:  database system is shut down

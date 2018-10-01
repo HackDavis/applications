@@ -19,6 +19,8 @@
     "@vue/cli-plugin-babel": "^3.0.0-beta.15",
     "@vue/cli-plugin-eslint": "^3.0.0-beta.15",
     "@vue/cli-service": "^3.0.0-beta.15",
+    "@vue/eslint-config-prettier": "^3.0.0-rc.3",
+    "eslint": "^5.6.1",
     "eslint-config-prettier": "3.0.1",
     "eslint-plugin-prettier": "2.6.2",
     "node-sass": "^4.9.0",
@@ -34,7 +36,8 @@
     "extends": [
       "plugin:vue/essential",
       "plugin:prettier/recommended",
-      "eslint:recommended"
+      "eslint:recommended",
+      "@vue/prettier"
     ],
     "rules": {
       "vue/html-indent": [
@@ -47,9 +50,6 @@
       "parser": "babel-eslint"
     }
   },
-  "eslintIgnore": [
-    "/dist/*"
-  ],
   "postcss": {
     "plugins": {
       "autoprefixer": {}
@@ -59,5 +59,8 @@
     "> 1%",
     "last 2 versions",
     "not ie <= 8"
+  ],
+  "eslintIgnore": [
+    "/dist/*"
   ]
 }

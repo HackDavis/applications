@@ -1,10 +1,12 @@
 <template>
-    <section>
-        <div class="container is-flex is-flex-column is-justify-center is-med">
-            <img class="image 3by4" src="@/assets/Pinguino-Linux.svg">
-            <h1 class="title">{{quote}}</h1>
-        </div>
-    </section>
+  <section>
+    <div class="container is-flex is-flex-column is-justify-center is-med">
+      <img 
+        class="image 3by4" 
+        src="@/assets/Pinguino-Linux.svg">
+      <h1 class="title">{{ quote }}</h1>
+    </div>
+  </section>
 </template>
 
 <script>

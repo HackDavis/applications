@@ -8,7 +8,7 @@ import VueCookie from "vue-cookie";
 
 Vue.use(VueResource);
 Vue.use(Router);
-Vue.use(VueCookie)
+Vue.use(VueCookie);
 
 Vue.http.interceptors.push(function() {
   return function(response) {

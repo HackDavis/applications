@@ -1,0 +1,17 @@
+{
+    "parserOptions": {
+        "ecmaVersion": 6,
+        "sourceType": "module",
+        "ecmaFeatures": {
+            "jsx": true
+        },
+	"no-unused-vars": [{"args": "none"}]
+    },
+    "rules": {
+        "semi": 2
+    },
+    "extends": [
+        "plugin:vue/essential"
+    ]
+}
+

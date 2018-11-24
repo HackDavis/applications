@@ -1,5 +1,6 @@
 import csv
 from datetime import datetime, timedelta
+from scipy import stats
 from sqlalchemy.sql.expression import func
 
 from src.shared import Shared
@@ -15,6 +16,7 @@ class Application(db.Model, ModelUtils, Serializer):
     scoring_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
     user = db.relationship('User', foreign_keys=scoring_user_id)
     score = db.Column(db.Integer, nullable=False)
+    standardized_score = db.Column(db.Float)
     last_modified = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
 
     @staticmethod
@@ -43,11 +45,27 @@ class Application(db.Model, ModelUtils, Serializer):
         return Application(score=0)
 
     @staticmethod
+    def set_standardized_scores(applications):
+        """Calculate and set standardize scores for applications"""
+        scores = [application.score for application in applications]
+        standardized_scores = stats.zscore(scores)
+        return list(
+            map(lambda application, standardized_score: Application.set_standardized_score(application, standardized_score),
+                applications, standardized_scores))
+
+    @staticmethod
+    def set_standardized_score(application, standardized_score):
+        """Set standardize score for an application"""
+        application.standardized_score = standardized_score
+        return application
+
+    @staticmethod
     def get_existing_application(user_id):
         """Returns application associated with user ID"""
         cutoff = datetime.now() - timedelta(hours=1)
-        return db.session.query(Application)\
-            .filter((Application.scoring_user_id == user_id) & (Application.last_modified > cutoff))\
+        return db.session.query(Application) \
+            .filter(
+            (Application.score == 0) & (Application.scoring_user_id == user_id) & (Application.last_modified > cutoff)) \
             .first()
 
     @staticmethod
@@ -56,8 +74,9 @@ class Application(db.Model, ModelUtils, Serializer):
         application = Application.get_existing_application(user_id)
         if application is None:
             cutoff = datetime.now() - timedelta(hours=1)
-            application = db.session.query(Application)\
-                .filter((Application.scoring_user_id == None) | (Application.last_modified < cutoff)) \
+            application = db.session.query(Application) \
+                .filter((Application.score == 0) & (
+                    (Application.scoring_user_id == None) | (Application.last_modified <= cutoff))) \
                 .limit(50) \
                 .from_self() \
                 .order_by(func.random()) \
@@ -102,7 +121,6 @@ class Application(db.Model, ModelUtils, Serializer):
         if application is None:
             return None
 
-        application.scoring_user_id = None
         application.score = score
 
         try:
@@ -112,3 +130,38 @@ class Application(db.Model, ModelUtils, Serializer):
             raise e
 
         return application
+
+    @staticmethod
+    def get_scored_applications():
+        """Returns all scored applications"""
+        return db.session.query(Application) \
+            .filter(Application.score != 0) \
+            .all()
+
+    @staticmethod
+    def standardize_scores():
+        """Updates the standardized scores for all applications"""
+        scored_applications = Application.get_scored_applications()
+
+        # gets all unique user ids
+        user_ids = {application.scoring_user_id for application in scored_applications}
+
+        # creates a dict to map between user_id and list of applications scored by that user
+        user_to_applications = {
+            user_id: list(
+                filter(lambda application: application.scoring_user_id == user_id,
+                       scored_applications))
+            for user_id in user_ids
+        }
+
+        # creates a dict to map between user_id and list of applications scored by that user with standardized_scores set
+        user_to_applications_with_standardized_scores = {
+            user_id: Application.set_standardized_scores(applications)
+            for user_id, applications in user_to_applications.items()
+        }
+
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            raise e

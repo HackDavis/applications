@@ -45,3 +45,4 @@ tavern==0.12.4
 urllib3==1.23
 URLObject==2.4.3
 Werkzeug==0.14.1
+scipy==1.1.0

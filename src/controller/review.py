@@ -37,9 +37,9 @@ def skip_application():
     return get_application()
 
 
-@review.route('/api/review/score', methods=['POST'])
+@review.route('/api/review/<id>/score', methods=['POST'])
 @login_required
-def score_application():
+def score_application(id):
     """Score application"""
     json = request.get_json(force=True)
 

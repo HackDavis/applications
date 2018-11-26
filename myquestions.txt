@@ -1,0 +1,58 @@
+diff --git a/src/models/Question.py b/src/models/Question.py
+index f4dac97..c363217 100644
+--- a/src/models/Question.py
++++ b/src/models/Question.py
+@@ -19,7 +19,8 @@ class Question(db.Model, ModelUtils, Serializer):
+     def insert(csv_file):
+         """Insert new rows extracted from csv_file"""
+         questions = Question.get_questions_from_csv(csv_file)
+-        rows = Question.convert_questions_to_rows(questions)
++        question_types = Question.get_question_types_from_csv(csv_file)
++        rows = Question.convert_questions_to_rows(questions, question_types)
+         Question.insert_rows(rows)
+         return rows
+ 
+@@ -30,15 +31,21 @@ class Question(db.Model, ModelUtils, Serializer):
+         return reader.fieldnames
+ 
+     @staticmethod
+-    def convert_questions_to_rows(questions):
++    def get_question_types_from_csv(csv_file):
++        reader = csv.reader(csv_file)
++        next(reader) # chomp question names
++        return next(reader)
++
++    @staticmethod
++    def convert_questions_to_rows(questions, question_types):
+         """Convert questions into rows to insert into database"""
+         return [
+-            # question_tuple[0] is the counter, question_tuple[1] is the question
+-            Question.convert_question_to_row(question_tuple[0] + 1, question_tuple[1])
+-            for question_tuple in enumerate(questions)
++            # question_tuple[0] is the counter, question_tuple[1][0] is the question name, question_tuple [1][1] is the question type
++            Question.convert_question_to_row(question_tuple[0] + 1, question_tuple[1][0], question_tuple[1][1])
++            for question_tuple in enumerate(zip(questions))
+         ]
+ 
+     @staticmethod
+-    def convert_question_to_row(index, question):
++    def convert_question_to_row(index, question, question_type):
+         """Convert question into row to insert into database"""
+-        return Question(question=question, question_type=QuestionType.essay, index=index)
++        return Question(question=question, question_type=QuestionType.getQuestionType(question_type), index=index)
+diff --git a/src/models/enums/QuestionType.py b/src/models/enums/QuestionType.py
+index 104e67b..0f739f8 100644
+--- a/src/models/enums/QuestionType.py
++++ b/src/models/enums/QuestionType.py
+@@ -5,3 +5,11 @@ class QuestionType(Enum):
+     ignore = auto()
+     essay = auto()
+     multiple_choice = auto()
++
++    @staticmethod
++    def getQuestionType(string):
++        for name, member in QuestionType.__members__.items():
++            if name == string:
++                return member
++
++        return QuestionType.ignore

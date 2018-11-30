@@ -1,15 +1,24 @@
 <template>
   <section>
-    <div class="container is-flex is-flex-column is-justify-center is-med">
-      <img 
-        class="image 3by4" 
-        src="@/assets/Pinguino-Linux.svg">
-      <h1 class="title">{{ quote }}</h1>
+    <div v-if="!loggedIn()" class="container is-flex is-flex-column is-justify-center is-med">
+      <div>
+        <img 
+          class="image 3by4" 
+          src="@/assets/Pinguino-Linux.svg">
+        <h1 class="title">{{ quote }}</h1>
+      </div>
+      
+    </div>
+    <div v-else class="container is-flex is-flex-column is-align-center">
+      <h1 class="title">List of Applicants</h1>
+      <applications-table></applications-table>
     </div>
   </section>
 </template>
 
 <script>
+import ApplicationsTable from './ApplicationsTable';
+
 /**
  * picks a random element from an array
  *
@@ -30,6 +39,9 @@ export default {
   mounted() {
     // demonstrate how to use lifecycle mounting, this will trigger whenever the page is relaoded
     this.quote = randomSelect(this.quotes);
+  },
+  components: {
+    'applications-table': ApplicationsTable
   }
 };
 </script>

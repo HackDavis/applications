@@ -17,15 +17,12 @@ class Shared:
         cls.db = SQLAlchemy()
         importlib.import_module('src.models.Answer')
         importlib.import_module('src.models.Application')
-        OAuthClass = importlib.import_module('src.models.OAuth')
+        OAuth = importlib.import_module('src.models.OAuth').OAuth
         importlib.import_module('src.models.Question')
         importlib.import_module('src.models.User')
         cls.db.init_app(app)
         with app.app_context():
-            # cls.db.drop_all()
             cls.db.create_all()
-
-        OAuth = OAuthClass.OAuth
 
         cls.google = make_google_blueprint(
             client_id=app.config.get('GOOGLE_CLIENT_ID'),

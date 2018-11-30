@@ -19,10 +19,8 @@ login_manager = Shared.login_manager
 @login_required
 def reload():
     """Reload applications from CSV file."""
-    """
     if current_user.role != Role.admin:
         abort(401, 'User needs to be an admin to access this route')
-    """
 
     with open(os.path.join(os.getcwd(), 'sample.csv'), encoding='utf-8') as csv_file:
         # drop rows
@@ -43,10 +41,8 @@ def reload():
 @login_required
 def standardize():
     """Calculate and persist standardized scores."""
-    """
     if current_user.role != Role.admin:
         abort(401, 'User needs to be an admin to access this route')
-    """
 
     Application.standardize_scores()
 

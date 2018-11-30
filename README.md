@@ -60,3 +60,22 @@ python3 start.py -c format
 python3 start.py -c deploy
 ```
 
+## Useful scripts
+
+### Adding an admin
+
+```bash
+python3 admin.py -c make-admin
+```
+
+### Removing an admin
+
+```bash
+python3 admin.py -c remove-admin
+```
+
+### Dropping the database
+
+```bash
+python3 admin.py -c drop-database
+```

@@ -13,8 +13,10 @@ db = Shared.db
 
 class Application(db.Model, ModelUtils, Serializer):
     id = db.Column(db.Integer, primary_key=True)
-    scoring_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
-    user = db.relationship('User', foreign_keys=scoring_user_id)
+    assigned_to = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
+    locked_by = db.Column(db.Integer, db.ForeignKey('user.id'))
+    assigned_to_user = db.relationship('User', foreign_keys=assigned_to)
+    locked_by_user = db.relationship('User', foreign_keys=locked_by)
     score = db.Column(db.Integer, nullable=False)
     standardized_score = db.Column(db.Float)
     last_modified = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
@@ -60,23 +62,23 @@ class Application(db.Model, ModelUtils, Serializer):
         return application
 
     @staticmethod
-    def get_existing_application(user_id):
-        """Returns application associated with user ID"""
+    def get_currently_assigned_application_for_user(user_id):
+        """Returns assigned application associated with user ID"""
         cutoff = datetime.now() - timedelta(hours=1)
         return db.session.query(Application) \
             .filter(
-            (Application.score == 0) & (Application.scoring_user_id == user_id) & (Application.last_modified > cutoff)) \
+            (Application.assigned_to == user_id) & (Application.score == 0) & (Application.last_modified > cutoff)) \
             .first()
 
     @staticmethod
-    def get_application(user_id):
+    def get_application_for_user(user_id):
         """Returns application for user to review"""
-        application = Application.get_existing_application(user_id)
+        application = Application.get_currently_assigned_application_for_user(user_id)
         if application is None:
             cutoff = datetime.now() - timedelta(hours=1)
             application = db.session.query(Application) \
                 .filter((Application.score == 0) & (
-                    (Application.scoring_user_id == None) | (Application.last_modified <= cutoff))) \
+                    (Application.assigned_to == None) | (Application.last_modified <= cutoff))) \
                 .limit(50) \
                 .from_self() \
                 .order_by(func.random()) \
@@ -85,7 +87,7 @@ class Application(db.Model, ModelUtils, Serializer):
             if application is None:
                 return None
 
-            application.scoring_user_id = user_id
+            application.assigned_to = user_id
 
             try:
                 db.session.commit()
@@ -112,12 +114,12 @@ class Application(db.Model, ModelUtils, Serializer):
     @staticmethod
     def skip_application(user_id):
         """Returns next application for user to review"""
-        application = Application.get_existing_application(user_id)
+        application = Application.get_currently_assigned_application_for_user(user_id)
 
         if application is None:
             return None
 
-        application.scoring_user_id = None
+        application.assigned_to = None
 
         try:
             db.session.commit()
@@ -128,22 +130,16 @@ class Application(db.Model, ModelUtils, Serializer):
         return application
 
     @staticmethod
-    def update_score(user_id, score):
+    def update_score(application, score, locked_by):
         """Updates the score for an application"""
-        application = Application.get_existing_application(user_id)
-
-        if application is None:
-            return None
-
         application.score = score
+        application.locked_by = locked_by
 
         try:
             db.session.commit()
         except Exception as e:
             db.session.rollback()
             raise e
-
-        return application
 
     @staticmethod
     def get_scored_applications():
@@ -158,13 +154,12 @@ class Application(db.Model, ModelUtils, Serializer):
         scored_applications = Application.get_scored_applications()
 
         # gets all unique user ids
-        user_ids = {application.scoring_user_id for application in scored_applications}
+        user_ids = {application.assigned_to for application in scored_applications}
 
         # creates a dict to map between user_id and list of applications scored by that user
         user_to_applications = {
             user_id: list(
-                filter(lambda application: application.scoring_user_id == user_id,
-                       scored_applications))
+                filter(lambda application: application.assigned_to == user_id, scored_applications))
             for user_id in user_ids
         }
 

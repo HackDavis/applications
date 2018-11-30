@@ -3,6 +3,7 @@ from flask_login import current_user, login_required
 
 from src.models.Answer import Answer
 from src.models.Application import Application
+from src.models.enums.Role import Role
 from src.models.lib.Serializer import Serializer
 from src.shared import Shared
 
@@ -13,13 +14,54 @@ google = Shared.google
 login_manager = Shared.login_manager
 
 
+def is_authorized(application_id, is_read_only):
+    if current_user.role == Role.admin:
+        # admins are authorized for any application
+        return True
+
+    application = Application.get_application(application_id)
+    if application is not None and application.assigned_to == current_user.id and application.score != 0 and (
+            is_read_only or application.locked_by is None):
+        # authorized if application is assigned to user, has been rated, and either is a read only operation or is not locked by an admin
+        return True
+
+    currently_assigned_application = Application.get_currently_assigned_application_for_user(
+        current_user.id)
+    if currently_assigned_application is not None and currently_assigned_application.id == application_id:
+        # authorized if application is the one currently assigned to user
+        return True
+
+    return False
+
+
 @review.route('/api/review', methods=['GET'])
 @login_required
 def get_application():
     """Get application for user"""
-    application = Application.get_application(current_user.get_id())
+    application = Application.get_application_for_user(current_user.id)
     if application is None:
+        # no more applications to score
         return Response(status=204)
+
+    answers = Answer.get_answers(application.id)
+    response = {'application': application, 'answers': answers}
+    return jsonify(Serializer.serialize_value(response))
+
+
+@review.route('/api/review/<application_id_str>', methods=['GET'])
+@login_required
+def get_application_using_id(application_id_str):
+    """Get application associated with application ID"""
+    try:
+        application_id = int(application_id_str)
+    except ValueError:
+        abort(400, 'application ID invalid')
+
+    application = Application.get_application(application_id)
+    if application is None:
+        abort(404, 'Application does not exist')
+    elif not is_authorized(application_id, True):
+        abort(401, 'User is not authorized for this application')
 
     answers = Answer.get_answers(application.id)
     response = {'application': application, 'answers': answers}
@@ -30,17 +72,28 @@ def get_application():
 @login_required
 def skip_application():
     """Skip application for user"""
-    past_application = Application.skip_application(current_user.get_id())
+    past_application = Application.skip_application(current_user.id)
     if past_application is None:
         abort(400, 'User is not currently assigned an application')
 
     return get_application()
 
 
-@review.route('/api/review/score', methods=['POST'])
+@review.route('/api/review/<application_id_str>/score', methods=['POST'])
 @login_required
-def score_application():
+def score_application(application_id_str):
     """Score application"""
+    try:
+        application_id = int(application_id_str)
+    except ValueError:
+        abort(400, 'application ID invalid')
+
+    application = Application.get_application(application_id)
+    if application is None:
+        abort(404, 'Application does not exist')
+    elif not is_authorized(application_id, False):
+        abort(401, 'User is not authorized for this application')
+
     json = request.get_json(force=True)
 
     score_str = json.get('score')
@@ -55,8 +108,10 @@ def score_application():
     if score < 1 or score > 5:
         abort(400, 'score not between 1 and 5')
 
-    application = Application.update_score(current_user.get_id(), score)
-    if application is None:
-        abort(400, 'User is not currently assigned an application')
+    locked_by = None
+    if current_user.role == Role.admin:
+        locked_by = current_user.id
+
+    Application.update_score(application, score, locked_by)
 
     return Response('Updated score for application', 200)

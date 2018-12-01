@@ -98,18 +98,31 @@ class Application(db.Model, ModelUtils, Serializer):
         return application
 
     @staticmethod
+    def get_application(application_id):
+        """Returns all applications associated with user ID"""
+        cutoff = datetime.now() - timedelta(hours=1)
+        return db.session.query(Application) \
+            .filter(Application.id == application_id).one()
+
+
+    @staticmethod
+    def get_application_id_by_user(application_id, user_id):
+        """Returns all applications associated with user ID"""
+        return db.session.query(Application) \
+            .filter((Application.assigned_to == user_id) & (Application.id == application_id)).one()
+
+
+    @staticmethod
     def get_all_applications_for_user(user_id):
         """Returns all applications associated with user ID"""
         cutoff = datetime.now() - timedelta(hours=1)
         return db.session.query(Application) \
-            .filter((Application.assigned_to == user_id) & ((Application.score != 0) | ((Application.score == 0) & (Application.last_modified > cutoff)))) \
-            .all()
+            .filter((Application.assigned_to == user_id) & ((Application.score != 0) | ((Application.score == 0) & (Application.last_modified > cutoff))))
 
     @staticmethod
     def get_all_applications():
         """Returns all applications"""
-        return db.session.query(Application) \
-            .all()
+        return db.session.query(Application)
 
     @staticmethod
     def skip_application(user_id):

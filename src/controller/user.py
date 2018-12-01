@@ -3,6 +3,8 @@ from flask_login import current_user, login_required
 
 from src.models.Answer import Answer
 from src.models.Application import Application
+from src.models.Question import Question
+from src.models.enums.QuestionType import QuestionType
 from src.models.enums.Role import Role
 from src.models.lib.Serializer import Serializer
 from src.shared import Shared
@@ -30,8 +32,19 @@ def get_scores():
     else:
         applications = Application.get_all_applications_for_user(current_user.id)
 
-    response = [{
-        'application': application,
-        'answers': Answer.get_identifying_answers(application.id)
-    } for application in applications]
-    return jsonify(Serializer.serialize_value(response))
+    app = applications.subquery()
+
+    firstNames = db.session.query(Answer).join(Question).filter(Question.question_type == QuestionType.firstName).subquery()
+    lastNames = db.session.query(Answer).join(Question).filter(Question.question_type == QuestionType.lastName).subquery()
+    emails = db.session.query(Answer).join(Question).filter(Question.question_type == QuestionType.email).subquery()
+    universities = db.session.query(Answer).join(Question).filter(Question.question_type == QuestionType.university).subquery()
+
+    response = db.session.query(Application.id, Application.score, firstNames.c.answer, lastNames.c.answer, emails.c.answer, universities.c.answer).join(app, app.c.id == Application.id) \
+    .join(firstNames, firstNames.c.application_id == Application.id) \
+    .join(lastNames, lastNames.c.application_id == Application.id) \
+    .join(emails, emails.c.application_id == Application.id) \
+    .join(universities, universities.c.application_id == Application.id) \
+    
+    my_results = [{'id': row[0], 'score': row[1], 'firstName': row[2], 'lastName': row[3], 'email': row[4], 'university': row[5]} for row in response.all()]
+
+    return jsonify(my_results)

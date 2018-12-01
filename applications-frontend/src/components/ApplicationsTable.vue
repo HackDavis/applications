@@ -12,14 +12,15 @@
       <thead>
         <th>Name</th>
         <th>Email</th>
-        <th>School</th>
+        <th>University</th>
         <th colspan="2">Score</th>
       </thead>
-      <tbody>
+      <progress class="loading is-primary" v-if="loading" max="100"></progress>
+      <tbody v-else>
         <tr v-for="item in searchResults" :key="item.id">
           <td>{{concatName(item.firstName, item.lastName)}}</td>
           <td>{{item.email}}</td>
-          <td>{{item.school}}</td>
+          <td>{{item.university}}</td>
           <td>{{item.score}}</td>
           <td>
             <router-link class="button" :to="'/review/' + item.id">
@@ -35,28 +36,35 @@
 </template>
 
 <script>
+import ProgressWrapper from './ProgressWrapper';
+
 export default {
   data() {
     return {
-      applications: [
-        {
-          firstName: "John",
-          lastName: "Cena",
-          email: "JC@ucdavis.edu",
-          school: "UC Davis",
-          id: 10,
-          score: 5
-        }
-      ],
+      applications: [],
       searchTerm: ""
     };
   },
+  components: {
+    'progress-bar': ProgressWrapper
+  },
+  created: function() {
+    this.$http
+        .get("/api/user/scores")
+        .then(response => this.applications = response.data, error => console.error(error));
+  },
   computed: {
     searchResults: function() {
-      return this.applications.filter(app => this.searchTerm === "" || 
+      if(this.searchTerm === "") {
+        return this.applications;
+      }
+      return this.applications.filter(app =>
         this.concatName(app.firstName, app.lastName).toLowerCase().includes(this.searchTerm.toLowerCase()) ||
         app.email.includes(this.searchTerm.toLowerCase()) ||
-        app.school.toLowerCase().includes(this.searchTerm.toLowerCase()));
+        app.university.toLowerCase().includes(this.searchTerm.toLowerCase()));
+    },
+    loading: function() {
+      return this.applications.length == 0;
     }
   },
   methods: {

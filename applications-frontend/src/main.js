@@ -8,6 +8,11 @@ import { library } from '@fortawesome/fontawesome-svg-core';
 import { faSearch, faEdit } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
+import "vue-virtual-scroller/dist/vue-virtual-scroller.css";
+import VueVirtualScroller from "vue-virtual-scroller";
+
+Vue.use(VueVirtualScroller);
+
 library.add(faSearch, faEdit);
 
 Vue.component('font-awesome-icon', FontAwesomeIcon);

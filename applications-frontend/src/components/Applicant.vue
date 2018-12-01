@@ -176,7 +176,7 @@ export default {
       );
     },
     next: function() {
-      let id = this.$route.params.id || "";
+      let id = this.$route.params.id ? "/" + this.$route.params.id : "";
 
       this.$http
         .get("/api/review" + id)

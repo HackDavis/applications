@@ -2,6 +2,7 @@ from enum import auto, Enum
 
 
 class QuestionType(Enum):
+    checkbox = auto()
     communicationsOptIn = auto()
     demographic = auto()
     dietaryRestriction = auto()
@@ -14,4 +15,4 @@ class QuestionType(Enum):
     resumeLink = auto()
     resumeSharingOptIn = auto()
     shirtSize = auto()
-    checkbox = auto()
+    university = auto()

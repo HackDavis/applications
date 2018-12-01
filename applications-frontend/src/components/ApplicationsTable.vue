@@ -76,9 +76,6 @@ export default {
 </script>
 
 <style scoped>
-table {
-  height: 800px;
-}
 td a.button {
   display: inline-block;
 }

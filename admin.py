@@ -29,23 +29,19 @@ def exit_with_error(error_message):
     exit(1)
 
 
-def get_user(id):
-    """Returns user associated with user ID"""
+def get_user_email(email):
+    """Returns user associated with user Email"""
     return db.session.query(User) \
-        .filter(User.id == id) \
+        .filter(User.email == email) \
         .first()
 
 
 def make_admin():
     """Makes a user an admin"""
-    print('What is the user ID of the user you are making an admin')
-    id_str = input()
-    try:
-        id = int(id_str)
-    except ValueError:
-        exit_with_error('Invalid user ID. Exiting.')
+    print('What is the email of the user you are making an admin')
+    email_str = input()
 
-    user = get_user(id)
+    user = get_user_email(email_str)
     if user is None:
         exit_with_error('User does not exist. Exiting.')
 
@@ -57,19 +53,15 @@ def make_admin():
         db.session.rollback()
         exit_with_error('Error occurred while persisting: {e}. Exiting.')
 
-    successful_exit(f"Made user {id} an admin.")
+    successful_exit(f"Made user {email_str} an admin.")
 
 
 def remove_admin():
     """Removes a user as an admin"""
-    print('What is the user ID of the user you are removing as an admin')
-    id_str = input()
-    try:
-        id = int(id_str)
-    except ValueError:
-        exit_with_error('Invalid user ID. Exiting.')
+    print('What is the email of the user you are removing as an admin')
+    email_str = input()
 
-    user = get_user(id)
+    user = get_user_email(email_str)
     if user is None:
         exit_with_error('User does not exist. Exiting.')
 
@@ -81,7 +73,7 @@ def remove_admin():
         db.session.rollback()
         exit_with_error('Error occurred while persisting: {e}. Exiting.')
 
-    successful_exit(f"Removed user {id} as an admin.")
+    successful_exit(f"Removed user {email_str} as an admin.")
 
 
 def drop_database():

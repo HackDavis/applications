@@ -47,11 +47,29 @@ class Answer(db.Model, ModelUtils, Serializer):
     def get_answers(application_id):
         """Returns all answers associated with the application ID"""
         answers = db.session.query(Answer) \
-        .filter(Answer.application_id == application_id) \
-        .join(Question) \
-        .filter(Question.question_type != QuestionType.ignore) \
-        .with_entities(Question.question, Question.question_type, Answer.answer) \
-        .all()
+            .filter(Answer.application_id == application_id) \
+            .join(Question) \
+            .filter(Question.question_type != QuestionType.ignore) \
+            .with_entities(Question.question, Question.question_type, Answer.answer) \
+            .all()
+
+        return [{
+            "answer": row[2],
+            "question": {
+                "question": row[0],
+                "question_type": row[1]
+            }
+        } for row in answers]
+
+    @staticmethod
+    def get_identifying_answers(application_id):
+        """Returns answers associated with the application ID that are deemed important for quick identification"""
+        answers = db.session.query(Answer) \
+            .filter(Answer.application_id == application_id) \
+            .join(Question) \
+            .filter((Question.question_type == QuestionType.firstName) | (Question.question_type == QuestionType.lastName) | (Question.question_type == QuestionType.email) | (Question.question_type == QuestionType.university)) \
+            .with_entities(Question.question, Question.question_type, Answer.answer) \
+            .all()
 
         return [{
             "answer": row[2],

@@ -118,9 +118,4 @@ def login():
 def logout():
     """Logout user"""
     logout_user()
-    return redirect("/")
-
-@auth.route('/api/user', methods=['GET'])
-@login_required
-def user_info():
-    return jsonify(Serializer.serialize(current_user))
+    return redirect('/')

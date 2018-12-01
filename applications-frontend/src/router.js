@@ -27,7 +27,7 @@ Vue.http.interceptors.push(function() {
 let router = new Router({
   routes: [
     {
-      path: "/review",
+      path: "/review/:id?",
       component: Applicant,
       meta: {
         requiresAuth: true

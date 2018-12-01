@@ -14,7 +14,7 @@ class Answer(db.Model, ModelUtils, Serializer):
     application_id = db.Column(
         db.Integer, db.ForeignKey('application.id'), nullable=False, index=True)
     application = db.relationship('Application', foreign_keys=application_id)
-    question_id = db.Column(db.Integer, db.ForeignKey('question.id'), nullable=False)
+    question_id = db.Column(db.Integer, db.ForeignKey('question.id'), nullable=False, index=True)
     question = db.relationship('Question', foreign_keys=question_id)
     answer = db.Column(db.Text, nullable=False)
     last_modified = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())

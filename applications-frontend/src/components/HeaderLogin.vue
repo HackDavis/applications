@@ -14,6 +14,14 @@ export default {
                 <a class="navbar-item is-size-5" href="/login">Login</a>
             );
         }
+    },
+    created() {
+        if (this.loggedIn() && !this.user) {
+            this.user = {};
+            this.getUserInfo();
+        } else if (!this.loggedIn()) {
+            this.user = null;
+        }
     }
 };
 </script>

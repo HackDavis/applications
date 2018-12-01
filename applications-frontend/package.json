@@ -26,7 +26,8 @@
     "node-sass": "^4.9.0",
     "prettier": "1.14.2",
     "sass-loader": "^7.0.3",
-    "vue-template-compiler": "^2.5.16"
+    "vue-template-compiler": "^2.5.16",
+    "vue-virtual-scroller": "^1.0.0-beta.2"
   },
   "eslintConfig": {
     "root": true,

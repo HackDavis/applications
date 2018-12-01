@@ -22,13 +22,5 @@ export default {
         }
       );
     }
-  },
-  created() {
-    if (this.loggedIn() && !this.user) {
-      this.user = {};
-      this.getUserInfo();
-    } else if (!this.loggedIn()) {
-      this.user = null;
-    }
   }
 };

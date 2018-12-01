@@ -100,7 +100,6 @@ class Application(db.Model, ModelUtils, Serializer):
     @staticmethod
     def get_application(application_id):
         """Returns an application, for admin or server-side"""
-        cutoff = datetime.now() - timedelta(hours=1)
         return db.session.query(Application) \
             .filter(Application.id == application_id).one()
 

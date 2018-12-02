@@ -1,6 +1,8 @@
 from flask import Blueprint, jsonify
 from flask_login import current_user, login_required
 
+from sqlalchemy.sql.functions import func 
+
 from src.models.Answer import Answer
 from src.models.Application import Application
 from src.models.Question import Question
@@ -39,27 +41,27 @@ def get_scores():
 
     app = applications.subquery()
 
-    #response = db.session.query(Application.id, Application.score, Answer.answer, Question.question_type).join(app, app.c.id == Application.id) \
-    #.join(Answer) \
-    #.join(Question) \
-    #.filter((Question.question_type == QuestionType.email) \
-    #| (Question.question_type == QuestionType.firstName) \
-    #| (Question.question_type == QuestionType.lastName) \
-    #| (Question.question_type == QuestionType.university)) \
-    #.order_by(Application.id) \
-    #.all()
-
-    firstNames = db.session.query(Answer).join(Question).filter(Question.question_type == QuestionType.firstName).subquery()
-    lastNames = db.session.query(Answer).join(Question).filter(Question.question_type == QuestionType.lastName).subquery()
-    emails = db.session.query(Answer).join(Question).filter(Question.question_type == QuestionType.email).subquery()
-    universities = db.session.query(Answer).join(Question).filter(Question.question_type == QuestionType.university).subquery()
-
-    response = db.session.query(Application.id, Application.score, firstNames.c.answer, lastNames.c.answer, emails.c.answer, universities.c.answer).join(app, app.c.id == Application.id) \
-    .join(firstNames, firstNames.c.application_id == Application.id) \
-    .join(lastNames, lastNames.c.application_id == Application.id) \
-    .join(emails, emails.c.application_id == Application.id) \
-    .join(universities, universities.c.application_id == Application.id) \
+    response = db.session.query(Application.id, Application.score, func.json_object_agg(Question.question_type, Answer.answer)).join(app, app.c.id == Application.id) \
+    .join(Answer) \
+    .join(Question) \
+    .filter((Question.question_type == QuestionType.email) \
+    | (Question.question_type == QuestionType.firstName) \
+    | (Question.question_type == QuestionType.lastName) \
+    | (Question.question_type == QuestionType.university)) \
+    .group_by(Application.id) \
     .all()
+
+    # firstNames = db.session.query(Answer).join(Question).filter(Question.question_type == QuestionType.firstName).subquery()
+    # lastNames = db.session.query(Answer).join(Question).filter(Question.question_type == QuestionType.lastName).subquery()
+    # emails = db.session.query(Answer).join(Question).filter(Question.question_type == QuestionType.email).subquery()
+    # universities = db.session.query(Answer).join(Question).filter(Question.question_type == QuestionType.university).subquery()
+
+    # response = db.session.query(Application.id, Application.score, firstNames.c.answer, lastNames.c.answer, emails.c.answer, universities.c.answer).join(app, app.c.id == Application.id) \
+    # .join(firstNames, firstNames.c.application_id == Application.id) \
+    # .join(lastNames, lastNames.c.application_id == Application.id) \
+    # .join(emails, emails.c.application_id == Application.id) \
+    # .join(universities, universities.c.application_id == Application.id) \
+    # .all()
 
     # t2 = time.perf_counter()
 
@@ -76,11 +78,18 @@ def get_scores():
     #    cur_row["score"] = int(row[1])
     #    cur_row[row[3].name] = row[2]
 
-    my_results = [{'id': row[0], 'score': row[1], 'firstName': row[2], 'lastName': row[3], 'email': row[4], 'university': row[5]} for row in response]
+    # my_results = [{'id': row[0], 'score': row[1], 'firstName': row[2], 'lastName': row[3], 'email': row[4], 'university': row[5]} for row in response]
 
-    #t3 = time.perf_counter()
+    my_results = [{'id': row[0], 'score': row[1], \
+        'university': row[2]['university'], \
+        'email': row[2]['email'], \
+        'firstName': row[2]['firstName'], \
+        'lastName': row[2]['lastName'] \
+    } for row in response]
 
-    #print("t3 - t2", t3 - t2)
-    #print("t2 - start", t2 - start)
+    # t3 = time.perf_counter()
+
+    # print("t3 - t2", t3 - t2)
+    # print("t2 - start", t2 - start)
 
     return jsonify(my_results)

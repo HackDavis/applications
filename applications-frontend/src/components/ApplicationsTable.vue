@@ -8,7 +8,7 @@
         </span>
       </div>
     </div>
-    <table class="table">
+    <table class="table" @scroll.passive="scroll">
       <thead>
         <th>Name</th>
         <th>Email</th>
@@ -17,7 +17,7 @@
       </thead>
       <progress class="loading is-primary" v-if="loading" max="100"></progress>
       <tbody v-else>
-        <tr v-for="item in searchResults" :key="item.id">
+        <tr v-for="item in paginatedItems" :key="item.id">
           <td>{{concatName(item.firstName, item.lastName)}}</td>
           <td>{{item.email}}</td>
           <td>{{item.university}}</td>
@@ -42,16 +42,30 @@ export default {
   data() {
     return {
       applications: [],
-      searchTerm: ""
+      searchTerm: "",
+      maxViewIndex: 0
     };
   },
   components: {
     'progress-bar': ProgressWrapper
   },
+  methods: {
+    scroll(e) {
+      if(e.target.scrollTop == e.target.scrollTopMax) {
+        this.maxViewIndex += 10;
+      }
+    },
+    concatName(first, last) {
+      return first + " " + last;
+    }
+  },
   created: function() {
     this.$http
         .get("/api/user/scores")
-        .then(response => this.applications = response.data, error => console.error(error));
+        .then(response => {
+          this.applications = response.data;
+          this.maxViewIndex = 20;
+        }, error => console.error(error));
   },
   computed: {
     searchResults: function() {
@@ -63,19 +77,27 @@ export default {
         app.email.includes(this.searchTerm.toLowerCase()) ||
         app.university.toLowerCase().includes(this.searchTerm.toLowerCase()));
     },
+    paginatedItems: function() {
+      return this.searchResults.slice(0, this.maxViewIndex);
+    },
     loading: function() {
       return this.applications.length == 0;
     }
   },
-  methods: {
-    concatName: function(first, last) {
-      return first + " " + last;
+  watch: {
+    searchTerm: function() {
+      this.maxViewIndex = 20;
     }
   }
 };
 </script>
 
 <style scoped>
+table {
+  height: 600px;
+  overflow-y: scroll;
+  display: block
+}
 td a.button {
   display: inline-block;
 }

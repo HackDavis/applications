@@ -195,6 +195,7 @@ export default {
       this.$http
         .post("/api/review/" + this.application.id + "/score", { score: this.application.score })
         .then(() => {
+          this.$router.push("/review");
           this.next();
         }, this.handleResponseFailure);
     }

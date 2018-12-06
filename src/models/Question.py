@@ -1,4 +1,5 @@
 import csv
+import time
 
 from src.shared import Shared
 from src.models.enums.QuestionType import QuestionType
@@ -14,14 +15,27 @@ class Question(db.Model, ModelUtils, Serializer):
     question_type = db.Column(db.Enum(QuestionType), nullable=False)
     index = db.Column(db.Integer, nullable=False, unique=True, index=True)
     last_modified = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
+    weight = db.Column(db.FLOAT)
 
     @staticmethod
-    def insert(csv_file):
+    def insert(csv_file, session):
         """Insert new rows extracted from csv_file"""
+
+        start = time.perf_counter()
+
         questions = Question.get_questions_from_csv(csv_file)
         question_types = Question.get_question_types_from_csv(csv_file)
         rows = Question.convert_questions_to_rows(questions, question_types)
-        Question.insert_rows(rows)
+
+        object_time = time.perf_counter()
+
+        print("question load time: ", object_time - start)
+
+        session.bulk_save_objects(rows, return_defaults=True)
+
+        question_bulk_save_time = time.perf_counter()
+
+        print("question save time: ", question_bulk_save_time - object_time)
         return rows
 
     @staticmethod

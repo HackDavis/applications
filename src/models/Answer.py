@@ -1,4 +1,5 @@
 import itertools
+import time
 
 from src.shared import Shared
 from src.models.lib.ModelUtils import ModelUtils
@@ -20,10 +21,20 @@ class Answer(db.Model, ModelUtils, Serializer):
     last_modified = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
 
     @staticmethod
-    def insert(question_rows, applications, application_rows):
+    def insert(question_rows, applications, application_rows, session):
         """Insert new rows extracted from CSV file"""
+
+        start = time.perf_counter()
+
         rows = Answer.convert_applications_to_rows(question_rows, applications, application_rows)
-        Answer.insert_rows(rows)
+
+        object_load = time.perf_counter()
+        print("Answers load time", object_load - start)
+
+        session.bulk_save_objects(rows)
+
+        bulk_save = time.perf_counter()
+        print("Answers save time", bulk_save - object_load)
         return rows
 
     @staticmethod

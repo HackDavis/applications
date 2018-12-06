@@ -1,4 +1,5 @@
 import csv
+import time
 from datetime import datetime, timedelta
 from scipy import stats
 from sqlalchemy.sql.expression import func
@@ -22,12 +23,24 @@ class Application(db.Model, ModelUtils, Serializer):
     last_modified = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
 
     @staticmethod
-    def insert(csv_file, question_rows):
+    def insert(csv_file, question_rows, session):
         """Insert new rows extracted from csv_file"""
+        start = time.perf_counter()
+
         applications = Application.get_applications_from_csv(csv_file)
         rows = Application.convert_applications_to_rows(applications)
-        Application.insert_rows(rows)
-        Answer.insert(question_rows, applications, rows)
+
+        object_load = time.perf_counter()
+
+        print("Applcations load time", object_load - start)
+
+        session.bulk_save_objects(rows, return_defaults=True)
+
+        applications_save = time.perf_counter()
+
+        print("Applications save time", applications_save - object_load)
+
+        Answer.insert(question_rows, applications, rows, session)
         return rows
 
     @staticmethod

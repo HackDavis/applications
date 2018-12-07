@@ -27,7 +27,7 @@ class Application(db.Model, ModelUtils, Serializer):
         applications = Application.get_applications_from_csv(csv_file)
         rows = Application.convert_applications_to_rows(applications)
         Application.insert_rows(rows)
-        Answer.insert(question_rows, applications, rows)
+        answers = Answer.insert(question_rows, applications, rows)
         return rows
 
     @staticmethod

@@ -6,6 +6,8 @@ from src.models.lib.Serializer import Serializer
 from src.models.enums.QuestionType import QuestionType
 from src.models.Question import Question
 
+from sqlalchemy.sql.expression import func
+
 db = Shared.db
 
 
@@ -16,6 +18,7 @@ class Answer(db.Model, ModelUtils, Serializer):
     application = db.relationship('Application', foreign_keys=application_id)
     question_id = db.Column(db.Integer, db.ForeignKey('question.id'), nullable=False)
     question = db.relationship('Question', foreign_keys=question_id)
+    answer_weight = db.Column(db.Float, default=1)
     answer = db.Column(db.Text, nullable=False)
     last_modified = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
 
@@ -78,3 +81,23 @@ class Answer(db.Model, ModelUtils, Serializer):
                 "question_type": row[1]
             }
         } for row in answers]
+
+    @staticmethod
+    def get_unique_answer_weights():
+        question_answer = db.session.query(Answer.question_id, Answer.answer, Answer.answer_weight) \
+        .distinct(Answer.answer, Answer.question_id) \
+        .join(Question) \
+        .filter((Question.question_type == QuestionType.demographic) | (Question.question_type == QuestionType.university)) \
+        .add_column(Question.question) \
+        .from_self(Question.question, func.json_object_agg(Answer.answer, Answer.answer_weight)) \
+        .group_by(Question.question)
+
+        results = question_answer.all()
+
+        print(len(results))
+
+        return results
+    
+    @staticmethod
+    def set_unique_answer_weights(weights_as_dict):
+        pass

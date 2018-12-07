@@ -1,4 +1,4 @@
-from flask import abort, Blueprint, Response
+from flask import abort, jsonify, Blueprint, Response
 from flask_login import current_user, login_required
 import os
 
@@ -7,6 +7,7 @@ from src.models.Application import Application
 from src.models.Question import Question
 from src.models.enums.Role import Role
 from src.shared import Shared
+from src.models.lib.Serializer import Serializer
 
 admin = Blueprint('admin', __name__)
 
@@ -47,3 +48,12 @@ def standardize():
     Application.standardize_scores()
 
     return Response('Standardized scores', 200)
+
+@admin.route('/api/admin/configure', methods=["GET"])
+@login_required
+def configure_parameters():
+    res = {}
+    res["question_weights"] = Question.get_question_weights()
+    res["answer_weights"] = Answer.get_unique_answer_weights()
+
+    return jsonify(Serializer.serialize_value(res))

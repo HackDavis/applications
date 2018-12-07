@@ -5,6 +5,8 @@ from src.models.enums.QuestionType import QuestionType
 from src.models.lib.ModelUtils import ModelUtils
 from src.models.lib.Serializer import Serializer
 
+from sqlalchemy.sql.expression import func
+
 db = Shared.db
 
 
@@ -14,6 +16,7 @@ class Question(db.Model, ModelUtils, Serializer):
     question_type = db.Column(db.Enum(QuestionType), nullable=False)
     index = db.Column(db.Integer, nullable=False, unique=True, index=True)
     last_modified = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
+    weight = db.Column(db.Float)
 
     @staticmethod
     def insert(csv_file):
@@ -55,4 +58,11 @@ class Question(db.Model, ModelUtils, Serializer):
                 'question type {question_type} not recognized for question: {question}'.format(
                     question_type=question_type_string, question=question))
 
-        return Question(question=question, question_type=question_type, index=index)
+        return Question(question=question, question_type=question_type, index=index, weight=0)
+
+    @staticmethod
+    def get_question_weights():
+        weights = db.session.query(Question.question, Question.weight) \
+        .filter((Question.question_type == QuestionType.demographic) | (Question.question_type == QuestionType.university)) \
+        .all()
+        return weights

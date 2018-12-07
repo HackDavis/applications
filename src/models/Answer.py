@@ -100,14 +100,22 @@ class Answer(db.Model, ModelUtils, Serializer):
         .join(Question) \
         .filter((Question.question_type == QuestionType.demographic) | (Question.question_type == QuestionType.university)) \
         .add_column(Question.question) \
-        .from_self(Question.question, func.json_object_agg(Answer.answer, Answer.answer_weight)) \
-        .group_by(Question.question)
+        .add_column(Question.id) \
+        .from_self(Question.id, Question.question, func.json_object_agg(Answer.answer, Answer.answer_weight)) \
+        .group_by(Question.id, Question.question)
 
         results = question_answer.all()
+        transformed = []
 
-        print(len(results))
+        for result in results:
+            t = [result[0], result[1]]
+            weights = [{"name": k, "weight": v} for k, v in result[2].items()]
+            t.append(weights)
+            transformed.append(t)
 
-        return results
+        print(len(transformed))
+
+        return transformed
     
     @staticmethod
     def set_unique_answer_weights(weights_as_dict):

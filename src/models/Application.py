@@ -190,8 +190,8 @@ class Application(db.Model, ModelUtils, Serializer):
 
             scored_applications_per_user[user].append(application)
 
-        for ((user, applications), stats) in zip(scored_applications_per_user.items(), stats_per_user):
-            for application in applications:
+        for (user, stats) in zip(sorted(scored_applications_per_user), stats_per_user):
+            for application in scored_applications_per_user[user]:
                 Application.set_standardized_score(application, (application.score - stats[0]) / stats[1])
 
         try:

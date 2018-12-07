@@ -170,7 +170,7 @@ class Application(db.Model, ModelUtils, Serializer):
         """Returns all scored applications"""
         return db.session.query(Application) \
             .filter(Application.score != 0) \
-            .join(User, (User.id == Application.assigned_to) | (User.id == Application.locked_by)) \
+            .join(User, (User.id == Application.locked_by) | (User.id == Application.assigned_to)) \
             .from_self(func.avg(Application.score), func.stddev(Application.score), User.id) \
             .group_by(User.id) \
             .all()

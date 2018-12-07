@@ -4,7 +4,7 @@ export default {
         if(this.loggedIn()) {
             return (
                 <div class="navbar-item">
-                    <img src={this.user.picture} />
+                    <img src={this.$user.getUser().picture} />
                     <a class="is-size-5" href="/logout">Logout</a>
                 </div>
             );
@@ -16,11 +16,11 @@ export default {
         }
     },
     created() {
-        if (this.loggedIn() && !this.user) {
-            this.user = {};
+        if (this.loggedIn() && !this.$user.getUser()) {
+            this.$user.setUser({});
             this.getUserInfo();
         } else if (!this.loggedIn()) {
-            this.user = null;
+            this.$user.setUser(null);
         }
     }
 };

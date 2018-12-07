@@ -19,6 +19,20 @@ Vue.component('font-awesome-icon', FontAwesomeIcon);
 
 Vue.config.productionTip = false;
 
+Vue.prototype.$user = {
+  _vm: new Vue({
+    data: {
+      user: null
+    }
+  }),
+  setUser(user) {
+    this._vm.$data.user = user;
+  },
+  getUser() {
+    return this._vm.$data.user;
+  }
+};
+
 Vue.mixin(auth);
 
 new Vue({

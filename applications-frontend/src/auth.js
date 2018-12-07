@@ -1,10 +1,4 @@
-import Vue from "vue";
 export default {
-  data() {
-    return {
-      user: null
-    };
-  },
   methods: {
     loggedIn() {
       return this.$cookie.get("remember_token") != undefined;
@@ -12,12 +6,12 @@ export default {
     getUserInfo() {
       this.$http.get("/api/user").then(
         response => {
-          this.user = response.body;
+          this.$user.setUser(response.body);
         },
         error => {
           if (error) {
             console.error(error);
-            this.user = null;
+            this.$user.setUser(null);
           }
         }
       );

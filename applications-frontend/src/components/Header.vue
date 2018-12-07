@@ -28,6 +28,9 @@
           <router-link 
             class="navbar-item is-size-5" 
             to="/review">Review</router-link>
+          <router-link v-if="this.$user.getUser() && this.$user.getUser().role == 'admin'"
+            class="navbar-item is-size-5"
+            to="/configure">Configure</router-link>
         </div>
         <div class="navbar-end">
           <header-login/>

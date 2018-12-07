@@ -1,11 +1,12 @@
 import csv
 import time
 from datetime import datetime, timedelta
-from scipy import stats
+from collections import defaultdict
 from sqlalchemy.sql.expression import func
 
 from src.shared import Shared
 from src.models.Answer import Answer
+from src.models.User import User
 from src.models.lib.ModelUtils import ModelUtils
 from src.models.lib.Serializer import Serializer
 
@@ -58,15 +59,6 @@ class Application(db.Model, ModelUtils, Serializer):
     def convert_application_to_row(application):
         """Convert application into row to insert into database"""
         return Application(score=0)
-
-    @staticmethod
-    def set_standardized_scores(applications):
-        """Calculate and set standardize scores for applications"""
-        scores = [application.score for application in applications]
-        standardized_scores = stats.zscore(scores)
-        return list(
-            map(lambda application, standardized_score: Application.set_standardized_score(application, standardized_score),
-                applications, standardized_scores))
 
     @staticmethod
     def set_standardized_score(application, standardized_score):
@@ -174,25 +166,33 @@ class Application(db.Model, ModelUtils, Serializer):
             .all()
 
     @staticmethod
+    def get_mean_stddev_scores_per_user():
+        """Returns all scored applications"""
+        return db.session.query(Application) \
+            .filter(Application.score != 0) \
+            .join(User, (User.id == Application.assigned_to) | (User.id == Application.locked_by)) \
+            .from_self(func.avg(Application.score), func.stddev(Application.score), User.id) \
+            .group_by(User.id) \
+            .all()
+
+    @staticmethod
     def standardize_scores():
         """Updates the standardized scores for all applications"""
+        stats_per_user = Application.get_mean_stddev_scores_per_user()
         scored_applications = Application.get_scored_applications()
 
-        # gets all unique user ids
-        user_ids = {application.assigned_to for application in scored_applications}
+        scored_applications_per_user = defaultdict(list)
 
-        # creates a dict to map between user_id and list of applications scored by that user
-        user_to_applications = {
-            user_id: list(
-                filter(lambda application: application.assigned_to == user_id, scored_applications))
-            for user_id in user_ids
-        }
+        for application in scored_applications:
+            user = application.assigned_to
+            if application.locked_by is not None:
+                user = application.locked_by
 
-        # creates a dict to map between user_id and list of applications scored by that user with standardized_scores set
-        user_to_applications_with_standardized_scores = {
-            user_id: Application.set_standardized_scores(applications)
-            for user_id, applications in user_to_applications.items()
-        }
+            scored_applications_per_user[user].append(application)
+
+        for ((user, applications), stats) in zip(scored_applications_per_user.items(), stats_per_user):
+            for application in applications:
+                Application.set_standardized_score(application, (application.score - stats[0]) / stats[1])
 
         try:
             db.session.commit()

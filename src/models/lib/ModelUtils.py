@@ -15,6 +15,7 @@ class ModelUtils:
             db.session.rollback()
             raise e
 
+    # unused at this point due to bulk insert methods
     @classmethod
     def insert_rows(cls, rows):
         """Insert provided rows into table"""

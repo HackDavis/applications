@@ -1,10 +1,12 @@
 import csv
+import time
 from datetime import datetime, timedelta
-from scipy import stats
+from collections import defaultdict
 from sqlalchemy.sql.expression import func
 
 from src.shared import Shared
 from src.models.Answer import Answer
+from src.models.User import User
 from src.models.lib.ModelUtils import ModelUtils
 from src.models.lib.Serializer import Serializer
 
@@ -22,12 +24,24 @@ class Application(db.Model, ModelUtils, Serializer):
     last_modified = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
 
     @staticmethod
-    def insert(csv_file, question_rows):
+    def insert(csv_file, question_rows, session):
         """Insert new rows extracted from csv_file"""
+        start = time.perf_counter()
+
         applications = Application.get_applications_from_csv(csv_file)
         rows = Application.convert_applications_to_rows(applications)
-        Application.insert_rows(rows)
-        Answer.insert(question_rows, applications, rows)
+
+        object_load = time.perf_counter()
+
+        print("Applcations load time", object_load - start)
+
+        session.bulk_save_objects(rows, return_defaults=True)
+
+        applications_save = time.perf_counter()
+
+        print("Applications save time", applications_save - object_load)
+
+        Answer.insert(question_rows, applications, rows, session)
         return rows
 
     @staticmethod
@@ -45,15 +59,6 @@ class Application(db.Model, ModelUtils, Serializer):
     def convert_application_to_row(application):
         """Convert application into row to insert into database"""
         return Application(score=0)
-
-    @staticmethod
-    def set_standardized_scores(applications):
-        """Calculate and set standardize scores for applications"""
-        scores = [application.score for application in applications]
-        standardized_scores = stats.zscore(scores)
-        return list(
-            map(lambda application, standardized_score: Application.set_standardized_score(application, standardized_score),
-                applications, standardized_scores))
 
     @staticmethod
     def set_standardized_score(application, standardized_score):
@@ -161,25 +166,33 @@ class Application(db.Model, ModelUtils, Serializer):
             .all()
 
     @staticmethod
+    def get_mean_stddev_scores_per_user():
+        """Returns all scored applications"""
+        return db.session.query(Application) \
+            .filter(Application.score != 0) \
+            .join(User, (User.id == Application.locked_by) | (User.id == Application.assigned_to)) \
+            .from_self(func.avg(Application.score), func.stddev(Application.score), User.id) \
+            .group_by(User.id) \
+            .all()
+
+    @staticmethod
     def standardize_scores():
         """Updates the standardized scores for all applications"""
+        stats_per_user = Application.get_mean_stddev_scores_per_user()
         scored_applications = Application.get_scored_applications()
 
-        # gets all unique user ids
-        user_ids = {application.assigned_to for application in scored_applications}
+        scored_applications_per_user = defaultdict(list)
 
-        # creates a dict to map between user_id and list of applications scored by that user
-        user_to_applications = {
-            user_id: list(
-                filter(lambda application: application.assigned_to == user_id, scored_applications))
-            for user_id in user_ids
-        }
+        for application in scored_applications:
+            user = application.assigned_to
+            if application.locked_by is not None:
+                user = application.locked_by
 
-        # creates a dict to map between user_id and list of applications scored by that user with standardized_scores set
-        user_to_applications_with_standardized_scores = {
-            user_id: Application.set_standardized_scores(applications)
-            for user_id, applications in user_to_applications.items()
-        }
+            scored_applications_per_user[user].append(application)
+
+        for (user, stats) in zip(sorted(scored_applications_per_user), stats_per_user):
+            for application in scored_applications_per_user[user]:
+                Application.set_standardized_score(application, (application.score - stats[0]) / stats[1])
 
         try:
             db.session.commit()

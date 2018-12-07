@@ -1,12 +1,15 @@
 from flask import abort, Blueprint, Response
 from flask_login import current_user, login_required
 import os
+import time
 
 from src.models.Answer import Answer
 from src.models.Application import Application
 from src.models.Question import Question
 from src.models.enums.Role import Role
 from src.shared import Shared
+
+from sqlalchemy.orm.session import Session
 
 admin = Blueprint('admin', __name__)
 
@@ -30,8 +33,28 @@ def reload():
 
         # load new rows
         try:
-            question_rows = Question.insert(csv_file)
-            Application.insert(csv_file, question_rows)
+            session = db.session
+
+            start = time.perf_counter()
+
+            question_rows = Question.insert(csv_file, session)
+            Application.insert(csv_file, question_rows, session)
+
+            op_time = time.perf_counter()
+
+            print("Total insert time", op_time - start)
+
+            try:
+                session.commit()
+                
+                commit_time = time.perf_counter()
+                print("Commit time", commit_time - op_time)
+
+            except Exception as e:
+                session.rollback()
+                print(e)
+                raise(e)
+
             return Response('Reloaded applications from CSV file', 200)
         except ValueError as e:
             abort(400, str(e))

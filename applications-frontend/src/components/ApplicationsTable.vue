@@ -21,7 +21,7 @@
           <td>{{concatName(item.firstName, item.lastName)}}</td>
           <td>{{item.email}}</td>
           <td>{{item.university}}</td>
-          <td>{{item.score}}</td>
+          <td>{{item.score > 0 ? item.score : "-"}}</td>
           <td>
             <router-link class="button" :to="'/review/' + item.id">
               <span class="icon">

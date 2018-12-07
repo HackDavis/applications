@@ -19,7 +19,7 @@
                 <div class="accordion" v-for="weight in answer_weights" :key="weight[0]">
                     <div class="accordion-header toggle">{{weight[1]}}</div>
                     <div class="accordion-body">
-                        <div class="accordion-content">
+                        <div class="accordion-content" @click.stop="dummy">
                             <div class="control" v-for="w in weight[2]" :key="w.name">
                                 <label class="label">{{w.name}}</label>
                                 <input class="input" v-model="w.weight" />
@@ -62,7 +62,8 @@ export default {
         },
         submit() {
             
-        }
+        },
+        dummy() {}
     }
 };
 </script>

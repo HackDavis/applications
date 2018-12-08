@@ -2,6 +2,7 @@ import Vue from "vue";
 import Router from "vue-router";
 import Applicant from "./components/Applicant";
 import Home from "./components/Home";
+import Configure from './components/Configure';
 import Error from "./Error";
 import VueResource from "vue-resource";
 import VueCookie from "vue-cookie";
@@ -42,6 +43,10 @@ let router = new Router({
       name: "error",
       component: Error,
       props: true
+    },
+    {
+      path: "/configure",
+      component: Configure
     }
   ],
   mode: "history"

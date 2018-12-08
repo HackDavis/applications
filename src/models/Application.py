@@ -3,10 +3,12 @@ import time
 from datetime import datetime, timedelta
 from collections import defaultdict
 from sqlalchemy.sql.expression import func
+from sqlalchemy.orm import aliased
 
 from src.shared import Shared
 from src.models.Answer import Answer
 from src.models.User import User
+from src.models.Question import Question
 from src.models.lib.ModelUtils import ModelUtils
 from src.models.lib.Serializer import Serializer
 
@@ -199,3 +201,13 @@ class Application(db.Model, ModelUtils, Serializer):
         except Exception as e:
             db.session.rollback()
             raise e
+
+    @staticmethod
+    def rank_participants():
+        Application.standardize_scores()
+
+        answer_values = db.session.query(Application.id, func.sum(Answer.answer_weight * Question.weight)) \
+        .join(Answer) \
+        .join(Question) \
+        .group_by(Application.id) \
+        .all()

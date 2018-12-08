@@ -95,3 +95,12 @@ def update_parameters():
     Answer.set_unique_answer_weights(data["answer_weights"])
 
     return Response('Updated scores', 200)
+
+@admin.route("/api/admin/rank", methods=["GET"])
+@login_required
+def get_final_acceptance_list():
+    if current_user.role != Role.admin:
+        abort(401, 'User needs to be an admin to access this route')
+
+    ranked_users = Application.rank_participants()
+    return jsonify(Serializer.serialize_value(ranked_users))

@@ -9,6 +9,7 @@ from src.shared import Shared
 from src.models.Answer import Answer
 from src.models.User import User
 from src.models.Question import Question
+from src.models.enums.QuestionType import QuestionType
 from src.models.lib.ModelUtils import ModelUtils
 from src.models.lib.Serializer import Serializer
 
@@ -206,8 +207,41 @@ class Application(db.Model, ModelUtils, Serializer):
     def rank_participants():
         Application.standardize_scores()
 
-        answer_values = db.session.query(Application.id, func.sum(Answer.answer_weight * Question.weight)) \
+        firstNames = db.session.query(Application.id) \
         .join(Answer) \
         .join(Question) \
-        .group_by(Application.id) \
+        .filter(Question.question_type == QuestionType.firstName) \
+        .add_column(Answer.answer) \
+        .subquery()
+
+        lastNames = db.session.query(Application.id) \
+        .join(Answer) \
+        .join(Question) \
+        .filter(Question.question_type == QuestionType.lastName) \
+        .add_column(Answer.answer) \
+        .subquery()
+
+        emails = db.session.query(Application.id) \
+        .join(Answer) \
+        .join(Question) \
+        .filter(Question.question_type == QuestionType.email) \
+        .add_column(Answer.answer) \
+        .subquery()
+
+        answer_values = db.session.query(Application.id, firstNames.c.answer, lastNames.c.answer, emails.c.answer, func.sum(Answer.answer_weight * Question.weight + Application.standardized_score)) \
+        .join(Answer) \
+        .join(Question) \
+        .join(firstNames) \
+        .join(lastNames) \
+        .join(emails) \
+        .group_by(Application.id, firstNames.c.answer, lastNames.c.answer, emails.c.answer) \
+        .order_by(func.sum(Answer.answer_weight * Question.weight + Application.standardized_score).desc().nullslast()) \
         .all()
+
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            raise e
+
+        return answer_values

@@ -1,4 +1,4 @@
-from flask import abort, jsonify, Blueprint, Response
+from flask import abort, request, jsonify, Blueprint, Response
 from flask_login import current_user, login_required
 import os
 import time
@@ -75,8 +75,23 @@ def standardize():
 @admin.route('/api/admin/configure', methods=["GET"])
 @login_required
 def configure_parameters():
+    if current_user.role != Role.admin:
+        abort(401, 'User needs to be an admin to access this route')
+
     res = {}
     res["question_weights"] = Question.get_question_weights()
     res["answer_weights"] = Answer.get_unique_answer_weights()
 
     return jsonify(Serializer.serialize_value(res))
+
+@admin.route('/api/admin/configure', methods=["PUT"])
+@login_required
+def update_parameters():
+    if current_user.role != Role.admin:
+        abort(401, 'User needs to be an admin to access this route')
+    
+    data = request.get_json()
+    Question.update_question_weights(data['question_weights'])
+    Answer.set_unique_answer_weights(data["answer_weights"])
+
+    return Response('Updated scores', 200)

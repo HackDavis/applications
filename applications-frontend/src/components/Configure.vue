@@ -3,11 +3,11 @@
         <div class="column">
             <div class="field is-horizontal" v-for="question in question_weights" :key="question[0]">
                 <div class="field-label">
-                    <label class="label">{{question[0]}}</label>
+                    <label class="label">{{question[1]}}</label>
                 </div>
                 <div class="field">
                     <div class="control">
-                        <input class="input" v-model="question[1]"/>
+                        <input class="input" v-model="question[2]"/>
                     </div>
                 </div>
             </div>
@@ -61,7 +61,36 @@ export default {
             this.question_weights = _.cloneDeep(this.orig.question_weights);
         },
         submit() {
+            let new_question_weights = []
+            for(let i = 0; i < this.question_weights.length; i++){
+                if(this.question_weights[i][2] != this.orig.question_weights[i][2]) {
+                    new_question_weights.push(this.question_weights[i])
+                }
+            }
+
+            let new_answer_weights = _.reduce(_.zip(this.answer_weights, this.orig.answer_weights), (acc, n) => {
+                console.log(n)
+                let new_weights = _.reduce(_.zip(n[0][2], n[1][2]), (acc, m) => {
+                    if(m[0].weight != m[1].weight) {
+                        acc.push(m[0])
+                        return acc
+                    }
+                    return acc;
+                }, []);
+                if(new_weights.length > 0) {
+                    acc.push([n[0][0], n[0][1], new_weights])
+                    return acc;
+                }
+                return acc;
+            }, []);
             
+
+            let update = {
+                answer_weights: new_answer_weights,
+                question_weights: new_question_weights
+            }
+
+            this.$http.put("/api/admin/configure", update).then(success => console.log(success), error => console.error(error))
         },
         dummy() {}
     }

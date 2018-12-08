@@ -101,7 +101,7 @@ class Answer(db.Model, ModelUtils, Serializer):
         .filter((Question.question_type == QuestionType.demographic) | (Question.question_type == QuestionType.university)) \
         .add_column(Question.question) \
         .add_column(Question.id) \
-        .from_self(Question.id, Question.question, func.json_object_agg(Answer.answer, Answer.answer_weight)) \
+        .from_self(Question.id, Question.question, func.array_agg(Answer.answer), func.array_agg(Answer.answer_weight)) \
         .group_by(Question.id, Question.question)
 
         results = question_answer.all()
@@ -109,7 +109,7 @@ class Answer(db.Model, ModelUtils, Serializer):
 
         for result in results:
             t = [result[0], result[1]]
-            weights = [{"name": k, "weight": v} for k, v in result[2].items()]
+            weights = [{"name": k, "weight": v} for k, v in zip(result[2], result[3])]
             t.append(weights)
             transformed.append(t)
 
@@ -118,5 +118,15 @@ class Answer(db.Model, ModelUtils, Serializer):
         return transformed
     
     @staticmethod
-    def set_unique_answer_weights(weights_as_dict):
-        pass
+    def set_unique_answer_weights(answer_weights):
+        for question in answer_weights:
+            for weight in question[2]:
+                db.session.query(Answer) \
+                .filter(Answer.question_id == question[0], Answer.answer == weight["name"]) \
+                .update({"answer_weight": weight["weight"]})
+        
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            print(e)

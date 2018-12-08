@@ -75,7 +75,20 @@ class Question(db.Model, ModelUtils, Serializer):
 
     @staticmethod
     def get_question_weights():
-        weights = db.session.query(Question.question, Question.weight) \
+        weights = db.session.query(Question.id, Question.question, Question.weight) \
         .filter((Question.question_type == QuestionType.demographic) | (Question.question_type == QuestionType.university)) \
         .all()
         return weights
+    
+    @staticmethod
+    def update_question_weights(question_weights):
+        for weight in question_weights:
+            db.session.query(Question) \
+            .filter(Question.id == weight[0]) \
+            .update({"weight": weight[2]})
+        
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            print(e)

@@ -63,8 +63,21 @@ export default {
     this.$http
         .get("/api/user/scores")
         .then(response => {
-          this.applications = response.data;
           this.maxViewIndex = 20;
+
+          if(response.data.length > 0) {
+            this.applications = response.data;
+            return;
+          }
+
+          this.applications.push({
+            firstName: "You have not reviewed any applications.",
+            lastName: "",
+            email: "",
+            score: 0,
+            id: ""
+          });
+          
         }, error => console.error(error));
   },
   computed: {

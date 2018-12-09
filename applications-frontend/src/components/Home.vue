@@ -1,6 +1,6 @@
 <template>
   <section>
-    <div v-if="!loggedIn()" class="container is-flex is-flex-column is-justify-center is-med">
+    <div v-if="!loggedIn() || !$user.getUser()" class="container is-flex is-flex-column is-justify-center is-med">
       <div>
         <img 
           class="image 3by4" 

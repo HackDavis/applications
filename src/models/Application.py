@@ -228,14 +228,18 @@ class Application(db.Model, ModelUtils, Serializer):
         .add_column(Answer.answer) \
         .subquery()
 
-        answer_values = db.session.query(Application.id, firstNames.c.answer, lastNames.c.answer, emails.c.answer, func.sum(Answer.answer_weight * Question.weight + Application.standardized_score)) \
+        answer_values = db.session.query(Application.id, func.sum(Answer.answer_weight * Question.weight).label("sum_values")) \
         .join(Answer) \
         .join(Question) \
-        .join(firstNames) \
-        .join(lastNames) \
-        .join(emails) \
+        .group_by(Application.id).subquery()
+
+        results = db.session.query(Application.id, firstNames.c.answer, lastNames.c.answer, emails.c.answer, func.sum(answer_values.c.sum_values + Application.standardized_score)) \
+        .join(answer_values, answer_values.c.id == Application.id) \
+        .join(firstNames, firstNames.c.id == Application.id) \
+        .join(lastNames, lastNames.c.id == Application.id) \
+        .join(emails, emails.c.id == Application.id) \
         .group_by(Application.id, firstNames.c.answer, lastNames.c.answer, emails.c.answer) \
-        .order_by(func.sum(Answer.answer_weight * Question.weight + Application.standardized_score).desc().nullslast()) \
+        .order_by(func.sum(answer_values.c.sum_values + Application.standardized_score).desc().nullslast()) \
         .all()
 
         try:
@@ -244,4 +248,4 @@ class Application(db.Model, ModelUtils, Serializer):
             db.session.rollback()
             raise e
 
-        return answer_values
+        return results

@@ -3,6 +3,7 @@ import Router from "vue-router";
 import Applicant from "./components/Applicant";
 import Home from "./components/Home";
 import Configure from './components/Configure';
+import Settings from './components/Settings';
 import Error from "./Error";
 import VueResource from "vue-resource";
 import VueCookie from "vue-cookie";
@@ -47,6 +48,10 @@ let router = new Router({
     {
       path: "/configure",
       component: Configure
+    },
+    {
+      path: "/settings",
+      component: Settings
     }
   ],
   mode: "history"

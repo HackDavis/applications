@@ -78,8 +78,7 @@
 
         <div class="subtitle is-4">Interests</div>
         <div class="columns is-mobile is-multiline is-centered has-background-light">
-          <span v-for="interest in interestAnswers" :key="interest.id" class="column is-centered is-narrow">{{
-            interest.answer }};</span>
+          <span v-for="interest in interestAnswers" :key="interest.id" class="column is-centered is-narrow">{{ interest.answer }}</span>
         </div>
 
         <br>

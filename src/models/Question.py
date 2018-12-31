@@ -41,6 +41,10 @@ class Question(db.Model, ModelUtils, Serializer):
         return rows
 
     @staticmethod
+    def get_questions_from_db():
+        return db.session.query(Question).all()
+
+    @staticmethod
     def get_questions_from_csv(csv_file):
         """Get questions from CSV file"""
         reader = csv.DictReader(csv_file)

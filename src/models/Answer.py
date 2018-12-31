@@ -41,6 +41,36 @@ class Answer(db.Model, ModelUtils, Serializer):
         return rows
 
     @staticmethod
+    def insert_ORM(question_rows, applications, application_rows):
+        """Insert new rows extracted from CSV file"""
+
+        start = time.perf_counter()
+
+        rows = Answer.convert_applications_to_rows(question_rows, applications, application_rows)
+
+        object_load = time.perf_counter()
+        print("Answers load time", object_load - start)
+
+        Answer.insert_rows(rows)
+
+        bulk_save = time.perf_counter()
+        print("Answers save time", bulk_save - object_load)
+        return rows
+
+    @staticmethod
+    def check_duplicate_email(email):
+        is_duplicate = db.session.query(Answer) \
+        .filter(Answer.answer == email) \
+        .from_self(Answer) \
+        .join(Question) \
+        .filter(Question.question_type == QuestionType.email) \
+        .all()
+        if len(is_duplicate) > 0:
+            return True
+        
+        return False
+
+    @staticmethod
     def convert_applications_to_rows(question_rows, applications, application_rows):
         """Convert applications into rows to insert into database"""
         rows = list(map(lambda application, application_row: Answer.convert_application_to_rows(question_rows, application, application_row), applications, application_rows))

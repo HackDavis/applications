@@ -19,6 +19,42 @@ google = Shared.google
 login_manager = Shared.login_manager
 
 
+@admin.route('/api/admin/load', methods=['POST', 'GET'])
+@login_required
+def load():
+    """Reload applications from CSV file."""
+    if current_user.role != Role.admin:
+        abort(401, 'User needs to be an admin to access this route')
+
+    with open(os.path.join(os.getcwd(), 'sample.csv'), encoding='utf-8') as csv_file:
+        # load new rows
+        try:
+            session = db.session
+
+            start = time.perf_counter()
+
+            question_rows = Question.get_questions_from_db()
+            Application.insert_without_duplicates(csv_file, question_rows)
+
+            op_time = time.perf_counter()
+
+            print("Total insert time", op_time - start)
+
+            try:
+                session.commit()
+                
+                commit_time = time.perf_counter()
+                print("Commit time", commit_time - op_time)
+
+            except Exception as e:
+                session.rollback()
+                print(e)
+                raise(e)
+
+            return Response('Reloaded applications from CSV file', 200)
+        except ValueError as e:
+            abort(400, str(e))
+
 @admin.route('/api/admin/reload', methods=['POST', 'GET'])
 @login_required
 def reload():

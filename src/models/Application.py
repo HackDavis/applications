@@ -25,7 +25,7 @@ class Application(db.Model, ModelUtils, Serializer):
     score = db.Column(db.Integer, nullable=False)
     standardized_score = db.Column(db.Float)
     last_modified = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
-    date_added = db.Column(db.Date)
+    date_added = db.Column(db.Date, nullable=False)
 
     @staticmethod
     def insert(csv_file, question_rows, session):

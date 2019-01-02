@@ -19,6 +19,7 @@ class Shared:
         importlib.import_module('src.models.Application')
         OAuth = importlib.import_module('src.models.OAuth').OAuth
         importlib.import_module('src.models.Question')
+        importlib.import_module('src.models.Settings')
         importlib.import_module('src.models.User')
         cls.db.init_app(app)
         with app.app_context():

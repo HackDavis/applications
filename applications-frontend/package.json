@@ -9,30 +9,30 @@
     "fix": "eslint --ext .js,.vue --fix ./"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-svg-core": "^1.2.8",
-    "@fortawesome/free-solid-svg-icons": "^5.5.0",
-    "@fortawesome/vue-fontawesome": "^0.1.2",
-    "bulma": "^0.7.1",
+    "@fortawesome/fontawesome-svg-core": "^1.2.12",
+    "@fortawesome/free-solid-svg-icons": "^5.6.3",
+    "@fortawesome/vue-fontawesome": "^0.1.4",
+    "bulma": "^0.7.2",
     "bulma-accordion": "^2.0.0",
     "lodash": "^4.17.11",
-    "vue": "^2.5.16",
+    "vue": "^2.5.21",
     "vue-cookie": "^1.1.4",
     "vue-resource": "^1.5.1",
-    "vue-router": "^3.0.1"
+    "vue-router": "^3.0.2"
   },
   "devDependencies": {
-    "@vue/cli-plugin-babel": "^3.0.0-beta.15",
-    "@vue/cli-plugin-eslint": "^3.0.0-beta.15",
-    "@vue/cli-service": "^3.0.0-beta.15",
-    "@vue/eslint-config-prettier": "^3.0.0-rc.3",
-    "eslint": "^5.9.0",
+    "@vue/cli-plugin-babel": "^3.2.2",
+    "@vue/cli-plugin-eslint": "^3.2.2",
+    "@vue/cli-service": "^3.2.2",
+    "@vue/eslint-config-prettier": "^3.0.5",
+    "eslint": "^5.11.1",
     "eslint-config-prettier": "3.0.1",
     "eslint-plugin-prettier": "2.6.2",
-    "node-sass": "^4.9.0",
+    "node-sass": "^4.11.0",
     "prettier": "1.14.2",
-    "sass-loader": "^7.0.3",
-    "vue-template-compiler": "^2.5.16",
-    "vue-virtual-scroller": "^1.0.0-beta.2"
+    "sass-loader": "^7.1.0",
+    "vue-template-compiler": "^2.5.21",
+    "vue-virtual-scroller": "^1.0.0-beta.4"
   },
   "eslintConfig": {
     "root": true,

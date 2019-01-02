@@ -1,5 +1,6 @@
 from flask import abort, request, jsonify, Blueprint, Response
 from flask_login import current_user, login_required
+from werkzeug.utils import secure_filename
 import os
 import time
 
@@ -9,6 +10,7 @@ from src.models.Question import Question
 from src.models.enums.Role import Role
 from src.shared import Shared
 from src.models.lib.Serializer import Serializer
+from src.config.config import Config
 
 from sqlalchemy.orm.session import Session
 
@@ -19,14 +21,28 @@ google = Shared.google
 login_manager = Shared.login_manager
 
 
-@admin.route('/api/admin/load', methods=['POST', 'GET'])
+@admin.route('/api/admin/load', methods=['POST'])
 @login_required
 def load():
     """Reload applications from CSV file."""
     if current_user.role != Role.admin:
         abort(401, 'User needs to be an admin to access this route')
 
-    with open(os.path.join(os.getcwd(), 'sample.csv'), encoding='utf-8') as csv_file:
+    if 'applicants' not in request.files:
+        abort(401, 'No file submitted')
+    file = request.files['applicants']
+    # if user does not select file, browser also
+    # submit an empty part without filename
+    if file.filename == '':
+        abort(401, 'Invalid file name')
+
+    filename = secure_filename(file.filename)
+
+    path = os.path.join(Config.UPLOAD_FOLDER, filename)
+
+    file.save(path)
+
+    with open(path, encoding='utf-8') as csv_file:
         # load new rows
         try:
             session = db.session
@@ -54,15 +70,32 @@ def load():
             return Response('Reloaded applications from CSV file', 200)
         except ValueError as e:
             abort(400, str(e))
+        except Exception as e:
+            print(e)
 
-@admin.route('/api/admin/reload', methods=['POST', 'GET'])
+@admin.route('/api/admin/reload', methods=['POST'])
 @login_required
 def reload():
     """Reload applications from CSV file."""
     if current_user.role != Role.admin:
         abort(401, 'User needs to be an admin to access this route')
 
-    with open(os.path.join(os.getcwd(), 'sample.csv'), encoding='utf-8') as csv_file:
+    if 'applicants' not in request.files:
+        abort(401, 'No file submitted')
+
+    file = request.files['applicants']
+    # if user does not select file, browser also
+    # submit an empty part without filename
+    if file.filename == '':
+        abort(401, 'Invalid file name')
+
+    filename = secure_filename(file.filename)
+
+    path = os.path.join(Config.UPLOAD_FOLDER, filename)
+
+    file.save(path)
+
+    with open(path, encoding='utf-8') as csv_file:
         # drop rows
         Answer.drop_rows()
         Application.drop_rows()

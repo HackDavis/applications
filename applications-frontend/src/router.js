@@ -3,9 +3,11 @@ import Router from "vue-router";
 import Applicant from "./components/Applicant";
 import Home from "./components/Home";
 import Configure from './components/Configure';
+import Upload from './components/Upload';
 import Error from "./Error";
 import VueResource from "vue-resource";
 import VueCookie from "vue-cookie";
+import { faUpload } from "@fortawesome/free-solid-svg-icons";
 
 Vue.use(VueResource);
 Vue.use(Router);
@@ -46,7 +48,17 @@ let router = new Router({
     },
     {
       path: "/configure",
-      component: Configure
+      component: Configure,
+      meta: {
+        requiresAuth: true
+      }
+    },
+    {
+      path: "/upload",
+      component: Upload,
+      meta: {
+        requiresAuth: true
+      }
     }
   ],
   mode: "history"

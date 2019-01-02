@@ -1,6 +1,6 @@
 import csv
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from collections import defaultdict
 from sqlalchemy.sql.expression import func
 from sqlalchemy.orm import aliased
@@ -25,6 +25,7 @@ class Application(db.Model, ModelUtils, Serializer):
     score = db.Column(db.Integer, nullable=False)
     standardized_score = db.Column(db.Float)
     last_modified = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
+    date_added = db.Column(db.Date, nullable=False)
 
     @staticmethod
     def insert(csv_file, question_rows, session):
@@ -103,7 +104,7 @@ class Application(db.Model, ModelUtils, Serializer):
     @staticmethod
     def convert_application_to_row(application):
         """Convert application into row to insert into database"""
-        return Application(score=0)
+        return Application(score=0, date_added=date.today())
 
     @staticmethod
     def set_standardized_score(application, standardized_score):

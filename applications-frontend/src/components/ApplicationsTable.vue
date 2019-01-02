@@ -23,7 +23,7 @@
           <td>{{item.university}}</td>
           <td>{{item.score > 0 ? item.score : "-"}}</td>
           <td>
-            <router-link class="button" :to="'/review/' + item.id">
+            <router-link class="button" :to="'/review/' + item.id" rel="noopener" target="_blank">
               <span class="icon">
                 <font-awesome-icon icon="edit" />
               </span>

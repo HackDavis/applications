@@ -34,6 +34,9 @@
           <router-link v-if="this.$user.getUser() && this.$user.getUser().role == 'admin'"
             class="navbar-item is-size-5"
             to="/upload">Upload</router-link>
+          <router-link v-if="this.$user.getUser() && this.$user.getUser().role == 'admin'"
+            class="navbar-item is-size-5"
+            to="/settings">Settings</router-link>
         </div>
         <div class="navbar-end">
           <header-login/>

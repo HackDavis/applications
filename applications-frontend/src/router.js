@@ -4,6 +4,7 @@ import Applicant from "./components/Applicant";
 import Home from "./components/Home";
 import Configure from './components/Configure';
 import Upload from './components/Upload';
+import Settings from './components/Settings';
 import Error from "./Error";
 import VueResource from "vue-resource";
 import VueCookie from "vue-cookie";
@@ -59,6 +60,10 @@ let router = new Router({
       meta: {
         requiresAuth: true
       }
+    },
+    {
+      path: "/settings",
+      component: Settings
     }
   ],
   mode: "history"

@@ -44,6 +44,12 @@
           </div>
         </div>
 
+        <!-- Feedback textarea -->
+        <div class="no-margin subtitle is-3">Feedback</div>
+        <div class="columns is-mobile is-multiline is-gapless">
+          <textarea class="textarea has-fixed-size" v-model="application.feedback"></textarea>
+        </div>
+
 
         <!-- Submit button -->
         <a v-on:click="score" :disabled="isInvalidScore" class="button is-primary is-medium" style="margin-top: 1em;">Submit</a>
@@ -192,7 +198,7 @@ export default {
       }
 
       this.$http
-        .post("/api/review/" + this.application.id + "/score", { score: this.application.score })
+        .post("/api/review/" + this.application.id + "/score", { score: this.application.score, feedback: this.application.feedback })
         .then(() => {
           this.$router.push("/review");
           this.next();
@@ -296,6 +302,10 @@ export default {
 /* Disabled circle colour */
 .control--radio input:disabled + .control__indicator:after {
     background: #7b7b7b;
+}
+
+.no-margin {
+  margin: 0 !important;
 }
 
 </style>

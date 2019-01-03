@@ -8,7 +8,6 @@ import Settings from './components/Settings';
 import Error from "./Error";
 import VueResource from "vue-resource";
 import VueCookie from "vue-cookie";
-import { faUpload } from "@fortawesome/free-solid-svg-icons";
 
 Vue.use(VueResource);
 Vue.use(Router);
@@ -63,7 +62,10 @@ let router = new Router({
     },
     {
       path: "/settings",
-      component: Settings
+      component: Settings,
+      meta: {
+        requiresAuth: true
+      }
     }
   ],
   mode: "history"

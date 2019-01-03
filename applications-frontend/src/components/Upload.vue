@@ -6,7 +6,7 @@
         <label class="label">Applicants: </label>
         <div class="file has-name">
           <label class="file-label">
-            <input id="file" class="file-input" type="file" @change="fileChanged" required name="resume" />
+            <input id="file" class="file-input" type="file" @change="fileChanged" required />
             <span class="file-cta">
               <span class="file-icon">
                 <font-awesome-icon :icon="['fa', 'file-csv']" />

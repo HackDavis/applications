@@ -30,12 +30,12 @@ def load():
         abort(401, 'User needs to be an admin to access this route')
 
     if 'applicants' not in request.files:
-        abort(401, 'No file submitted')
+        abort(400, 'No file submitted')
     file = request.files['applicants']
     # if user does not select file, browser also
     # submit an empty part without filename
     if file.filename == '':
-        abort(401, 'Invalid file name')
+        abort(400, 'Invalid file name')
 
     filename = secure_filename(file.filename)
 
@@ -82,13 +82,13 @@ def reload():
         abort(401, 'User needs to be an admin to access this route')
 
     if 'applicants' not in request.files:
-        abort(401, 'No file submitted')
+        abort(400, 'No file submitted')
 
     file = request.files['applicants']
     # if user does not select file, browser also
     # submit an empty part without filename
     if file.filename == '':
-        abort(401, 'Invalid file name')
+        abort(400, 'Invalid file name')
 
     filename = secure_filename(file.filename)
 

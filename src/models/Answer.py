@@ -43,18 +43,8 @@ class Answer(db.Model, ModelUtils, Serializer):
     @staticmethod
     def insert_ORM(question_rows, applications, application_rows):
         """Insert new rows extracted from CSV file"""
-
-        start = time.perf_counter()
-
         rows = Answer.convert_applications_to_rows(question_rows, applications, application_rows)
-
-        object_load = time.perf_counter()
-        print("Answers load time", object_load - start)
-
         Answer.insert_rows(rows)
-
-        bulk_save = time.perf_counter()
-        print("Answers save time", bulk_save - object_load)
         return rows
 
     @staticmethod

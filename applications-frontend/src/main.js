@@ -5,7 +5,7 @@ import "./sass/styles.scss";
 import auth from "./auth";
 
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faSearch, faEdit } from '@fortawesome/free-solid-svg-icons';
+import { faSearch, faEdit, faFileCsv } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 import "vue-virtual-scroller/dist/vue-virtual-scroller.css";
@@ -13,7 +13,7 @@ import VueVirtualScroller from "vue-virtual-scroller";
 
 Vue.use(VueVirtualScroller);
 
-library.add(faSearch, faEdit);
+library.add(faSearch, faEdit, faFileCsv);
 
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 

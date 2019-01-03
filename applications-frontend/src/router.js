@@ -3,6 +3,7 @@ import Router from "vue-router";
 import Applicant from "./components/Applicant";
 import Home from "./components/Home";
 import Configure from './components/Configure';
+import Upload from './components/Upload';
 import Settings from './components/Settings';
 import Error from "./Error";
 import VueResource from "vue-resource";
@@ -47,11 +48,24 @@ let router = new Router({
     },
     {
       path: "/configure",
-      component: Configure
+      component: Configure,
+      meta: {
+        requiresAuth: true
+      }
+    },
+    {
+      path: "/upload",
+      component: Upload,
+      meta: {
+        requiresAuth: true
+      }
     },
     {
       path: "/settings",
-      component: Settings
+      component: Settings,
+      meta: {
+        requiresAuth: true
+      }
     }
   ],
   mode: "history"

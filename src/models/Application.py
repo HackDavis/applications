@@ -78,6 +78,9 @@ class Application(db.Model, ModelUtils, Serializer):
         for application in applications:
             if not Answer.check_duplicate_email(application[email_index]):
                 application_row = Application.convert_application_to_row(application)
+
+                db.session.add(application_row)
+
                 rows.append(application_row)
                 Answer.insert_ORM(question_rows, [application], [application_row])
 

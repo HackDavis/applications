@@ -160,8 +160,7 @@ export default {
       return user && user.role == 'admin';
     },
     isReadOnlyForUser: function() {
-      const user = this.$user.getUser();
-      return this.application.locked_by != null && (!user || this.application.locked_by != user.id) && !this.isUserAdmin();
+      return this.application.locked_by != null && !this.isUserAdmin();
     },
     isUserAndAssignedDifferent: function() {
       const user = this.$user.getUser();

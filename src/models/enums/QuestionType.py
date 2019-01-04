@@ -12,6 +12,7 @@ class QuestionType(Enum):
     ignore = auto()
     lastName = auto()
     link = auto()
+    major = auto()
     resumeLink = auto()
     resumeSharingOptIn = auto()
     shirtSize = auto()

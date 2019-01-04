@@ -180,6 +180,11 @@ class Application(db.Model, ModelUtils, Serializer):
             .scalar()
 
     @staticmethod
+    def count_applications():
+        """Counts number of applications in database"""
+        return db.session.query(func.count(Application.id)).scalar()
+
+    @staticmethod
     def get_all_applications():
         """Returns all applications"""
         return db.session.query(Application)
@@ -225,10 +230,9 @@ class Application(db.Model, ModelUtils, Serializer):
     @staticmethod
     def get_mean_stddev_scores_per_user():
         """Returns all scored applications"""
-        return db.session.query(Application) \
+        return db.session.query(func.avg(Application.score), func.stddev(Application.score), User.id) \
             .filter(Application.score != 0) \
             .join(User, (User.id == Application.locked_by) | (User.id == Application.assigned_to)) \
-            .from_self(func.avg(Application.score), func.stddev(Application.score), User.id) \
             .group_by(User.id) \
             .all()
 

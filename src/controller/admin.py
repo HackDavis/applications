@@ -270,5 +270,7 @@ def update_settings():
 @login_required
 def get_demographics():
     """Get the demographic information from applicants"""
-    
-    pass
+    applicant_count = Application.count_applications()
+    answer_totals = Answer.count_values_per_answer()
+
+    return jsonify(Serializer.serialize_value({'total': applicant_count, 'answers': answer_totals}))

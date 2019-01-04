@@ -4,7 +4,7 @@ export default {
         if(this.loggedIn()) {
             return (
                 <div class="navbar-item">
-                    <img src={this.$user.getUser().picture} />
+                    <img class="profile-pic" src={this.$user.getUser().picture} />
                     <a class="is-size-5" href="/logout">Logout</a>
                 </div>
             );
@@ -27,5 +27,8 @@ export default {
 </script>
 
 <style>
-
+.profile-pic {
+  margin-right: 0.5em;
+  border-radius: 50%;
+}
 </style>

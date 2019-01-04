@@ -47,7 +47,7 @@
         <!-- Feedback textarea -->
         <div class="no-margin subtitle is-3">Feedback</div>
         <div class="columns is-mobile is-multiline is-gapless">
-          <textarea class="textarea has-fixed-size" v-model="application.feedback"></textarea>
+          <textarea class="textarea has-fixed-size" v-model="application.feedback" placeholder="Optionally justify your rating here"></textarea>
         </div>
 
 

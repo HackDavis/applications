@@ -3,7 +3,6 @@ import time
 from datetime import datetime, timedelta, date
 from collections import defaultdict
 from sqlalchemy.sql.expression import func
-from sqlalchemy.orm import aliased
 
 from src.shared import Shared
 from src.models.Answer import Answer
@@ -24,6 +23,7 @@ class Application(db.Model, ModelUtils, Serializer):
     locked_by_user = db.relationship('User', foreign_keys=locked_by)
     score = db.Column(db.Integer, nullable=False)
     standardized_score = db.Column(db.Float)
+    feedback = db.Column(db.Text)
     last_modified = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
     date_added = db.Column(db.Date, nullable=False)
 
@@ -193,9 +193,10 @@ class Application(db.Model, ModelUtils, Serializer):
         return application
 
     @staticmethod
-    def update_score(application, score, locked_by):
+    def update_score_and_feedback(application, score, feedback, locked_by):
         """Updates the score for an application"""
         application.score = score
+        application.feedback = feedback
         application.locked_by = locked_by
 
         try:

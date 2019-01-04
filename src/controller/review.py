@@ -106,6 +106,8 @@ def score_application(application_id_str):
     json = request.get_json(force=True)
 
     score_str = json.get('score')
+    feedback = json.get('feedback')
+
     if score_str is None:
         abort(400, 'score not provided')
 
@@ -121,6 +123,6 @@ def score_application(application_id_str):
     if current_user.role == Role.admin:
         locked_by = current_user.id
 
-    Application.update_score(application, score, locked_by)
+    Application.update_score_and_feedback(application, score, feedback, locked_by)
 
     return Response('Updated score for application', 200)

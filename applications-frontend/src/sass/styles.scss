@@ -8,17 +8,19 @@
 $navbar-item-img-max-height: 3rem;
 
 .columns {
-	border-radius: 1em;
+	border-radius: 0.4em;
 	padding: 1em;
 }
+
+.column {
+    border-radius: 0.4em;
+}
+
 .section-column {
 	margin: 2em;
-	border-radius: 0.75em;
+	border-radius: 0.4em;
 }
-.profile-picture {	
-    border-radius: 50%;
-    margin-top: 2em;
-}
+
 .break {
     display: block;    
     height: 0.1em;

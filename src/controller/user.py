@@ -1,11 +1,13 @@
 from flask import Blueprint, jsonify
 from flask_login import current_user, login_required
 
-from sqlalchemy.sql.functions import func 
+from sqlalchemy.orm import aliased
+from sqlalchemy.sql.functions import func
 
 from src.models.Answer import Answer
 from src.models.Application import Application
 from src.models.Question import Question
+from src.models.User import User
 from src.models.enums.QuestionType import QuestionType
 from src.models.enums.Role import Role
 from src.models.lib.Serializer import Serializer
@@ -41,15 +43,21 @@ def get_scores():
 
     app = applications.subquery()
 
-    response = db.session.query(Application.id, Application.score, func.json_object_agg(Question.question_type, Answer.answer)).join(app, app.c.id == Application.id) \
-    .join(Answer) \
-    .join(Question) \
-    .filter((Question.question_type == QuestionType.email) \
-    | (Question.question_type == QuestionType.firstName) \
-    | (Question.question_type == QuestionType.lastName) \
-    | (Question.question_type == QuestionType.university)) \
-    .group_by(Application.id) \
-    .all()
+    assigned_to_user = aliased(User)
+    locked_by_user = aliased(User)
+    response = db.session.query(Application.id, Application.score, assigned_to_user.email, locked_by_user.email, func.json_object_agg(Question.question_type, Answer.answer)) \
+        .order_by(Application.last_modified.desc()) \
+        .filter(Application.id == app.c.id) \
+        .join(assigned_to_user, Application.assigned_to_user, isouter=True) \
+        .join(locked_by_user, Application.locked_by_user, isouter=True) \
+        .join(Answer) \
+        .join(Question) \
+        .filter((Question.question_type == QuestionType.email)
+                | (Question.question_type == QuestionType.firstName)
+                | (Question.question_type == QuestionType.lastName)
+                | (Question.question_type == QuestionType.university)) \
+        .group_by(Application.id, assigned_to_user.email, locked_by_user.email) \
+        .all()
 
     # firstNames = db.session.query(Answer).join(Question).filter(Question.question_type == QuestionType.firstName).subquery()
     # lastNames = db.session.query(Answer).join(Question).filter(Question.question_type == QuestionType.lastName).subquery()
@@ -80,11 +88,15 @@ def get_scores():
 
     # my_results = [{'id': row[0], 'score': row[1], 'firstName': row[2], 'lastName': row[3], 'email': row[4], 'university': row[5]} for row in response]
 
-    my_results = [{'id': row[0], 'score': row[1], \
-        'university': row[2]['university'], \
-        'email': row[2]['email'], \
-        'firstName': row[2]['firstName'], \
-        'lastName': row[2]['lastName'] \
+    my_results = [{
+        'id': row[0],
+        'score': row[1],
+        'assignedToEmail': row[2],
+        'lockedByEmail': row[3],
+        'university': row[4]['university'],
+        'email': row[4]['email'],
+        'firstName': row[4]['firstName'],
+        'lastName': row[4]['lastName']
     } for row in response]
 
     # t3 = time.perf_counter()

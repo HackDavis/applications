@@ -10,7 +10,6 @@
       
     </div>
     <div v-else class="container is-flex is-flex-column is-align-center">
-      <h1 class="title">List of Applicants</h1>
       <applications-table></applications-table>
     </div>
   </section>

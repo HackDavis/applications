@@ -6,10 +6,10 @@
     <div class="container">
       <div class="navbar-brand">
         <router-link 
-          class="navbar-item" 
+          class="branding navbar-item" 
           to="/">
           <img 
-            class="image is-32x32" 
+            class="image" 
             src="@/assets/logo.png">
         </router-link>
         <h1 class="navbar-item is-size-2">Heck<b>Davis</b></h1>
@@ -85,5 +85,9 @@ export default {
 <style scoped>
 nav.navbar {
   margin-bottom: 1.5rem;
+}
+
+.branding {
+  color: inherit !important;
 }
 </style>

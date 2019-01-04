@@ -25,7 +25,7 @@
       </div>
       <div class="navbar-menu">
         <div class="navbar-start">
-          <router-link 
+          <router-link v-if="this.$user.getUser()"
             class="navbar-item is-size-5" 
             to="/review">Review</router-link>
           <router-link v-if="this.$user.getUser() && this.$user.getUser().role == 'admin'"

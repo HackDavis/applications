@@ -62,7 +62,7 @@
 
     <!-- Information panel -->
 
-    <div class="column" style="border-radius: 1em;">
+    <div class="column">
       <div class="subtitle is-3 has-text-centered">Applicant</div>
       <div class="container is-fluid">
 
@@ -95,7 +95,7 @@
           <div class="column is-6">
             <div class="is-5">{{ essayAnswer.question.question }}</div>
           </div>
-          <div class="column has-background-light is-6" style="border-radius: 1em;">
+          <div class="column has-background-light is-6">
             <div class="is-5">{{ essayAnswer.answer }}</div>
           </div>
         </div>

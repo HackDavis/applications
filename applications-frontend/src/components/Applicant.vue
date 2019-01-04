@@ -160,11 +160,11 @@ export default {
       return user && user.role == 'admin';
     },
     isReadOnlyForUser: function() {
-      return this.application.locked_by != null && !this.isUserAdmin();
+      return this.application.locked_by && !this.isUserAdmin();
     },
     isUserAndAssignedDifferent: function() {
       const user = this.$user.getUser();
-      return this.application.id != null && (!user || this.application.assigned_to != user.id);
+      return this.application.id && (!user || this.application.assigned_to != user.id);
     },
     filterAnswersByQuestionTypes: function(validQuestionTypes) {
       return this.answers.filter(answer =>

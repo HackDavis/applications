@@ -22,7 +22,59 @@ google = Shared.google
 login_manager = Shared.login_manager
 
 
-@admin.route('/api/admin/load', methods=['POST'])
+def validate_and_return_string(json, key, is_required):
+    """Validate whether value associated with key in json exists (if required value) and is a string"""
+
+    value = json.get(key)  # value could be string, int, etc
+
+    if value is not None:
+        if not isinstance(key, str):
+            # value is not a string
+            abort(400, '{key} not a string'.format(key=key))
+
+        if len(value) == 0:
+            # treat empty string as None
+            value = None
+
+    if value is None and is_required:
+        abort(400, '{key} not provided'.format(key=key))
+
+    return value
+
+
+def validate_and_return_positive_integer(json, key, is_required):
+    """Validate whether value associated with key in json exists (if required value) and is a positive integer"""
+
+    value = json.get(key)  # value could be string, int, etc
+
+    if isinstance(value, str) and len(value) == 0:
+        # treat empty string as None
+        value = None
+
+    if value is None and is_required:
+        abort(400, '{key} not provided'.format(key=key))
+
+    number = None
+    if value is not None:
+        try:
+            # attempt conversion to float
+            number_float = float(value)
+        except ValueError:
+            abort(400, '{key} not an integer'.format(key=key))
+
+        number = int(number_float)
+        if number_float != number:
+            # number does not cleanly convert to int
+            abort(400, '{key} not an integer'.format(key=key))
+
+        if number < 0:
+            # number not positive
+            abort(400, '{key} not greater than or equal to 0'.format(key=key))
+
+    return number
+
+
+@admin.route('/api/admin/load', methods=['POST', 'GET'])
 @login_required
 def load():
     """Reload applications from CSV file."""
@@ -193,58 +245,6 @@ def get_settings():
     return jsonify(Serializer.serialize_value(settings))
 
 
-def validate_and_return_string(json, key, is_required):
-    """Validate whether value associated with key in json exists (if required value) and is a string"""
-
-    value = json.get(key)  # value could be string, int, etc
-
-    if value is not None:
-        if not isinstance(key, str):
-            # value is not a string
-            abort(400, '{key} not a string'.format(key=key))
-
-        if len(value) == 0:
-            # treat empty string as None
-            value = None
-
-    if value is None and is_required:
-        abort(400, '{key} not provided'.format(key=key))
-
-    return value
-
-
-def validate_and_return_positive_integer(json, key, is_required):
-    """Validate whether value associated with key in json exists (if required value) and is a positive integer"""
-
-    value = json.get(key)  # value could be string, int, etc
-
-    if isinstance(value, str) and len(value) == 0:
-        # treat empty string as None
-        value = None
-
-    if value is None and is_required:
-        abort(400, '{key} not provided'.format(key=key))
-
-    number = None
-    if value is not None:
-        try:
-            # attempt conversion to float
-            number_float = float(value)
-        except ValueError:
-            abort(400, '{key} not an integer'.format(key=key))
-
-        number = int(number_float)
-        if number_float != number:
-            # number does not cleanly convert to int
-            abort(400, '{key} not an integer'.format(key=key))
-
-        if number < 0:
-            # number not positive
-            abort(400, '{key} not greater than or equal to 0'.format(key=key))
-
-    return number
-
-
 @admin.route('/api/admin/settings', methods=["PUT"])
 @login_required
 def update_settings():
@@ -264,3 +264,11 @@ def update_settings():
     Settings.update_settings(name, application_limit, accept_limit, waitlist_limit)
 
     return Response('Updated settings', 200)
+
+
+@admin.route('/api/admin/demographics', methods=["GET"])
+@login_required
+def get_demographics():
+    """Get the demographic information from applicants"""
+    
+    pass

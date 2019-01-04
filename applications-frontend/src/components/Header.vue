@@ -11,8 +11,8 @@
           <img 
             class="image" 
             src="@/assets/logo.png">
+          <h1 class="name is-size-2">HACK<b>DAVIS</b></h1>
         </router-link>
-        <h1 class="navbar-item is-size-2">Heck<b>Davis</b></h1>
         <a 
           role="button" 
           class="navbar-burger" 
@@ -89,5 +89,10 @@ nav.navbar {
 
 .branding {
   color: inherit !important;
+}
+
+.branding h1 {
+  padding-left: 0.3em;
+  padding-right: 0.3em;
 }
 </style>

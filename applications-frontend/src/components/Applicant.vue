@@ -175,10 +175,7 @@ export default {
       this.setData(response.data);
     },
     handleResponseFailure(error) {
-      //console.error(error);
-      alert(
-        "Something went wrong. Please contact the HackDavis Technical team for further support."
-      );
+      console.error(error);
     },
     next: function() {
       let id = this.$route.params.id ? "/" + this.$route.params.id : "";

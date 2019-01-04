@@ -75,7 +75,7 @@
           </div>
           <div v-for="linkAnswer in linkAnswers" :key="linkAnswer.id">
             <div class="column is-narrow">
-              <a :href="linkAnswer.answer" class="button is-primary is-medium">{{ linkAnswer.question.question }}</a>
+              <a :href="linkAnswer.answer" class="button is-primary is-medium" rel="noopener" target="_blank">{{ linkAnswer.question.question }}</a>
             </div>
           </div>
         </div>

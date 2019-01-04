@@ -3,6 +3,7 @@ from flask_login import current_user, login_required
 
 from src.models.Answer import Answer
 from src.models.Application import Application
+from src.models.Settings import Settings
 from src.models.enums.Role import Role
 from src.models.lib.Serializer import Serializer
 from src.shared import Shared
@@ -38,6 +39,13 @@ def is_authorized(application_id, is_read_only):
 @login_required
 def get_application():
     """Get application for user"""
+    if current_user.role != Role.admin:
+        settings = Settings.get_settings()
+        application_count = Application.get_count_of_applications_for_user(current_user.id)
+        if application_count >= settings.application_limit:
+            # no more applications to score for user
+            return Response(status=204)
+
     application = Application.get_application_for_user(current_user.id)
     if application is None:
         # no more applications to score

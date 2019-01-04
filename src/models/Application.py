@@ -167,7 +167,17 @@ class Application(db.Model, ModelUtils, Serializer):
         """Returns all applications associated with user ID"""
         cutoff = datetime.now() - timedelta(hours=1)
         return db.session.query(Application) \
-            .filter((Application.assigned_to == user_id) & ((Application.score != 0) | ((Application.score == 0) & (Application.last_modified > cutoff))))
+            .filter(Application.assigned_to == user_id) \
+            .filter((Application.score != 0) | ((Application.score == 0) & (Application.last_modified > cutoff)))
+
+    @staticmethod
+    def get_count_of_applications_for_user(user_id):
+        """Returns count of applications associated with user ID"""
+        cutoff = datetime.now() - timedelta(hours=1)
+        return db.session.query(func.count(Application.id)) \
+            .filter(Application.assigned_to == user_id) \
+            .filter((Application.score != 0) | ((Application.score == 0) & (Application.last_modified > cutoff))) \
+            .scalar()
 
     @staticmethod
     def get_all_applications():

@@ -152,15 +152,7 @@ class Application(db.Model, ModelUtils, Serializer):
     def get_application(application_id):
         """Returns an application, for admin or server-side"""
         return db.session.query(Application) \
-            .filter(Application.id == application_id).one()
-
-
-    @staticmethod
-    def get_application_id_by_user(application_id, user_id):
-        """Returns all an application associated with user ID"""
-        return db.session.query(Application) \
-            .filter((Application.assigned_to == user_id) & (Application.id == application_id)).one()
-
+            .filter(Application.id == application_id).first()
 
     @staticmethod
     def get_all_applications_for_user(user_id):

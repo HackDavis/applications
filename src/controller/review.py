@@ -15,12 +15,11 @@ google = Shared.google
 login_manager = Shared.login_manager
 
 
-def is_authorized(application_id, is_read_only):
+def is_authorized(application, is_read_only):
     if current_user.role == Role.admin:
         # admins are authorized for any application
         return True
 
-    application = Application.get_application(application_id)
     if application is not None and application.assigned_to == current_user.id and application.score != 0 and (
             is_read_only or application.locked_by is None):
         # authorized if application is assigned to user, has been rated, and either is a read only operation or is not locked by an admin
@@ -28,7 +27,7 @@ def is_authorized(application_id, is_read_only):
 
     currently_assigned_application = Application.get_currently_assigned_application_for_user(
         current_user.id)
-    if currently_assigned_application is not None and currently_assigned_application.id == application_id:
+    if currently_assigned_application is not None and currently_assigned_application.id == application.id:
         # authorized if application is the one currently assigned to user
         return True
 
@@ -65,15 +64,11 @@ def get_application_using_id(application_id_str):
     except ValueError:
         abort(400, 'application ID invalid')
 
-    if current_user.role == Role.admin:
-        application = Application.get_application(application_id)
-
-    else:
-        application = Application.get_application_id_by_user(application_id, current_user.id)
-        if application is None:
-            abort(404, 'Application does not exist')
-        elif not is_authorized(application_id, True):
-            abort(401, 'User is not authorized for this application')
+    application = Application.get_application(application_id)
+    if application is None:
+        abort(404, 'Application does not exist')
+    elif not is_authorized(application, True):
+        abort(401, 'User is not authorized for this application')
 
     answers = Answer.get_answers(application.id)
     response = {'application': application, 'answers': answers}
@@ -100,16 +95,11 @@ def score_application(application_id_str):
     except ValueError:
         abort(400, 'application ID invalid')
 
-    if current_user.role == Role.admin:
-        application = Application.get_application(application_id)
-        
-    else:
-        application = Application.get_application_id_by_user(application_id, current_user.id)
-        if application is None:
-            abort(404, 'Application does not exist')
-        elif not is_authorized(application_id, True):
-            abort(401, 'User is not authorized for this application')
-
+    application = Application.get_application(application_id)
+    if application is None:
+        abort(404, 'Application does not exist')
+    elif not is_authorized(application, False):
+        abort(401, 'User is not authorized for this application')
 
     json = request.get_json(force=True)
 

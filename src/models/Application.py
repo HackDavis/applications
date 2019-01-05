@@ -199,7 +199,9 @@ class Application(db.Model, ModelUtils, Serializer):
         """Updates the score for an application"""
         application.score = score
         application.feedback = feedback
-        application.locked_by = locked_by
+
+        if application.assigned_to != locked_by:
+            application.locked_by = locked_by
 
         try:
             db.session.commit()

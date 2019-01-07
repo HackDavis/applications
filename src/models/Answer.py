@@ -149,16 +149,3 @@ class Answer(db.Model, ModelUtils, Serializer):
             db.session.rollback()
             print(e)
     
-    @staticmethod
-    def count_values_per_answer():
-        answer_totals_q = db.session.query(func.count(Answer.id), Answer.answer, Question.question, Answer.question_id) \
-        .join(Question) \
-        .filter(Question.question_type == QuestionType.demographic) \
-        .group_by(Answer.question_id, Question.question, Answer.answer) \
-        .order_by(Answer.question_id)
-        
-        print(answer_totals_q)
-        answer_totals = answer_totals_q.all()
-
-        return answer_totals
-    

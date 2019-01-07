@@ -4,7 +4,8 @@ from flask_login import current_user, login_required
 from sqlalchemy.sql.functions import func 
 
 from src.models.Answer import Answer
-from src.models.Application import Application
+from src.models.schema.Application import Application
+from src.models.functions.ApplicationQueries import ApplicationQueries
 from src.models.Question import Question
 from src.models.enums.QuestionType import QuestionType
 from src.models.enums.Role import Role
@@ -35,9 +36,9 @@ def get_scores():
     # start = time.perf_counter()
 
     if current_user.role == Role.admin:
-        applications = Application.get_all_applications()
+        applications = ApplicationQueries.get_all_applications()
     else:
-        applications = Application.get_all_applications_for_user(current_user.id)
+        applications = ApplicationQueries.get_all_applications_for_user(current_user.id)
 
     app = applications.subquery()
 

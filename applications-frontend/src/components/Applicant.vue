@@ -62,7 +62,7 @@
 
     <!-- Information panel -->
 
-    <div class="column" style="border-radius: 1em;">
+    <div class="column">
       <div class="subtitle is-3 has-text-centered">Applicant</div>
       <div class="container is-fluid">
 
@@ -75,7 +75,7 @@
           </div>
           <div v-for="linkAnswer in linkAnswers" :key="linkAnswer.id">
             <div class="column is-narrow">
-              <a :href="linkAnswer.answer" class="button is-primary is-medium">{{ linkAnswer.question.question }}</a>
+              <a :href="linkAnswer.answer" class="button is-primary is-medium" rel="noopener" target="_blank">{{ linkAnswer.question.question }}</a>
             </div>
           </div>
         </div>
@@ -95,7 +95,7 @@
           <div class="column is-6">
             <div class="is-5">{{ essayAnswer.question.question }}</div>
           </div>
-          <div class="column has-background-light is-6" style="border-radius: 1em;">
+          <div class="column has-background-light is-6">
             <div class="is-5">{{ essayAnswer.answer }}</div>
           </div>
         </div>
@@ -175,10 +175,7 @@ export default {
       this.setData(response.data);
     },
     handleResponseFailure(error) {
-      //console.error(error);
-      alert(
-        "Something went wrong. Please contact the HackDavis Technical team for further support."
-      );
+      console.error(error);
     },
     next: function() {
       let id = this.$route.params.id ? "/" + this.$route.params.id : "";

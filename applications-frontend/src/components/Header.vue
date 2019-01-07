@@ -6,13 +6,13 @@
     <div class="container">
       <div class="navbar-brand">
         <router-link 
-          class="navbar-item" 
+          class="branding navbar-item" 
           to="/">
           <img 
-            class="image is-32x32" 
+            class="image" 
             src="@/assets/logo.png">
+          <h1 class="name is-size-2">HACK<b>DAVIS</b></h1>
         </router-link>
-        <h1 class="navbar-item is-size-2">Heck<b>Davis</b></h1>
         <a 
           role="button" 
           class="navbar-burger" 
@@ -25,7 +25,7 @@
       </div>
       <div class="navbar-menu">
         <div class="navbar-start">
-          <router-link 
+          <router-link v-if="this.$user.getUser()"
             class="navbar-item is-size-5" 
             to="/review">Review</router-link>
           <router-link v-if="this.$user.getUser() && this.$user.getUser().role == 'admin'"
@@ -85,5 +85,14 @@ export default {
 <style scoped>
 nav.navbar {
   margin-bottom: 1.5rem;
+}
+
+.branding {
+  color: inherit !important;
+}
+
+.branding h1 {
+  padding-left: 0.3em;
+  padding-right: 0.3em;
 }
 </style>

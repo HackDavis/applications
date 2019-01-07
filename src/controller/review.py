@@ -41,7 +41,7 @@ def get_application():
     if current_user.role != Role.admin:
         settings = Settings.get_settings()
         application_count = Application.get_count_of_applications_for_user(current_user.id)
-        if application_count >= settings.application_limit:
+        if settings.application_limit is not None and application_count >= settings.application_limit:
             # no more applications to score for user
             return Response(status=204)
 

@@ -66,6 +66,10 @@ let router = new Router({
       meta: {
         requiresAuth: true
       }
+    },
+    {
+      path: "*",
+      redirect: "/error/404"
     }
   ],
   mode: "history"

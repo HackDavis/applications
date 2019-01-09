@@ -16,8 +16,8 @@ class ModelUtils:
             raise e
 
     # unused at this point due to bulk insert methods
-    @classmethod
-    def insert_rows(cls, rows):
+    @staticmethod
+    def insert_rows(rows):
         """Insert provided rows into table"""
         db.session.add_all(rows)
 

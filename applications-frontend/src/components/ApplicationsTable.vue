@@ -27,7 +27,7 @@
         </span>
       </div>
     </div>
-    <table class="table" @scroll.passive="scroll">
+    <table id="applications-table" class="table" @scroll.passive="scroll">
       <thead>
         <th>Name</th>
         <th>Email</th>
@@ -93,7 +93,11 @@ export default {
           this.maxViewIndex = 20;
 
           if(response.data.length > 0) {
-            this.applications = response.data;
+            this.applications = response.data.map(element => {
+              if(element.lockedByEmail) element.lockedByEmail = element.lockedByEmail.split("@")[0];
+              if(element.assignedToEmail) element.assignedToEmail = element.assignedToEmail.split("@")[0];
+              return element;
+            });
             return;
           }
 
@@ -143,7 +147,8 @@ export default {
       }
 
       const applicationsByUser = this.applications.reduce((applicationsByUser, application) => {
-        const assignedToEmail = application.assignedToEmail ? application.assignedToEmail : 'unassigned';
+        const assignedToEmail = application.assignedToEmail;
+        if(!assignedToEmail) return applicationsByUser;
         if (!applicationsByUser[assignedToEmail]) {
           applicationsByUser[assignedToEmail] = Object.assign({}, initialState);
         }
@@ -176,7 +181,7 @@ export default {
 </script>
 
 <style scoped>
-table {
+table#applications-table {
   height: 600px;
   overflow-y: scroll;
   display: block;

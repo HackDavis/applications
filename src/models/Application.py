@@ -4,13 +4,16 @@ from datetime import datetime, timedelta, date
 from collections import defaultdict
 from sqlalchemy.sql.expression import func
 
-from src.shared import Shared
 from src.models.Answer import Answer
 from src.models.User import User
 from src.models.Question import Question
+from src.models.Settings import Settings
 from src.models.enums.QuestionType import QuestionType
 from src.models.lib.ModelUtils import ModelUtils
 from src.models.lib.Serializer import Serializer
+from src.shared import Shared
+
+
 
 db = Shared.db
 
@@ -26,7 +29,7 @@ class Application(db.Model, ModelUtils, Serializer):
     feedback = db.Column(db.Text)
     last_modified = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
     date_added = db.Column(db.Date, nullable=False)
-
+    
     @staticmethod
     def insert(csv_file, question_rows, session):
         """Insert new rows extracted from csv_file"""
@@ -172,6 +175,17 @@ class Application(db.Model, ModelUtils, Serializer):
             .scalar()
 
     @staticmethod
+    def count_applications():
+        """Counts number of applications in database"""
+        return db.session.query(func.count(Application.id)).scalar()
+
+    @staticmethod
+    def count_accepted():
+        """Counts number of applications in database"""
+        accepted = Application.get_accepted_ids_query()
+        return db.session.query(Application).join(accepted, accepted.c.id == Application.id).count()
+
+    @staticmethod
     def get_all_applications():
         """Returns all applications"""
         return db.session.query(Application)
@@ -219,10 +233,9 @@ class Application(db.Model, ModelUtils, Serializer):
     @staticmethod
     def get_mean_stddev_scores_per_user():
         """Returns all scored applications"""
-        return db.session.query(Application) \
+        return db.session.query(func.avg(Application.score), func.stddev(Application.score), User.id) \
             .filter(Application.score != 0) \
             .join(User, (User.id == Application.locked_by) | (User.id == Application.assigned_to)) \
-            .from_self(func.avg(Application.score), func.stddev(Application.score), User.id) \
             .group_by(User.id) \
             .all()
 
@@ -242,14 +255,24 @@ class Application(db.Model, ModelUtils, Serializer):
             scored_applications_per_user[user].append(application)
 
         for (user, stats) in zip(sorted(scored_applications_per_user), stats_per_user):
+            stddev = stats[1]
+            if stddev == 0 or stddev is None:
+                stddev = 1
             for application in scored_applications_per_user[user]:
-                Application.set_standardized_score(application, (application.score - stats[0]) / stats[1])
+                Application.set_standardized_score(application, (application.score - stats[0]) / stddev)
 
         try:
             db.session.commit()
         except Exception as e:
             db.session.rollback()
             raise e
+
+    @staticmethod
+    def question_answer_matrix_subquery():
+        return db.session.query(Application.id, func.sum(Answer.answer_weight * Question.weight).label("sum_values")) \
+        .join(Answer) \
+        .join(Question) \
+        .group_by(Application.id).subquery()
 
     @staticmethod
     def rank_participants():
@@ -276,12 +299,10 @@ class Application(db.Model, ModelUtils, Serializer):
         .add_column(Answer.answer) \
         .subquery()
 
-        answer_values = db.session.query(Application.id, func.sum(Answer.answer_weight * Question.weight).label("sum_values")) \
-        .join(Answer) \
-        .join(Question) \
-        .group_by(Application.id).subquery()
+        answer_values = Application.question_answer_matrix_subquery()
 
         results = db.session.query(Application.id, firstNames.c.answer, lastNames.c.answer, emails.c.answer, func.sum(answer_values.c.sum_values + Application.standardized_score)) \
+        .filter(Application.score != 0) \
         .join(answer_values, answer_values.c.id == Application.id) \
         .join(firstNames, firstNames.c.id == Application.id) \
         .join(lastNames, lastNames.c.id == Application.id) \
@@ -297,3 +318,35 @@ class Application(db.Model, ModelUtils, Serializer):
             raise e
 
         return results
+
+    @staticmethod
+    def get_accepted_ids_query():
+        limit = Settings.get_settings().accept_limit
+
+        Application.standardize_scores()
+
+        answer_values = Application.question_answer_matrix_subquery()
+
+        return db.session.query(Application.id, func.sum(answer_values.c.sum_values + Application.standardized_score)) \
+        .filter(Application.score != 0) \
+        .group_by(Application.id) \
+        .order_by(func.sum(answer_values.c.sum_values + Application.standardized_score).desc().nullslast()) \
+        .limit(limit) \
+        .subquery()
+
+
+    @staticmethod
+    def count_values_per_answer():
+        accepted = Application.get_accepted_ids_query()
+
+        answer_totals_q = db.session.query(func.count(Answer.id), Answer.answer, Question.question, Answer.question_id) \
+        .join(Question) \
+        .join(accepted) \
+        .filter(Question.question_type == QuestionType.demographic) \
+        .group_by(Answer.question_id, Question.question, Answer.answer) \
+        .order_by(Answer.question_id)
+        
+        print(answer_totals_q)
+        answer_totals = answer_totals_q.all()
+
+        return answer_totals

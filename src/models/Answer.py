@@ -50,10 +50,8 @@ class Answer(db.Model, ModelUtils, Serializer):
     @staticmethod
     def check_duplicate_email(email):
         is_duplicate = db.session.query(Answer) \
-        .filter(Answer.answer == email) \
-        .from_self(Answer) \
         .join(Question) \
-        .filter(Question.question_type == QuestionType.email) \
+        .filter(Question.question_type == QuestionType.email, Answer.answer == email) \
         .all()
         if len(is_duplicate) > 0:
             return True
@@ -150,3 +148,4 @@ class Answer(db.Model, ModelUtils, Serializer):
         except Exception as e:
             db.session.rollback()
             print(e)
+    

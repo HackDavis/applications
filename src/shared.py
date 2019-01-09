@@ -16,7 +16,7 @@ class Shared:
         """Instantiate shared data"""
         cls.db = SQLAlchemy()
         importlib.import_module('src.models.Answer')
-        importlib.import_module('src.models.schema.Application')
+        importlib.import_module('src.models.Application')
         OAuth = importlib.import_module('src.models.OAuth').OAuth
         importlib.import_module('src.models.Question')
         importlib.import_module('src.models.Settings')

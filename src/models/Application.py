@@ -4,26 +4,39 @@ from datetime import datetime, timedelta, date
 from collections import defaultdict
 from sqlalchemy.sql.expression import func
 
-from src.shared import Shared
 from src.models.Answer import Answer
 from src.models.User import User
 from src.models.Question import Question
-from src.models.schema.Application import Application
 from src.models.Settings import Settings
 from src.models.enums.QuestionType import QuestionType
 from src.models.lib.ModelUtils import ModelUtils
+from src.models.lib.Serializer import Serializer
+from src.shared import Shared
+
+
 
 db = Shared.db
 
 
-class ApplicationQueries():
+class Application(db.Model, ModelUtils, Serializer):
+    id = db.Column(db.Integer, primary_key=True)
+    assigned_to = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
+    locked_by = db.Column(db.Integer, db.ForeignKey('user.id'))
+    assigned_to_user = db.relationship('User', foreign_keys=assigned_to)
+    locked_by_user = db.relationship('User', foreign_keys=locked_by)
+    score = db.Column(db.Integer, nullable=False)
+    standardized_score = db.Column(db.Float)
+    feedback = db.Column(db.Text)
+    last_modified = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
+    date_added = db.Column(db.Date, nullable=False)
+    
     @staticmethod
     def insert(csv_file, question_rows, session):
         """Insert new rows extracted from csv_file"""
         start = time.perf_counter()
 
-        applications = ApplicationQueries.get_applications_from_csv(csv_file)
-        rows = ApplicationQueries.convert_applications_to_rows(applications)
+        applications = Application.get_applications_from_csv(csv_file)
+        rows = Application.convert_applications_to_rows(applications)
 
         object_load = time.perf_counter()
 
@@ -45,7 +58,7 @@ class ApplicationQueries():
 
         Question.get_questions_from_csv(csv_file) #need to advance the csv_file reader
         question_types = Question.get_question_types_from_csv(csv_file)
-        applications = ApplicationQueries.get_applications_from_csv(csv_file)
+        applications = Application.get_applications_from_csv(csv_file)
 
         email_index = 0
         for i in range(len(question_types)):
@@ -67,7 +80,7 @@ class ApplicationQueries():
 
         for application in applications:
             if not Answer.check_duplicate_email(application[email_index]):
-                application_row = ApplicationQueries.convert_application_to_row(application)
+                application_row = Application.convert_application_to_row(application)
 
                 db.session.add(application_row)
 
@@ -89,7 +102,7 @@ class ApplicationQueries():
     @staticmethod
     def convert_applications_to_rows(applications):
         """Convert applications into rows to insert into database"""
-        return [ApplicationQueries.convert_application_to_row(application) for application in applications]
+        return [Application.convert_application_to_row(application) for application in applications]
 
     @staticmethod
     def convert_application_to_row(application):
@@ -114,7 +127,7 @@ class ApplicationQueries():
     @staticmethod
     def get_application_for_user(user_id):
         """Returns application for user to review"""
-        application = ApplicationQueries.get_currently_assigned_application_for_user(user_id)
+        application = Application.get_currently_assigned_application_for_user(user_id)
         if application is None:
             cutoff = datetime.now() - timedelta(hours=1)
             application = db.session.query(Application) \
@@ -169,7 +182,7 @@ class ApplicationQueries():
     @staticmethod
     def count_accepted():
         """Counts number of applications in database"""
-        accepted = ApplicationQueries.get_accepted_ids_query()
+        accepted = Application.get_accepted_ids_query()
         return db.session.query(Application).join(accepted, accepted.c.id == Application.id).count()
 
     @staticmethod
@@ -180,7 +193,7 @@ class ApplicationQueries():
     @staticmethod
     def skip_application(user_id):
         """Returns next application for user to review"""
-        application = ApplicationQueries.get_currently_assigned_application_for_user(user_id)
+        application = Application.get_currently_assigned_application_for_user(user_id)
 
         if application is None:
             return None
@@ -229,8 +242,8 @@ class ApplicationQueries():
     @staticmethod
     def standardize_scores():
         """Updates the standardized scores for all applications"""
-        stats_per_user = ApplicationQueries.get_mean_stddev_scores_per_user()
-        scored_applications = ApplicationQueries.get_scored_applications()
+        stats_per_user = Application.get_mean_stddev_scores_per_user()
+        scored_applications = Application.get_scored_applications()
 
         scored_applications_per_user = defaultdict(list)
 
@@ -246,7 +259,7 @@ class ApplicationQueries():
             if stddev == 0 or stddev is None:
                 stddev = 1
             for application in scored_applications_per_user[user]:
-                ApplicationQueries.set_standardized_score(application, (application.score - stats[0]) / stddev)
+                Application.set_standardized_score(application, (application.score - stats[0]) / stddev)
 
         try:
             db.session.commit()
@@ -263,7 +276,7 @@ class ApplicationQueries():
 
     @staticmethod
     def rank_participants():
-        ApplicationQueries.standardize_scores()
+        Application.standardize_scores()
 
         firstNames = db.session.query(Application.id) \
         .join(Answer) \
@@ -286,7 +299,7 @@ class ApplicationQueries():
         .add_column(Answer.answer) \
         .subquery()
 
-        answer_values = ApplicationQueries.question_answer_matrix_subquery()
+        answer_values = Application.question_answer_matrix_subquery()
 
         results = db.session.query(Application.id, firstNames.c.answer, lastNames.c.answer, emails.c.answer, func.sum(answer_values.c.sum_values + Application.standardized_score)) \
         .filter(Application.score != 0) \
@@ -310,9 +323,9 @@ class ApplicationQueries():
     def get_accepted_ids_query():
         limit = Settings.get_settings().accept_limit
 
-        ApplicationQueries.standardize_scores()
+        Application.standardize_scores()
 
-        answer_values = ApplicationQueries.question_answer_matrix_subquery()
+        answer_values = Application.question_answer_matrix_subquery()
 
         return db.session.query(Application.id, func.sum(answer_values.c.sum_values + Application.standardized_score)) \
         .filter(Application.score != 0) \
@@ -324,7 +337,7 @@ class ApplicationQueries():
 
     @staticmethod
     def count_values_per_answer():
-        accepted = ApplicationQueries.get_accepted_ids_query()
+        accepted = Application.get_accepted_ids_query()
 
         answer_totals_q = db.session.query(func.count(Answer.id), Answer.answer, Question.question, Answer.question_id) \
         .join(Question) \

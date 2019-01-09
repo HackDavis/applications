@@ -2,8 +2,7 @@ from flask import abort, Blueprint, jsonify, request, Response
 from flask_login import current_user, login_required
 
 from src.models.Answer import Answer
-from src.models.schema.Application import Application
-from src.models.functions.ApplicationQueries import ApplicationQueries
+from src.models.Application import Application
 from src.models.Settings import Settings
 from src.models.enums.Role import Role
 from src.models.lib.Serializer import Serializer
@@ -26,7 +25,7 @@ def is_authorized(application, is_read_only):
         # authorized if application is assigned to user, has been rated, and either is a read only operation or is not locked by an admin
         return True
 
-    currently_assigned_application = ApplicationQueries.get_currently_assigned_application_for_user(
+    currently_assigned_application = Application.get_currently_assigned_application_for_user(
         current_user.id)
     if currently_assigned_application is not None and currently_assigned_application.id == application.id:
         # authorized if application is the one currently assigned to user
@@ -41,12 +40,12 @@ def get_application():
     """Get application for user"""
     if current_user.role != Role.admin:
         settings = Settings.get_settings()
-        application_count = ApplicationQueries.get_count_of_applications_for_user(current_user.id)
+        application_count = Application.get_count_of_applications_for_user(current_user.id)
         if settings.application_limit is not None and application_count >= settings.application_limit:
             # no more applications to score for user
             return Response(status=204)
 
-    application = ApplicationQueries.get_application_for_user(current_user.id)
+    application = Application.get_application_for_user(current_user.id)
     if application is None:
         # no more applications to score
         return Response(status=204)
@@ -65,7 +64,7 @@ def get_application_using_id(application_id_str):
     except ValueError:
         abort(400, 'application ID invalid')
 
-    application = ApplicationQueries.get_application(application_id)
+    application = Application.get_application(application_id)
     if application is None:
         abort(404, 'Application does not exist')
     elif not is_authorized(application, True):
@@ -80,7 +79,7 @@ def get_application_using_id(application_id_str):
 @login_required
 def skip_application():
     """Skip application for user"""
-    past_application = ApplicationQueries.skip_application(current_user.id)
+    past_application = Application.skip_application(current_user.id)
     if past_application is None:
         abort(400, 'User is not currently assigned an application')
 
@@ -96,7 +95,7 @@ def score_application(application_id_str):
     except ValueError:
         abort(400, 'application ID invalid')
 
-    application = ApplicationQueries.get_application(application_id)
+    application = Application.get_application(application_id)
     if application is None:
         abort(404, 'Application does not exist')
     elif not is_authorized(application, False):
@@ -122,6 +121,6 @@ def score_application(application_id_str):
     if current_user.role == Role.admin:
         locked_by = current_user.id
 
-    ApplicationQueries.update_score_and_feedback(application, score, feedback, locked_by)
+    Application.update_score_and_feedback(application, score, feedback, locked_by)
 
     return Response('Updated score for application', 200)

@@ -5,8 +5,7 @@ import os
 import time
 
 from src.models.Answer import Answer
-from src.models.schema.Application import Application
-from src.models.functions.ApplicationQueries import ApplicationQueries
+from src.models.Application import Application
 from src.models.Question import Question
 from src.models.Settings import Settings
 from src.models.enums.Role import Role
@@ -104,7 +103,7 @@ def load():
             start = time.perf_counter()
 
             question_rows = Question.get_questions_from_db()
-            ApplicationQueries.insert_without_duplicates(csv_file, question_rows)
+            Application.insert_without_duplicates(csv_file, question_rows)
 
             op_time = time.perf_counter()
 
@@ -162,7 +161,7 @@ def reload():
             start = time.perf_counter()
 
             question_rows = Question.insert(csv_file, session)
-            ApplicationQueries.insert(csv_file, question_rows, session)
+            Application.insert(csv_file, question_rows, session)
 
             op_time = time.perf_counter()
 
@@ -191,7 +190,7 @@ def standardize():
     if current_user.role != Role.admin:
         abort(401, 'User needs to be an admin to access this route')
 
-    ApplicationQueries.standardize_scores()
+    Application.standardize_scores()
 
     return Response('Standardized scores', 200)
 
@@ -225,7 +224,7 @@ def get_final_acceptance_list():
     if current_user.role != Role.admin:
         abort(401, 'User needs to be an admin to access this route')
 
-    ranked_users = ApplicationQueries.rank_participants()
+    ranked_users = Application.rank_participants()
     return jsonify(Serializer.serialize_value(ranked_users))
 
 
@@ -271,7 +270,7 @@ def update_settings():
 @login_required
 def get_demographics():
     """Get the demographic information from applicants"""
-    applicant_count = ApplicationQueries.count_accepted()
-    answer_totals = ApplicationQueries.count_values_per_answer()
+    applicant_count = Application.count_accepted()
+    answer_totals = Application.count_values_per_answer()
 
     return jsonify(Serializer.serialize_value({'total': applicant_count, 'answers': answer_totals}))

@@ -1,6 +1,23 @@
 <template>
     <div>
-        <statistics></statistics>
+        <div class="container">
+            <div class="columns is-multiline">
+                <div v-for="(stats, question) in answers" :key="stats[0][3]" class="column is-one-third">
+                    <div class="card">
+                    <header class="card-header">
+                        <h1 class="card-header-title">{{question}}</h1>
+                    </header>
+                    <div class="card-content">
+                        <div class="content">
+                            <ul>
+                                <li v-for="stat in stats" :key="stat[1]">{{stat[1]}}: {{(stat[0] * 100 / total).toFixed(2)}}%</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
         <div class="columns">
             <div class="column">
                 <div class="field is-horizontal" v-for="question in question_weights" :key="question[0]">
@@ -39,25 +56,24 @@
 <script>
 import _ from 'lodash';
 import bulmaAccordion from 'bulma-accordion/dist/js/bulma-accordion.min.js';
-import Statistics from './Statistics';
 
 export default {
     data () {
         return {
             answer_weights: [],
-            question_weights: []
+            question_weights: [],
+            total: 1,
+            answers: {}
         };
     },
     created() {
+        this.reloadStats();
         this.$http.get("/api/admin/configure").then(response => {
             this.answer_weights = response.body.answer_weights;
             this.question_weights = response.body.question_weights;
             this.orig = _.cloneDeep(response.body);
             bulmaAccordion.attach();
         }, error => console.error(error));
-    },
-    components: {
-        'statistics': Statistics
     },
     methods: {
         reset() {
@@ -94,9 +110,26 @@ export default {
                 question_weights: new_question_weights
             }
 
-            this.$http.put("/api/admin/configure", update).then(success => console.log(success), error => console.error(error))
+            this.$http.put("/api/admin/configure", update).then(success => {
+                console.log(success)
+                this.reloadStats();
+            }, error => console.error(error))
         },
-        dummy() {}
+        dummy() {},
+        reloadStats() {
+            this.$http.get("/api/admin/demographics").then(response => {
+                this.total = response.data.total;
+                let answer_map = {};
+                response.data.answers.forEach(element => {
+                if(answer_map[element[2]] === undefined) {
+                    answer_map[element[2]] = [];
+                }
+                answer_map[element[2]].push(element)
+                })
+
+                this.answers = answer_map;
+            }, error => console.error(error));
+        }
     }
 };
 </script>

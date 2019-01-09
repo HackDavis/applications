@@ -10,35 +10,35 @@
         <div class="columns is-mobile is-multiline has-background-light is-gapless">
           <div class="column">
             <label class="control control--radio column  is-flex is-align-center is-flex-column-reverse">1
-              <input v-model="application.score" value="1" type="radio" name="radio" checked="checked">
+              <input v-model="application.score" value="1" type="radio" name="radio" checked="checked" :disabled="isDisabled">
               <div class="control__indicator" />
             </label>
           </div>
 
           <div class="column">
             <label class="control control--radio column  is-flex is-align-center is-flex-column-reverse">2
-              <input v-model="application.score" value="2" type="radio" name="radio" checked="checked">
+              <input v-model="application.score" value="2" type="radio" name="radio" checked="checked" :disabled="isDisabled">
               <div class="control__indicator" />
             </label>
           </div>
 
           <div class="column">
             <label class="control control--radio column  is-flex is-align-center is-flex-column-reverse">3
-              <input v-model="application.score" value="3" type="radio" name="radio" checked="checked">
+              <input v-model="application.score" value="3" type="radio" name="radio" checked="checked" :disabled="isDisabled">
               <div class="control__indicator" />
             </label>
           </div>
 
           <div class="column">
             <label class="control control--radio column  is-flex is-align-center is-flex-column-reverse">4
-              <input v-model="application.score" value="4" type="radio" name="radio" checked="checked">
+              <input v-model="application.score" value="4" type="radio" name="radio" checked="checked" :disabled="isDisabled">
               <div class="control__indicator" />
             </label>
           </div>
 
           <div class="column">
             <label class="control control--radio column  is-flex is-align-center is-flex-column-reverse">5
-              <input v-model="application.score" value="5" type="radio" name="radio" checked="checked">
+              <input v-model="application.score" value="5" type="radio" name="radio" checked="checked" :disabled="isDisabled">
               <div class="control__indicator" />
             </label>
           </div>
@@ -47,15 +47,18 @@
         <!-- Feedback textarea -->
         <div class="no-margin subtitle is-3">Feedback</div>
         <div class="columns is-mobile is-multiline is-gapless">
-          <textarea class="textarea has-fixed-size" v-model="application.feedback" placeholder="Optionally justify your rating here"></textarea>
+          <textarea class="textarea has-fixed-size" v-model="application.feedback" :disabled="isDisabled" placeholder="Optionally justify your rating here"></textarea>
         </div>
 
+        <!-- Message area -->
+        <div v-if="isAssignedDifferent" class="subtitle is-5">This application has been assigned to {{application.assigned_to_user ? application.assigned_to_user.email : "no one"}}</div>
+        <div v-if="application.locked_by" class="subtitle is-5">This application has been locked by {{application.locked_by_user.email}}</div>
 
         <!-- Submit button -->
-        <a v-on:click="score" :disabled="isInvalidScore" class="button is-primary is-medium" style="margin-top: 1em;">Submit</a>
+        <a v-on:click="score" :disabled="isDisabled || isInvalidScore" class="button is-primary is-medium">Submit</a>
 
         <!-- Skip button -->
-        <a v-on:click="skip" class="button is-medium" style="margin-top: 1em;">Skip</a>
+        <a v-on:click="skip" class="button is-medium">Skip</a>
 
       </center>
     </div>
@@ -114,6 +117,13 @@ export default {
     };
   },
   computed: {
+    isAssignedDifferent: function() {
+      const user = this.$user.getUser();
+      return this.application.id && (!user || this.application.assigned_to != user.id);
+    },
+    isDisabled: function() {
+      return !this.application.id || (this.application.locked_by && !this.isUserAdmin());
+    },
     essayAnswers: function() {
       return this.filterAnswersByQuestionTypes(["essay"]);
     },
@@ -143,6 +153,10 @@ export default {
     this.next();
   },
   methods: {
+    isUserAdmin: function() {
+      const user = this.$user.getUser();
+      return user && user.role == 'admin';
+    },
     filterAnswersByQuestionTypes: function(validQuestionTypes) {
       return this.answers.filter(answer =>
         validQuestionTypes.includes(answer.question.question_type)
@@ -299,6 +313,10 @@ export default {
 /* Disabled circle colour */
 .control--radio input:disabled + .control__indicator:after {
     background: #7b7b7b;
+}
+
+.button {
+  margin: 1em 0.5em;
 }
 
 .no-margin {

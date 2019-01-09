@@ -51,8 +51,8 @@
         </div>
 
         <!-- Message area -->
-        <div v-if="isReadOnly" class="no-margin subtitle is-5">This application has been locked by {{application.locked_by_user.email}}</div>
-        <div v-if="isAssignedDifferent" class="no-margin subtitle is-5">This application has been assigned to {{application.assigned_to_user ? application.assigned_to_user.email : "no one"}}</div>
+        <div v-if="isAssignedDifferent" class="subtitle is-5">This application has been assigned to {{application.assigned_to_user ? application.assigned_to_user.email : "no one"}}</div>
+        <div v-if="application.locked_by" class="subtitle is-5">This application has been locked by {{application.locked_by_user.email}}</div>
 
         <!-- Submit button -->
         <a v-on:click="score" :disabled="isDisabled || isInvalidScore" class="button is-primary is-medium">Submit</a>
@@ -117,14 +117,12 @@ export default {
     };
   },
   computed: {
-    isReadOnly: function() {
-      return this.isReadOnlyForUser();
+    isAssignedDifferent: function() {
+      const user = this.$user.getUser();
+      return this.application.id && (!user || this.application.assigned_to != user.id);
     },
     isDisabled: function() {
-      return !this.application.id || this.isReadOnlyForUser();
-    },
-    isAssignedDifferent: function() {
-      return this.isUserAndAssignedDifferent();
+      return !this.application.id || (this.application.locked_by && !this.isUserAdmin());
     },
     essayAnswers: function() {
       return this.filterAnswersByQuestionTypes(["essay"]);
@@ -158,13 +156,6 @@ export default {
     isUserAdmin: function() {
       const user = this.$user.getUser();
       return user && user.role == 'admin';
-    },
-    isReadOnlyForUser: function() {
-      return this.application.locked_by && !this.isUserAdmin();
-    },
-    isUserAndAssignedDifferent: function() {
-      const user = this.$user.getUser();
-      return this.application.id && (!user || this.application.assigned_to != user.id);
     },
     filterAnswersByQuestionTypes: function(validQuestionTypes) {
       return this.answers.filter(answer =>

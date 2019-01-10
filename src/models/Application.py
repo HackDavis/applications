@@ -270,52 +270,29 @@ class Application(db.Model, ModelUtils, Serializer):
     @staticmethod
     def question_answer_matrix_subquery():
         return db.session.query(Application.id, func.sum(Answer.answer_weight * Question.weight).label("sum_values")) \
-        .join(Answer) \
-        .join(Question) \
-        .group_by(Application.id).subquery()
+            .join(Answer) \
+            .join(Question) \
+            .group_by(Application.id) \
+            .subquery()
 
     @staticmethod
     def rank_participants():
         Application.standardize_scores()
 
-        firstNames = db.session.query(Application.id) \
-        .join(Answer) \
-        .join(Question) \
-        .filter(Question.question_type == QuestionType.firstName) \
-        .add_column(Answer.answer) \
-        .subquery()
-
-        lastNames = db.session.query(Application.id) \
-        .join(Answer) \
-        .join(Question) \
-        .filter(Question.question_type == QuestionType.lastName) \
-        .add_column(Answer.answer) \
-        .subquery()
-
-        emails = db.session.query(Application.id) \
-        .join(Answer) \
-        .join(Question) \
-        .filter(Question.question_type == QuestionType.email) \
-        .add_column(Answer.answer) \
-        .subquery()
+        question_answer_pairs = db.session.query(Application.id) \
+            .join(Answer) \
+            .join(Question) \
+            .add_columns(Question.question, Answer.answer) \
+            .subquery()
 
         answer_values = Application.question_answer_matrix_subquery()
 
-        results = db.session.query(Application.id, firstNames.c.answer, lastNames.c.answer, emails.c.answer, func.sum(answer_values.c.sum_values + Application.standardized_score)) \
-        .filter(Application.score != 0) \
-        .join(answer_values, answer_values.c.id == Application.id) \
-        .join(firstNames, firstNames.c.id == Application.id) \
-        .join(lastNames, lastNames.c.id == Application.id) \
-        .join(emails, emails.c.id == Application.id) \
-        .group_by(Application.id, firstNames.c.answer, lastNames.c.answer, emails.c.answer) \
-        .order_by(func.sum(answer_values.c.sum_values + Application.standardized_score).desc().nullslast()) \
-        .all()
-
-        try:
-            db.session.commit()
-        except Exception as e:
-            db.session.rollback()
-            raise e
+        results = db.session.query(Application.id, func.json_object_agg(question_answer_pairs.c.question, question_answer_pairs.c.answer), func.sum(answer_values.c.sum_values + Application.standardized_score)) \
+            .join(question_answer_pairs, question_answer_pairs.c.id == Application.id) \
+            .join(answer_values, answer_values.c.id == Application.id) \
+            .group_by(Application.id) \
+            .order_by(func.sum(answer_values.c.sum_values + Application.standardized_score).desc().nullslast()) \
+            .all()
 
         return results
 
@@ -333,7 +310,6 @@ class Application(db.Model, ModelUtils, Serializer):
         .order_by(func.sum(answer_values.c.sum_values + Application.standardized_score).desc().nullslast()) \
         .limit(limit) \
         .subquery()
-
 
     @staticmethod
     def count_values_per_answer():

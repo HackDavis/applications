@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify
 from flask_login import current_user, login_required
+from datetime import datetime, timedelta, date
 
 from sqlalchemy.orm import aliased
 from sqlalchemy.sql.functions import func
@@ -43,12 +44,14 @@ def get_scores():
 
     app = applications.subquery()
 
+    cutoff = datetime.now() - timedelta(hours=1)
+
     assigned_to_user = aliased(User)
     locked_by_user = aliased(User)
     response = db.session.query(Application.id, Application.score, assigned_to_user.email, locked_by_user.email, func.json_object_agg(Question.question_type, Answer.answer)) \
         .order_by(Application.last_modified.desc()) \
         .filter(Application.id == app.c.id) \
-        .join(assigned_to_user, Application.assigned_to_user, isouter=True) \
+        .join(assigned_to_user, (Application.assigned_to == assigned_to_user.id) & ((Application.score != 0) | (Application.last_modified > cutoff)), isouter=True) \
         .join(locked_by_user, Application.locked_by_user, isouter=True) \
         .join(Answer) \
         .join(Question) \

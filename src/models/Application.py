@@ -311,7 +311,6 @@ class Application(db.Model, ModelUtils, Serializer):
         .limit(limit) \
         .subquery()
 
-
     @staticmethod
     def count_values_per_answer():
         accepted = Application.get_accepted_ids_query()

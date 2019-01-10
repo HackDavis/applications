@@ -34,6 +34,7 @@
         </div>
       </div>
     </form>
+    <a id="export-button" href="/api/admin/export" class="button">Export Scores</a>
   </div>
 </template>
 
@@ -81,4 +82,9 @@ export default {
 </script>
 
 <style>
+
+#export-button {
+  margin-top: 20px;
+}
+
 </style>

@@ -1,6 +1,11 @@
-from flask import abort, request, jsonify, Blueprint, Response
+from flask import abort, request, jsonify, Blueprint, Response, stream_with_context
 from flask_login import current_user, login_required
+from functools import reduce
+from io import StringIO
 from werkzeug.utils import secure_filename
+from werkzeug.datastructures import Headers
+from werkzeug.wrappers import Response
+import csv
 import os
 import time
 
@@ -166,14 +171,58 @@ def update_parameters():
 
     return Response('Updated scores', 200)
 
-@admin.route("/api/admin/rank", methods=["GET"])
+
+def generate_csv(ranked_applications):
+    data = StringIO()
+    writer = csv.writer(data)
+
+    if len(ranked_applications) == 0:
+        writer.writerow('No applications scored')
+        return data.getvalue()
+
+    settings = Settings.get_settings()
+
+    first = ranked_applications[0]
+    questions = sorted(first[1].keys())
+
+    # write header
+    headers = questions + ['score', 'result']
+    writer.writerow(headers)
+    yield data.getvalue()
+    data.seek(0)
+    data.truncate(0)
+
+    # write each application
+    for rank in range(len(ranked_applications)):
+        application = ranked_applications[rank]
+
+        result = 'REJECT'
+        if rank + 1 < settings.accept_limit:
+            result = 'ACCEPT'
+        elif rank + 1 < settings.accept_limit + settings.waitlist_limit:
+            result = 'WAITLIST'
+
+        answers = [value for (key, value) in sorted(application[1].items())]
+        row = answers + [application[2], result]
+        writer.writerow(row)
+        yield data.getvalue()
+        data.seek(0)
+        data.truncate(0)
+
+
+@admin.route("/api/admin/export", methods=["GET"])
 @login_required
-def get_final_acceptance_list():
+def export():
     if current_user.role != Role.admin:
         abort(401, 'User needs to be an admin to access this route')
 
-    ranked_users = Application.rank_participants()
-    return jsonify(Serializer.serialize_value(ranked_users))
+    ranked_applications = Application.rank_participants()
+
+    headers = Headers()
+    headers.set('Content-Disposition', 'attachment', filename='export.csv')
+
+    # stream the response as the data is generated
+    return Response(stream_with_context(generate_csv(ranked_applications)), mimetype='text/csv', headers=headers)
 
 
 @admin.route('/api/admin/settings', methods=["GET"])

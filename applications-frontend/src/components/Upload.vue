@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <progress class="loading is-primary" v-if="waiting" max="100"></progress>
+    <progress class="progress loading is-primary" v-if="waiting" max="100"></progress>
     <form v-else class="form" enctype="multipart/form-data" method="POST">
       <div class="field">
         <label class="label">Applicants: </label>

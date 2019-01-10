@@ -36,7 +36,7 @@
         <th v-if="isAdmin">Assigned to</th>
         <th>Locked by</th>
       </thead>
-      <progress class="loading is-primary" v-if="loading" max="100"></progress>
+      <progress class="progress loading is-primary" v-if="loading" max="100"></progress>
       <tbody v-else>
         <tr v-for="item in paginatedItems" :key="item.id">
           <td>{{concatName(item.firstName, item.lastName)}}</td>

@@ -1,13 +1,20 @@
-from flask import abort, request, jsonify, Blueprint, Response
+from flask import abort, request, jsonify, Blueprint, Response, stream_with_context
 from flask_login import current_user, login_required
+from functools import reduce
+from io import StringIO
 from werkzeug.utils import secure_filename
+from werkzeug.datastructures import Headers
+from werkzeug.wrappers import Response
+import csv
 import os
 import time
 
+from src.models.Action import Action
 from src.models.Answer import Answer
 from src.models.Application import Application
 from src.models.Question import Question
 from src.models.Settings import Settings
+from src.models.enums.ActionType import ActionType
 from src.models.enums.Role import Role
 from src.shared import Shared
 from src.models.lib.Serializer import Serializer
@@ -120,6 +127,8 @@ def load():
                 print(e)
                 raise(e)
 
+            Action.log_action(ActionType.load, current_user.id)
+
             return Response('Reloaded applications from CSV file', 200)
         except ValueError as e:
             abort(400, str(e))
@@ -178,21 +187,12 @@ def reload():
                 print(e)
                 raise(e)
 
+            Action.log_action(ActionType.load, current_user.id)
+
             return Response('Reloaded applications from CSV file', 200)
         except ValueError as e:
             abort(400, str(e))
 
-
-@admin.route('/api/admin/standardize', methods=['POST', 'GET'])
-@login_required
-def standardize():
-    """Calculate and persist standardized scores."""
-    if current_user.role != Role.admin:
-        abort(401, 'User needs to be an admin to access this route')
-
-    Application.standardize_scores()
-
-    return Response('Standardized scores', 200)
 
 @admin.route('/api/admin/configure', methods=["GET"])
 @login_required
@@ -216,16 +216,66 @@ def update_parameters():
     Question.update_question_weights(data['question_weights'])
     Answer.set_unique_answer_weights(data["answer_weights"])
 
+    Action.log_action(ActionType.configure_weights, current_user.id)
+
     return Response('Updated scores', 200)
 
-@admin.route("/api/admin/rank", methods=["GET"])
+
+def generate_csv(ranked_applications):
+    data = StringIO()
+    writer = csv.writer(data)
+
+    if len(ranked_applications) == 0:
+        writer.writerow('No applications scored')
+        return data.getvalue()
+
+    settings = Settings.get_settings()
+
+    first = ranked_applications[0]
+    questions = sorted(first[1].keys())
+
+    # write header
+    headers = questions + ['score', 'result']
+    writer.writerow(headers)
+    yield data.getvalue()
+    data.seek(0)
+    data.truncate(0)
+
+    # write each application
+    for rank in range(len(ranked_applications)):
+        application = ranked_applications[rank]
+
+        result = 'REJECT'
+        if rank + 1 < settings.accept_limit:
+            result = 'ACCEPT'
+        elif rank + 1 < settings.accept_limit + settings.waitlist_limit:
+            result = 'WAITLIST'
+
+        answers = [value for (key, value) in sorted(application[1].items())]
+        row = answers + [application[2], result]
+        writer.writerow(row)
+        yield data.getvalue()
+        data.seek(0)
+        data.truncate(0)
+
+
+@admin.route("/api/admin/export", methods=["GET"])
 @login_required
-def get_final_acceptance_list():
+def export():
     if current_user.role != Role.admin:
         abort(401, 'User needs to be an admin to access this route')
 
-    ranked_users = Application.rank_participants()
-    return jsonify(Serializer.serialize_value(ranked_users))
+    Application.standardize_scores()
+
+    ranked_applications = Application.rank_participants()
+
+    Action.log_action(ActionType.export, current_user.id)
+
+    headers = Headers()
+    headers.set('Content-Disposition', 'attachment', filename='export.csv')
+
+    # stream the response as the data is generated
+    return Response(stream_with_context(generate_csv(ranked_applications)), mimetype='text/csv', headers=headers)
 
 
 @admin.route('/api/admin/settings', methods=["GET"])
@@ -262,6 +312,8 @@ def update_settings():
     waitlist_limit = validate_and_return_positive_integer(json, 'waitlist_limit', True)
 
     Settings.update_settings(name, application_limit, accept_limit, waitlist_limit)
+
+    Action.log_action(ActionType.configure_settings, current_user.id)
 
     return Response('Updated settings', 200)
 

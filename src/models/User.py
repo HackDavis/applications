@@ -15,3 +15,7 @@ class User(db.Model, UserMixin, Serializer):
     picture = db.Column(db.String(256))
     role = db.Column(db.Enum(Role), nullable=False)
     last_modified = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
+
+    @staticmethod
+    def count_users():
+        return db.session.query(User).count()

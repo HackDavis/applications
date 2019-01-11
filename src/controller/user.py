@@ -9,6 +9,7 @@ from src.models.Answer import Answer
 from src.models.Application import Application
 from src.models.Question import Question
 from src.models.User import User
+from src.models.Settings import Settings
 from src.models.enums.QuestionType import QuestionType
 from src.models.enums.Role import Role
 from src.models.lib.Serializer import Serializer
@@ -29,6 +30,24 @@ def get_user():
     """Get information about the user"""
     return jsonify(Serializer.serialize_value(current_user._get_current_object()))
 
+
+@user.route('/api/user/progress', methods=['GET'])
+@login_required
+def get_progress():
+    team_total = Application.count_applications()
+    team_scored = Application.count_scored()
+
+    user_total = Settings.get_settings().application_limit
+
+    if user_total is None:
+        user_total = team_total / User.count_users()
+
+    user_scored = db.session.query(Application) \
+    .join(User, Application.assigned_to == current_user.id) \
+    .filter(Application.score != 0) \
+    .count()
+
+    return jsonify(Serializer.serialize_value({'team': {'done': team_scored, 'total': team_total}, 'self': {'done': user_scored, 'total': user_total}}))
 
 @user.route('/api/user/scores', methods=['GET'])
 @login_required

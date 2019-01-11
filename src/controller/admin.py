@@ -9,10 +9,12 @@ import csv
 import os
 import time
 
+from src.models.Action import Action
 from src.models.Answer import Answer
 from src.models.Application import Application
 from src.models.Question import Question
 from src.models.Settings import Settings
+from src.models.enums.ActionType import ActionType
 from src.models.enums.Role import Role
 from src.shared import Shared
 from src.models.lib.Serializer import Serializer
@@ -125,6 +127,8 @@ def load():
                 print(e)
                 raise(e)
 
+            Action.log_action(ActionType.load, current_user.id)
+
             return Response('Reloaded applications from CSV file', 200)
         except ValueError as e:
             abort(400, str(e))
@@ -183,21 +187,12 @@ def reload():
                 print(e)
                 raise(e)
 
+            Action.log_action(ActionType.load, current_user.id)
+
             return Response('Reloaded applications from CSV file', 200)
         except ValueError as e:
             abort(400, str(e))
 
-
-@admin.route('/api/admin/standardize', methods=['POST', 'GET'])
-@login_required
-def standardize():
-    """Calculate and persist standardized scores."""
-    if current_user.role != Role.admin:
-        abort(401, 'User needs to be an admin to access this route')
-
-    Application.standardize_scores()
-
-    return Response('Standardized scores', 200)
 
 @admin.route('/api/admin/configure', methods=["GET"])
 @login_required
@@ -220,6 +215,8 @@ def update_parameters():
     data = request.get_json()
     Question.update_question_weights(data['question_weights'])
     Answer.set_unique_answer_weights(data["answer_weights"])
+
+    Action.log_action(ActionType.configure_weights, current_user.id)
 
     return Response('Updated scores', 200)
 
@@ -268,7 +265,11 @@ def export():
     if current_user.role != Role.admin:
         abort(401, 'User needs to be an admin to access this route')
 
+    Application.standardize_scores()
+
     ranked_applications = Application.rank_participants()
+
+    Action.log_action(ActionType.export, current_user.id)
 
     headers = Headers()
     headers.set('Content-Disposition', 'attachment', filename='export.csv')
@@ -311,6 +312,8 @@ def update_settings():
     waitlist_limit = validate_and_return_positive_integer(json, 'waitlist_limit', True)
 
     Settings.update_settings(name, application_limit, accept_limit, waitlist_limit)
+
+    Action.log_action(ActionType.configure_settings, current_user.id)
 
     return Response('Updated settings', 200)
 

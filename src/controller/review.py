@@ -1,9 +1,11 @@
 from flask import abort, Blueprint, jsonify, request, Response
 from flask_login import current_user, login_required
 
+from src.models.Action import Action
 from src.models.Answer import Answer
 from src.models.Application import Application
 from src.models.Settings import Settings
+from src.models.enums.ActionType import ActionType
 from src.models.enums.Role import Role
 from src.models.lib.Serializer import Serializer
 from src.shared import Shared
@@ -83,6 +85,8 @@ def skip_application():
     if past_application is None:
         abort(400, 'User is not currently assigned an application')
 
+    Action.log_action(ActionType.skip, current_user.id, past_application.id)
+
     return get_application()
 
 
@@ -122,5 +126,7 @@ def score_application(application_id_str):
         locked_by = current_user.id
 
     Application.update_score_and_feedback(application, score, feedback, locked_by)
+
+    Action.log_action(ActionType.score, current_user.id, application.id)
 
     return Response('Updated score for application', 200)

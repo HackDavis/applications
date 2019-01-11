@@ -1,24 +1,34 @@
 <template>
   <div>
-    <h1 v-if="isAdmin" class="title">Applications By User</h1>
-    <table v-if="isAdmin" class="table" @scroll.passive="scroll">
-      <thead>
-        <th>User</th>
-        <th>Apps scored</th>
-        <th>Apps rescored by admin</th>
-        <th>Apps rescored as admin</th>
-      </thead>
-      <tbody>
-        <tr v-for="item in applicationsByUser" :key="item[0]">
-          <td>{{item[0]}}</td>
-          <td>{{item[1].totalScored}}</td>
-          <td>{{item[1].scoredLockedByAdmin}}</td>
-          <td>{{item[1].scoredLockedAsAdmin}}</td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="is-flex is-justify-between summary">
+      <div class="summary-left">
+        <h1 class="subtitle is-4">Your Progress</h1>
+        <progress class="progress is-primary" :value="progress.self.done" :max="progress.self.total"></progress>
+        <h2 class="subtitle is-4">Team Progress</h2>
+        <progress class="progress is-primary" :value="progress.team.done" :max="progress.team.total"></progress>
+      </div>
+      <div class="summary-right">
+        <h1 v-if="isAdmin" class="title has-text-centered">Applications By User</h1>
+        <table v-if="isAdmin" class="table" @scroll.passive="scroll">
+          <thead>
+            <th>User</th>
+            <th>Apps scored</th>
+            <th>Apps rescored by admin</th>
+            <th>Apps rescored as admin</th>
+          </thead>
+          <tbody>
+            <tr v-for="item in applicationsByUser" :key="item[0]">
+              <td>{{item[0]}}</td>
+              <td>{{item[1].totalScored}}</td>
+              <td>{{item[1].scoredLockedByAdmin}}</td>
+              <td>{{item[1].scoredLockedAsAdmin}}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
 
-    <h1 class="title">Applications</h1>
+    <h1 class="title has-text-centered">Applications</h1>
     <div class="field">
       <div class="control has-icons-left">
         <input v-model.lazy="searchTerm" class="input is-primary is-rounded" type="text" placeholder="Search" />
@@ -66,7 +76,17 @@ export default {
     return {
       applications: [],
       searchTerm: "",
-      maxViewIndex: 0
+      maxViewIndex: 0,
+      progress: {
+        team: {
+          done: 0,
+          total: 1
+        },
+        self: {
+          done: 0,
+          total: 1
+        }
+      }
     };
   },
   components: {
@@ -87,6 +107,7 @@ export default {
     }
   },
   created: function() {
+    this.$http.get("/api/user/progress").then(response => this.progress = response.data, error => console.error(error));
     this.$http
         .get("/api/user/scores")
         .then(response => {
@@ -198,7 +219,23 @@ table tbody td:last-child {
   padding-left: 0;
 }
 
-h1 {
-  text-align: center;
+progress.progress {
+  max-width: 300px;
+  width: 100%;
+}
+
+.summary {
+  margin-bottom: 3rem;
+  flex-wrap: wrap;
+}
+
+.summary .summary-left {
+  flex-grow: 1;
+  padding: 15px;
+  min-width: 150px;
+}
+.summary .summary-right {
+  flex-shrink: 0;
+  padding: 15px;
 }
 </style>

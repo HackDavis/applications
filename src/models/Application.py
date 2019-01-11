@@ -178,6 +178,11 @@ class Application(db.Model, ModelUtils, Serializer):
     def count_applications():
         """Counts number of applications in database"""
         return db.session.query(func.count(Application.id)).scalar()
+    
+    @staticmethod
+    def count_scored():
+        """Counts number of applications in database"""
+        return db.session.query(Application).filter(Application.score != 0).count()
 
     @staticmethod
     def count_accepted():

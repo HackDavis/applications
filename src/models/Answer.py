@@ -24,7 +24,7 @@ class Answer(db.Model, ModelUtils, Serializer):
     last_modified = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
 
     @staticmethod
-    def insert(question_rows, applications, application_rows, session):
+    def insert(question_rows, applications, application_rows):
         """Insert new rows extracted from CSV file"""
 
         start = time.perf_counter()
@@ -34,17 +34,10 @@ class Answer(db.Model, ModelUtils, Serializer):
         object_load = time.perf_counter()
         print("Answers load time", object_load - start)
 
-        session.bulk_save_objects(rows)
+        db.session.bulk_save_objects(rows)
 
         bulk_save = time.perf_counter()
         print("Answers save time", bulk_save - object_load)
-        return rows
-
-    @staticmethod
-    def insert_ORM(question_rows, applications, application_rows):
-        """Insert new rows extracted from CSV file"""
-        rows = Answer.convert_applications_to_rows(question_rows, applications, application_rows)
-        Answer.insert_rows(rows)
         return rows
 
     @staticmethod

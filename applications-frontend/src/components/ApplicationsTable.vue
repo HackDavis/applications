@@ -142,11 +142,10 @@ export default {
       }
 
       const searchTerm = this.searchTerm.toLowerCase();
-      const concatedName = this.concatName(app.firstName, app.lastName);
       const isAdmin = this.isUserAdmin();
 
       return this.applications.filter(app =>
-        (concatedName && concatedName.toLowerCase().includes(searchTerm) ||
+        (this.concatName(app.firstName, app.lastName).toLowerCase().includes(searchTerm) ||
         (app.email && app.email.includes(searchTerm)) ||
         (app.university && app.university.toLowerCase().includes(searchTerm)) ||
         (app.score && app.score.toString().includes(searchTerm)) ||

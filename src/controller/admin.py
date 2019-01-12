@@ -105,8 +105,6 @@ def load():
     with open(path, encoding='utf-8') as csv_file:
         # load new rows
         try:
-            session = db.session
-
             start = time.perf_counter()
 
             question_rows = Question.get_questions_from_db()
@@ -117,13 +115,13 @@ def load():
             print("Total insert time", op_time - start)
 
             try:
-                session.commit()
+                db.session.commit()
                 
                 commit_time = time.perf_counter()
                 print("Commit time", commit_time - op_time)
 
             except Exception as e:
-                session.rollback()
+                db.session.rollback()
                 print(e)
                 raise(e)
 
@@ -160,31 +158,30 @@ def reload():
 
     with open(path, encoding='utf-8') as csv_file:
         # drop rows
+        Action.drop_rows()
         Answer.drop_rows()
         Application.drop_rows()
         Question.drop_rows()
 
         # load new rows
         try:
-            session = db.session
-
             start = time.perf_counter()
 
-            question_rows = Question.insert(csv_file, session)
-            Application.insert(csv_file, question_rows, session)
+            question_rows = Question.insert(csv_file)
+            Application.insert(csv_file, question_rows)
 
             op_time = time.perf_counter()
 
             print("Total insert time", op_time - start)
 
             try:
-                session.commit()
+                db.session.commit()
                 
                 commit_time = time.perf_counter()
                 print("Commit time", commit_time - op_time)
 
             except Exception as e:
-                session.rollback()
+                db.session.rollback()
                 print(e)
                 raise(e)
 

@@ -144,13 +144,16 @@ export default {
       const searchTerm = this.searchTerm.toLowerCase();
       const isAdmin = this.isUserAdmin();
 
-      return this.applications.filter(app =>
-        (this.concatName(app.firstName, app.lastName).toLowerCase().includes(searchTerm) ||
+      return this.applications.filter(app => {
+        const concatedName = this.concatName(app.firstName, app.lastName);
+        
+        return (concatedName.toLowerCase().includes(searchTerm) ||
         (app.email && app.email.includes(searchTerm)) ||
         (app.university && app.university.toLowerCase().includes(searchTerm)) ||
         (app.score && app.score.toString().includes(searchTerm)) ||
         (isAdmin && app.assignedToEmail && app.assignedToEmail.toLowerCase().includes(searchTerm)) ||
-        (app.lockedByEmail && app.lockedByEmail.toLowerCase().includes(searchTerm))));
+        (app.lockedByEmail && app.lockedByEmail.toLowerCase().includes(searchTerm)));
+      })
     },
     paginatedItems: function() {
       return this.searchResults.slice(0, this.maxViewIndex);

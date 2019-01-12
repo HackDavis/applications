@@ -31,6 +31,8 @@ class Answer(db.Model, ModelUtils, Serializer):
 
         rows = Answer.convert_applications_to_rows(question_rows, applications, application_rows)
 
+        print("Answer rows inserted", len(rows))
+
         object_load = time.perf_counter()
         print("Answers load time", object_load - start)
 
@@ -123,8 +125,6 @@ class Answer(db.Model, ModelUtils, Serializer):
             weights = [{"name": k, "weight": v} for k, v in zip(result[2], result[3])]
             t.append(weights)
             transformed.append(t)
-
-        print(len(transformed))
 
         return transformed
     

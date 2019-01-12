@@ -45,7 +45,6 @@ class Application(db.Model, ModelUtils, Serializer):
             if qt == QuestionType.email:
                 email_index = i
                 break
-        print(email_index)
 
         # use last submission of all applicants
         email_application_map = {application[email_index]: application for application in applications}
@@ -103,6 +102,7 @@ class Application(db.Model, ModelUtils, Serializer):
         print("Applcations load time", object_load - start)
 
         rows = []
+        applications_insert = []
         to_delete = []
 
         for application in applications:
@@ -122,23 +122,24 @@ class Application(db.Model, ModelUtils, Serializer):
                 else:
                     to_delete.append(duplicate.application)
             
+            applications_insert.append(application)
             application_row = Application.convert_application_to_row(application)
 
             rows.append(application_row)
+
+        print('Application rows deleted', len(to_delete))
+
+        for row in to_delete:
+            db.session.delete(row)
+
+        print('Application rows inserted: ', len(rows))
 
         db.session.bulk_save_objects(rows, return_defaults=True) 
 
         applications_save = time.perf_counter()
         print("Applications save time", applications_save - object_load)
 
-        Answer.insert(question_rows, applications, rows)
-
-        delete_start = time.perf_counter()
-
-        for row in to_delete:
-            db.session.delete(row)
-
-        print("Applications delete time", time.perf_counter() - delete_start)
+        Answer.insert(question_rows, applications_insert, rows)
 
         return rows
 
@@ -376,7 +377,6 @@ class Application(db.Model, ModelUtils, Serializer):
         .group_by(Answer.question_id, Question.question, Answer.answer) \
         .order_by(Answer.question_id)
         
-        print(answer_totals_q)
         answer_totals = answer_totals_q.all()
 
         return answer_totals

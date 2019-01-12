@@ -31,24 +31,37 @@ class Application(db.Model, ModelUtils, Serializer):
     date_added = db.Column(db.Date, nullable=False)
     
     @staticmethod
-    def insert(csv_file, question_rows, session):
+    def insert(csv_file, question_rows):
         """Insert new rows extracted from csv_file"""
         start = time.perf_counter()
 
+        question_types = Question.get_question_types_from_csv(csv_file)
         applications = Application.get_applications_from_csv(csv_file)
-        rows = Application.convert_applications_to_rows(applications)
+
+        email_index = 0
+        for i in range(len(question_rows)):
+            qt = question_rows[i].question_type
+            if qt == QuestionType.email:
+                email_index = i
+                break
+        print(email_index)
+
+        # use last submission of all applicants
+        email_application_map = {application[email_index]: application for application in applications}
+        filtered_applications = [application for (email, application) in email_application_map.items()]
+
+        rows = Application.convert_applications_to_rows(filtered_applications)
 
         object_load = time.perf_counter()
+        print("Applications load time", object_load - start)
 
-        print("Applcations load time", object_load - start)
-
-        session.bulk_save_objects(rows, return_defaults=True)
+        db.session.bulk_save_objects(rows, return_defaults=True)
 
         applications_save = time.perf_counter()
-
         print("Applications save time", applications_save - object_load)
 
-        Answer.insert(question_rows, applications, rows, session)
+        Answer.insert(question_rows, filtered_applications, rows)
+
         return rows
 
     @staticmethod
@@ -72,24 +85,21 @@ class Application(db.Model, ModelUtils, Serializer):
                     'question type {question_type} not recognized'.format(
                         question_type=question_types[i]))
 
+        # use last submission of all applicants
+        email_application_map = {application[email_index]: application for application in applications}
+        filtered_applications = [application for (email, application) in email_application_map.items() if not Answer.check_duplicate_email(email)]
+
+        rows = Application.convert_applications_to_rows(filtered_applications)
+
         object_load = time.perf_counter()
+        print("Applications load time", object_load - start)
 
-        print("Applcations load time", object_load - start)
-
-        rows = []
-
-        for application in applications:
-            if not Answer.check_duplicate_email(application[email_index]):
-                application_row = Application.convert_application_to_row(application)
-
-                db.session.add(application_row)
-
-                rows.append(application_row)
-                Answer.insert_ORM(question_rows, [application], [application_row])
+        db.session.bulk_save_objects(rows, return_defaults=True)
 
         applications_save = time.perf_counter()
-
         print("Applications save time", applications_save - object_load)
+
+        Answer.insert(question_rows, filtered_applications, rows)
 
         return rows
 

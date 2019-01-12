@@ -134,6 +134,7 @@ def load():
             abort(400, str(e))
         except Exception as e:
             print(e)
+            abort(500, str(e))
 
 @admin.route('/api/admin/reload', methods=['POST'])
 @login_required

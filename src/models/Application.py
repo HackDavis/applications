@@ -29,6 +29,7 @@ class Application(db.Model, ModelUtils, Serializer):
     feedback = db.Column(db.Text)
     last_modified = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
     date_added = db.Column(db.Date, nullable=False)
+    answers = db.relationship('Answer', cascade="delete")
     
     @staticmethod
     def insert(csv_file, question_rows, session):
@@ -60,6 +61,18 @@ class Application(db.Model, ModelUtils, Serializer):
         question_types = Question.get_question_types_from_csv(csv_file)
         applications = Application.get_applications_from_csv(csv_file)
 
+        submit_index = 0
+        for i in range(len(question_types)):
+            try:
+                qt = QuestionType[question_types[i]]
+                if qt == QuestionType.submitDate:
+                    submit_index = i
+                    break
+            except KeyError:
+                raise ValueError(
+                    'question type {question_type} not recognized'.format(
+                        question_type=question_types[i]))
+
         email_index = 0
         for i in range(len(question_types)):
             try:
@@ -77,19 +90,41 @@ class Application(db.Model, ModelUtils, Serializer):
         print("Applcations load time", object_load - start)
 
         rows = []
+        to_delete = []
 
         for application in applications:
-            if not Answer.check_duplicate_email(application[email_index]):
-                application_row = Application.convert_application_to_row(application)
+            duplicate = Answer.check_duplicate_email(application[email_index])
+            if duplicate:
+                date = application[submit_index]
 
-                db.session.add(application_row)
+                format = "%Y-%m-%d %H:%M:%S"
 
-                rows.append(application_row)
-                Answer.insert_ORM(question_rows, [application], [application_row])
+                new_time = datetime.strptime(date, format) 
+                duplicate_time = db.session.query(Answer).filter(Answer.application_id == duplicate.application_id).join(Question).filter(Question.question_type == QuestionType.submitDate).first()
+                old_time = datetime.strptime(duplicate_time.answer, format)
+                
+                if old_time >= new_time:
+                    continue
+                
+                else:
+                    to_delete.append(duplicate.application)
+            
+            application_row = Application.convert_application_to_row(application)
+
+            db.session.add(application_row)
+            db.session.flush()
+
+            rows.append(application_row)
+            Answer.insert_ORM(question_rows, [application], [application_row])
 
         applications_save = time.perf_counter()
 
         print("Applications save time", applications_save - object_load)
+
+        for row in to_delete:
+            db.session.delete(row)
+
+        print("Applications delete time", time.perf_counter() - applications_save)
 
         return rows
 

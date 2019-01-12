@@ -52,11 +52,11 @@ class Answer(db.Model, ModelUtils, Serializer):
         is_duplicate = db.session.query(Answer) \
         .join(Question) \
         .filter(Question.question_type == QuestionType.email, Answer.answer == email) \
-        .all()
-        if len(is_duplicate) > 0:
-            return True
+        .first()
+        if is_duplicate is not None:
+            return is_duplicate
         
-        return False
+        return None
 
     @staticmethod
     def convert_applications_to_rows(question_rows, applications, application_rows):

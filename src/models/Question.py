@@ -20,7 +20,7 @@ class Question(db.Model, ModelUtils, Serializer):
     weight = db.Column(db.Float)
 
     @staticmethod
-    def insert(csv_file):
+    def insert(csv_file, session):
         """Insert new rows extracted from csv_file"""
 
         start = time.perf_counter()
@@ -33,7 +33,7 @@ class Question(db.Model, ModelUtils, Serializer):
 
         print("question load time: ", object_time - start)
 
-        db.session.bulk_save_objects(rows, return_defaults=True)
+        session.bulk_save_objects(rows, return_defaults=True)
 
         question_bulk_save_time = time.perf_counter()
 

@@ -68,10 +68,10 @@ export default {
         }
       }).then(response => {
         this.waiting = false;
-        console.log(response);
+        console.log(response)
       }, error => {
         this.waiting = false;
-        console.error(error);
+        console.error(error)
       });
     },
     fileChanged(e) {

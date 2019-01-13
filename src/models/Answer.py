@@ -24,22 +24,27 @@ class Answer(db.Model, ModelUtils, Serializer):
     last_modified = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
 
     @staticmethod
-    def insert(question_rows, applications, application_rows):
+    def insert(question_rows, applications, application_rows, session):
         """Insert new rows extracted from CSV file"""
 
         start = time.perf_counter()
 
         rows = Answer.convert_applications_to_rows(question_rows, applications, application_rows)
 
-        print("Answer rows inserted", len(rows))
-
         object_load = time.perf_counter()
         print("Answers load time", object_load - start)
 
-        db.session.bulk_save_objects(rows)
+        session.bulk_save_objects(rows)
 
         bulk_save = time.perf_counter()
         print("Answers save time", bulk_save - object_load)
+        return rows
+
+    @staticmethod
+    def insert_ORM(question_rows, applications, application_rows):
+        """Insert new rows extracted from CSV file"""
+        rows = Answer.convert_applications_to_rows(question_rows, applications, application_rows)
+        Answer.insert_rows(rows)
         return rows
 
     @staticmethod
@@ -47,11 +52,11 @@ class Answer(db.Model, ModelUtils, Serializer):
         is_duplicate = db.session.query(Answer) \
         .join(Question) \
         .filter(Question.question_type == QuestionType.email, Answer.answer == email) \
-        .first()
-        if is_duplicate is not None:
-            return is_duplicate
+        .all()
+        if len(is_duplicate) > 0:
+            return True
         
-        return None
+        return False
 
     @staticmethod
     def convert_applications_to_rows(question_rows, applications, application_rows):
@@ -125,6 +130,8 @@ class Answer(db.Model, ModelUtils, Serializer):
             weights = [{"name": k, "weight": v} for k, v in zip(result[2], result[3])]
             t.append(weights)
             transformed.append(t)
+
+        print(len(transformed))
 
         return transformed
     

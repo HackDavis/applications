@@ -29,39 +29,26 @@ class Application(db.Model, ModelUtils, Serializer):
     feedback = db.Column(db.Text)
     last_modified = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
     date_added = db.Column(db.Date, nullable=False)
-    answers = db.relationship('Answer', cascade="delete")
     
     @staticmethod
-    def insert(csv_file, question_rows):
+    def insert(csv_file, question_rows, session):
         """Insert new rows extracted from csv_file"""
         start = time.perf_counter()
 
-        question_types = Question.get_question_types_from_csv(csv_file)
         applications = Application.get_applications_from_csv(csv_file)
-
-        email_index = 0
-        for i in range(len(question_rows)):
-            qt = question_rows[i].question_type
-            if qt == QuestionType.email:
-                email_index = i
-                break
-
-        # use last submission of all applicants
-        email_application_map = {application[email_index]: application for application in applications}
-        filtered_applications = [application for (email, application) in email_application_map.items()]
-
-        rows = Application.convert_applications_to_rows(filtered_applications)
+        rows = Application.convert_applications_to_rows(applications)
 
         object_load = time.perf_counter()
-        print("Applications load time", object_load - start)
 
-        db.session.bulk_save_objects(rows, return_defaults=True)
+        print("Applcations load time", object_load - start)
+
+        session.bulk_save_objects(rows, return_defaults=True)
 
         applications_save = time.perf_counter()
+
         print("Applications save time", applications_save - object_load)
 
-        Answer.insert(question_rows, filtered_applications, rows)
-
+        Answer.insert(question_rows, applications, rows, session)
         return rows
 
     @staticmethod
@@ -72,18 +59,6 @@ class Application(db.Model, ModelUtils, Serializer):
         Question.get_questions_from_csv(csv_file) #need to advance the csv_file reader
         question_types = Question.get_question_types_from_csv(csv_file)
         applications = Application.get_applications_from_csv(csv_file)
-
-        submit_index = 0
-        for i in range(len(question_types)):
-            try:
-                qt = QuestionType[question_types[i]]
-                if qt == QuestionType.submitDate:
-                    submit_index = i
-                    break
-            except KeyError:
-                raise ValueError(
-                    'question type {question_type} not recognized'.format(
-                        question_type=question_types[i]))
 
         email_index = 0
         for i in range(len(question_types)):
@@ -102,44 +77,19 @@ class Application(db.Model, ModelUtils, Serializer):
         print("Applcations load time", object_load - start)
 
         rows = []
-        applications_insert = []
-        to_delete = []
 
         for application in applications:
-            duplicate = Answer.check_duplicate_email(application[email_index])
-            if duplicate:
-                date = application[submit_index]
+            if not Answer.check_duplicate_email(application[email_index]):
+                application_row = Application.convert_application_to_row(application)
 
-                format = "%Y-%m-%d %H:%M:%S"
+                db.session.add(application_row)
 
-                new_time = datetime.strptime(date, format) 
-                duplicate_time = db.session.query(Answer).filter(Answer.application_id == duplicate.application_id).join(Question).filter(Question.question_type == QuestionType.submitDate).first()
-                old_time = datetime.strptime(duplicate_time.answer, format)
-                
-                if old_time >= new_time:
-                    continue
-                
-                else:
-                    to_delete.append(duplicate.application)
-            
-            applications_insert.append(application)
-            application_row = Application.convert_application_to_row(application)
-
-            rows.append(application_row)
-
-        print('Application rows deleted', len(to_delete))
-
-        for row in to_delete:
-            db.session.delete(row)
-
-        print('Application rows inserted: ', len(rows))
-
-        db.session.bulk_save_objects(rows, return_defaults=True) 
+                rows.append(application_row)
+                Answer.insert_ORM(question_rows, [application], [application_row])
 
         applications_save = time.perf_counter()
-        print("Applications save time", applications_save - object_load)
 
-        Answer.insert(question_rows, applications_insert, rows)
+        print("Applications save time", applications_save - object_load)
 
         return rows
 
@@ -377,6 +327,7 @@ class Application(db.Model, ModelUtils, Serializer):
         .group_by(Answer.question_id, Question.question, Answer.answer) \
         .order_by(Answer.question_id)
         
+        print(answer_totals_q)
         answer_totals = answer_totals_q.all()
 
         return answer_totals

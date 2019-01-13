@@ -16,5 +16,4 @@ class QuestionType(Enum):
     resumeLink = auto()
     resumeSharingOptIn = auto()
     shirtSize = auto()
-    submitDate = auto()
     university = auto()

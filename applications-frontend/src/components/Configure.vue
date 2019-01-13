@@ -113,7 +113,7 @@ export default {
             this.$http.put("/api/admin/configure", update).then(success => {
                 console.log(success)
                 this.reloadStats();
-            }, error => console.error(error));
+            }, error => console.error(error))
         },
         dummy() {},
         reloadStats() {

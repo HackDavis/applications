@@ -5,7 +5,9 @@ from sqlalchemy.inspection import inspect
 class Serializer:
     def serialize(self):
         """Serialize a SQLAlchemy model"""
-        return {key: self.serialize_value(getattr(self, key)) for key in inspect(self).attrs.keys()}
+        model_dict = self.__dict__
+        model_dict.pop('_sa_instance_state', None)
+        return self.serialize_value(model_dict)
 
     @staticmethod
     def serialize_value(value):

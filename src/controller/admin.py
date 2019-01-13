@@ -82,77 +82,7 @@ def validate_and_return_positive_integer(json, key, is_required):
 
     return number
 
-def remove_duplicates(csv_file_path):
-    format = "%Y-%m-%d %H:%M:%S"
 
-    with open(csv_file_path, encoding='utf-8') as csv_file:
-        reader = csv.reader(csv_file)
-        questions = next(reader)
-        question_types = Question.get_question_types_from_csv(csv_file)
-        applications = Application.get_applications_from_csv(csv_file)
-        unique_applications = []
-
-        submit_index = 0
-        for i in range(len(question_types)):
-            try:
-                qt = QuestionType[question_types[i]]
-                if qt == QuestionType.submitDate:
-                    submit_index = i
-                    break
-            except KeyError:
-                raise ValueError(
-                    'question type {question_type} not recognized'.format(
-                        question_type=question_types[i]))
-
-        email_index = 0
-        for i in range(len(question_types)):
-            try:
-                qt = QuestionType[question_types[i]]
-                if qt == QuestionType.email:
-                    email_index = i
-                    break
-            except KeyError:
-                raise ValueError(
-                    'question type {question_type} not recognized'.format(
-                        question_type=question_types[i]))
-
-        checked_emails = set()
-
-        for application in applications:
-            if application[email_index] in checked_emails:
-                continue
-
-            checked_emails.add(application[email_index])
-
-            duplicates = []
-            for possible_duplicate in applications:
-                if possible_duplicate == application:
-                    continue
-                
-                if possible_duplicate[email_index] == application[email_index]:
-                    duplicates.append(possible_duplicate)
-
-            if len(duplicates) == 0:
-                unique_applications.append(application)
-                continue
-            
-            duplicates.append(application)
-
-            def set_time(d):
-                d[submit_index] = datetime.strptime(d[submit_index], format)
-                return d
-
-            duplicates_time = map(set_time, duplicates)
-            sorted_duplicates = sorted(duplicates_time, key=lambda x: x[submit_index])
-            unique_applications.append(sorted_duplicates[0])
-        
-        with open(os.path.join(Config.UPLOAD_FOLDER, "output.csv"), "w", encoding='utf-8') as output:
-            writer = csv.writer(output)
-            writer.writerow(questions)
-            writer.writerow(question_types)
-            for app in unique_applications:
-                writer.writerow(app)
-        
 @admin.route('/api/admin/load', methods=['POST', 'GET'])
 @login_required
 def load():
@@ -172,44 +102,26 @@ def load():
 
     path = os.path.join(Config.UPLOAD_FOLDER, filename)
 
-    print(Config.UPLOAD_FOLDER)
-
-    print(path)
-
     file.save(path)
-    remove_duplicates(path)
 
-    with open(os.path.join(Config.UPLOAD_FOLDER, "output.csv"), encoding='utf-8') as csv_file:
+    with open(path, encoding='utf-8') as csv_file:
         # load new rows
         try:
             start = time.perf_counter()
 
             question_rows = Question.get_questions_from_db()
-            Application.insert_without_duplicates(csv_file, question_rows)
+            Question.get_questions_from_csv(csv_file) # need to advance the csv_file reader
+            Application.insert(csv_file, question_rows, True)
 
             op_time = time.perf_counter()
-
             print("Total insert time", op_time - start)
-
-            try:
-                db.session.commit()
-                
-                commit_time = time.perf_counter()
-                print("Commit time", commit_time - op_time)
-
-            except Exception as e:
-                db.session.rollback()
-                print(e)
-                raise(e)
 
             Action.log_action(ActionType.load, current_user.id)
 
             return Response('Reloaded applications from CSV file', 200)
         except ValueError as e:
             abort(400, str(e))
-        except Exception as e:
-            print(e)
-            abort(500, str(e))
+
 
 @admin.route('/api/admin/reload', methods=['POST'])
 @login_required
@@ -232,9 +144,8 @@ def reload():
     path = os.path.join(Config.UPLOAD_FOLDER, filename)
 
     file.save(path)
-    remove_duplicates(path)
 
-    with open(os.path.join(Config.UPLOAD_FOLDER, "output.csv"), encoding='utf-8') as csv_file:
+    with open(path, encoding='utf-8') as csv_file:
         # drop rows
         Action.drop_rows()
         Answer.drop_rows()
@@ -246,24 +157,12 @@ def reload():
             start = time.perf_counter()
 
             question_rows = Question.insert(csv_file)
-            Application.insert(csv_file, question_rows)
+            Application.insert(csv_file, question_rows, False)
 
             op_time = time.perf_counter()
-
             print("Total insert time", op_time - start)
 
-            try:
-                db.session.commit()
-                
-                commit_time = time.perf_counter()
-                print("Commit time", commit_time - op_time)
-
-            except Exception as e:
-                db.session.rollback()
-                print(e)
-                raise(e)
-
-            Action.log_action(ActionType.load, current_user.id)
+            Action.log_action(ActionType.reload, current_user.id)
 
             return Response('Reloaded applications from CSV file', 200)
         except ValueError as e:

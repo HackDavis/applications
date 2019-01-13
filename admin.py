@@ -8,6 +8,7 @@ from src.models.enums.Role import Role
 
 db = SQLAlchemy()
 
+from src.models.Action import Action
 from src.models.Answer import Answer
 from src.models.Application import Application
 from src.models.OAuth import OAuth
@@ -86,6 +87,7 @@ def drop_database():
         exit('Confirmation not received. Exiting.')
 
     try:
+        Action.__table__.drop(db.engine)
         OAuth.__table__.drop(db.engine)
         Answer.__table__.drop(db.engine)
         Application.__table__.drop(db.engine)

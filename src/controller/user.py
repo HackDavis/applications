@@ -43,8 +43,7 @@ def get_progress():
         user_total = team_total / User.count_users()
 
     user_scored = db.session.query(Application) \
-    .join(User, Application.assigned_to == current_user.id) \
-    .filter(Application.score != 0) \
+    .filter(Application.assigned_to == current_user.id, Application.score != 0) \
     .count()
 
     return jsonify(Serializer.serialize_value({'team': {'done': team_scored, 'total': team_total}, 'self': {'done': user_scored, 'total': user_total}}))

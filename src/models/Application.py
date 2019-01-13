@@ -14,7 +14,6 @@ from src.models.lib.Serializer import Serializer
 from src.shared import Shared
 
 
-
 db = Shared.db
 
 
@@ -28,120 +27,83 @@ class Application(db.Model, ModelUtils, Serializer):
     standardized_score = db.Column(db.Float)
     feedback = db.Column(db.Text)
     last_modified = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
-    date_added = db.Column(db.Date, nullable=False)
-    answers = db.relationship('Answer', cascade="delete")
-    
+    date_added = db.Column(db.DateTime, nullable=False)
+    answers = db.relationship('Answer', cascade='all, delete-orphan')
+
     @staticmethod
-    def insert(csv_file, question_rows):
+    def insert(csv_file, question_rows, check_for_duplicates):
         """Insert new rows extracted from csv_file"""
         start = time.perf_counter()
 
-        question_types = Question.get_question_types_from_csv(csv_file)
         applications = Application.get_applications_from_csv(csv_file)
 
-        email_index = 0
-        for i in range(len(question_rows)):
-            qt = question_rows[i].question_type
-            if qt == QuestionType.email:
-                email_index = i
-                break
+        email_index = None
+        submit_date_index = None
 
-        # use last submission of all applicants
-        email_application_map = {application[email_index]: application for application in applications}
+        for i in range(len(question_rows)):
+            question_type = question_rows[i].question_type
+            if question_type == QuestionType.email:
+                email_index = i
+            elif question_type == QuestionType.submitDate:
+                submit_date_index = i
+
+        if email_index is None or submit_date_index is None:
+            raise ValueError("Submitted time and/or email not provided")
+
+        # save last submitted application at each email
+        date_format = "%Y-%m-%d %H:%M:%S"
+        sorted_applications = sorted(applications, key=lambda application: datetime.strptime(application[submit_date_index], date_format))
+        email_application_map = {application[email_index]: application for application in sorted_applications}
         filtered_applications = [application for (email, application) in email_application_map.items()]
 
-        rows = Application.convert_applications_to_rows(filtered_applications)
+        applications_to_insert = []
+        rows_to_delete = []
 
-        object_load = time.perf_counter()
-        print("Applications load time", object_load - start)
+        if check_for_duplicates:
+            for application in filtered_applications:
+                duplicate = Answer.check_duplicate_email(application[email_index])
+                if duplicate:
+                    new_time = datetime.strptime(application[submit_date_index], date_format)
+                    duplicate_time = db.session.query(Answer).filter(Answer.application_id == duplicate.application_id).join(Question).filter(Question.question_type == QuestionType.submitDate).first()
+                    old_time = datetime.strptime(duplicate_time.answer, date_format)
 
-        db.session.bulk_save_objects(rows, return_defaults=True)
+                    if old_time >= new_time:
+                        continue
 
-        applications_save = time.perf_counter()
-        print("Applications save time", applications_save - object_load)
+                    rows_to_delete.append(duplicate.application)
+                applications_to_insert.append(application)
+        else:
+            applications_to_insert = filtered_applications
 
-        Answer.insert(question_rows, filtered_applications, rows)
+        rows_to_insert = Application.convert_applications_to_rows(applications_to_insert, datetime.now())
 
-        return rows
+        processing_done_time = time.perf_counter()
+        print("Applications processing time: ", processing_done_time - start)
 
-    @staticmethod
-    def insert_without_duplicates(csv_file, question_rows):
-        """Insert new rows extracted from csv_file"""
         start = time.perf_counter()
 
-        Question.get_questions_from_csv(csv_file) #need to advance the csv_file reader
-        question_types = Question.get_question_types_from_csv(csv_file)
-        applications = Application.get_applications_from_csv(csv_file)
-
-        submit_index = 0
-        for i in range(len(question_types)):
-            try:
-                qt = QuestionType[question_types[i]]
-                if qt == QuestionType.submitDate:
-                    submit_index = i
-                    break
-            except KeyError:
-                raise ValueError(
-                    'question type {question_type} not recognized'.format(
-                        question_type=question_types[i]))
-
-        email_index = 0
-        for i in range(len(question_types)):
-            try:
-                qt = QuestionType[question_types[i]]
-                if qt == QuestionType.email:
-                    email_index = i
-                    break
-            except KeyError:
-                raise ValueError(
-                    'question type {question_type} not recognized'.format(
-                        question_type=question_types[i]))
-
-        object_load = time.perf_counter()
-
-        print("Applcations load time", object_load - start)
-
-        rows = []
-        applications_insert = []
-        to_delete = []
-
-        for application in applications:
-            duplicate = Answer.check_duplicate_email(application[email_index])
-            if duplicate:
-                date = application[submit_index]
-
-                format = "%Y-%m-%d %H:%M:%S"
-
-                new_time = datetime.strptime(date, format) 
-                duplicate_time = db.session.query(Answer).filter(Answer.application_id == duplicate.application_id).join(Question).filter(Question.question_type == QuestionType.submitDate).first()
-                old_time = datetime.strptime(duplicate_time.answer, format)
-                
-                if old_time >= new_time:
-                    continue
-                
-                else:
-                    to_delete.append(duplicate.application)
-            
-            applications_insert.append(application)
-            application_row = Application.convert_application_to_row(application)
-
-            rows.append(application_row)
-
-        print('Application rows deleted', len(to_delete))
-
-        for row in to_delete:
+        for row in rows_to_delete:
             db.session.delete(row)
 
-        print('Application rows inserted: ', len(rows))
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            raise e
 
-        db.session.bulk_save_objects(rows, return_defaults=True) 
+        deleting_done_time = time.perf_counter()
+        print('Number of application rows deleted: ', len(rows_to_delete))
+        print('Applications delete time: ', deleting_done_time - start)
 
-        applications_save = time.perf_counter()
-        print("Applications save time", applications_save - object_load)
+        start = time.perf_counter()
 
-        Answer.insert(question_rows, applications_insert, rows)
+        db.session.bulk_save_objects(rows_to_insert, return_defaults=True)
 
-        return rows
+        inserting_done_time = time.perf_counter()
+        print('Number of application rows inserted: ', len(rows_to_insert))
+        print('Applications insert time: ', inserting_done_time - start)
+
+        Answer.insert(question_rows, applications_to_insert, rows_to_insert)
 
     @staticmethod
     def get_applications_from_csv(csv_file):
@@ -150,14 +112,14 @@ class Application(db.Model, ModelUtils, Serializer):
         return applications[1:]
 
     @staticmethod
-    def convert_applications_to_rows(applications):
+    def convert_applications_to_rows(applications, date):
         """Convert applications into rows to insert into database"""
-        return [Application.convert_application_to_row(application) for application in applications]
+        return [Application.convert_application_to_row(application, date) for application in applications]
 
     @staticmethod
-    def convert_application_to_row(application):
+    def convert_application_to_row(application, date):
         """Convert application into row to insert into database"""
-        return Application(score=0, date_added=date.today())
+        return Application(score=0, date_added=date)
 
     @staticmethod
     def set_standardized_score(application, standardized_score):

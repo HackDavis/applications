@@ -1,6 +1,5 @@
 import os
 
-
 class Config:
     SECRET_KEY = os.getenv('SECRET_KEY')
     DB_USER = os.getenv('DB_USER')
@@ -20,4 +19,4 @@ class Config:
     SQLALCHEMY_DATABASE_URI = 'postgresql://{}:{}@{}:{}/{}'.format(DB_USER, DB_PASSWORD,
                                                                    DB_HOSTNAME, DB_PORT, DB_NAME)
     USE_SESSION_FOR_NEXT = 1
-    UPLOAD_FOLDER = os.path.dirname(os.path.join(os.getcwd(), '../applicants'))
+    UPLOAD_FOLDER = os.path.join(os.getcwd(), 'applicants')

@@ -20,15 +20,15 @@ db = Shared.db
 class Application(db.Model, ModelUtils, Serializer):
     id = db.Column(db.Integer, primary_key=True)
     assigned_to = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
-    locked_by = db.Column(db.Integer, db.ForeignKey('user.id'))
+    locked_by = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
     assigned_to_user = db.relationship('User', foreign_keys=assigned_to)
     locked_by_user = db.relationship('User', foreign_keys=locked_by)
-    score = db.Column(db.Integer, nullable=False)
+    score = db.Column(db.Integer, nullable=False, index=True)
     standardized_score = db.Column(db.Float)
     feedback = db.Column(db.Text)
-    last_modified = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
     date_added = db.Column(db.DateTime, nullable=False)
     answers = db.relationship('Answer', cascade='all, delete-orphan')
+    last_modified = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
 
     @staticmethod
     def insert(csv_file, question_rows, check_for_duplicates):

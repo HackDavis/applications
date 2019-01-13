@@ -19,7 +19,7 @@ class Answer(db.Model, ModelUtils, Serializer):
     application = db.relationship('Application', foreign_keys=application_id)
     question_id = db.Column(db.Integer, db.ForeignKey('question.id'), nullable=False, index=True)
     question = db.relationship('Question', foreign_keys=question_id)
-    answer_weight = db.Column(db.Float, default=1)
+    answer_weight = db.Column(db.Float, default=1, nullable=False)
     answer = db.Column(db.Text, nullable=False)
     last_modified = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
 

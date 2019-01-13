@@ -9,7 +9,7 @@ db = Shared.db
 class Action(db.Model, ModelUtils, Serializer):
     id = db.Column(db.Integer, primary_key=True)
     action_type = db.Column(db.Enum(ActionType), nullable=False, index=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, index=True)
     user = db.relationship('User', foreign_keys=user_id)
     application_id = db.Column(db.Integer, db.ForeignKey('application.id'))
     application = db.relationship('Application', foreign_keys=application_id)

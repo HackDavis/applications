@@ -40,12 +40,11 @@ def is_authorized(application, is_read_only):
 @login_required
 def get_application():
     """Get application for user"""
-    if current_user.role != Role.admin:
-        settings = Settings.get_settings()
-        application_count = Application.get_count_of_applications_for_user(current_user.id)
-        if settings.application_limit is not None and application_count >= settings.application_limit:
-            # no more applications to score for user
-            return Response(status=204)
+    settings = Settings.get_settings()
+    application_count = Application.get_count_of_applications_for_user(current_user.id)
+    if settings.application_limit is not None and application_count >= settings.application_limit:
+        # no more applications to score for user
+        return Response(status=204)
 
     application = Application.get_application_for_user(current_user.id)
     if application is None:

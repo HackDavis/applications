@@ -297,19 +297,19 @@ class Application(db.Model, ModelUtils, Serializer):
     def rank_participants():
         Application.standardize_scores()
 
-        question_answer_pairs = db.session.query(Application.id) \
-            .join(Answer) \
-            .join(Question) \
-            .add_columns(Question.question, Answer.answer) \
-            .subquery()
-
         answer_values = Application.question_answer_matrix_subquery()
 
-        results = db.session.query(Application.id, func.json_object_agg(question_answer_pairs.c.question, question_answer_pairs.c.answer), func.sum(answer_values.c.sum_values + Application.standardized_score)) \
-            .join(question_answer_pairs, question_answer_pairs.c.id == Application.id) \
+        scores = db.session.query(Application.id, func.sum(answer_values.c.sum_values + Application.standardized_score).label("final_score")) \
             .join(answer_values, answer_values.c.id == Application.id) \
             .group_by(Application.id) \
-            .order_by(func.sum(answer_values.c.sum_values + Application.standardized_score).desc().nullslast()) \
+            .subquery()
+
+        results = db.session.query(Application.id, func.json_object_agg(Question.question, Answer.answer), scores.c.final_score) \
+            .join(scores, scores.c.id == Application.id) \
+            .join(Answer) \
+            .join(Question) \
+            .group_by(Application.id, scores.c.final_score) \
+            .order_by(scores.c.final_score.desc().nullslast()) \
             .all()
 
         return results

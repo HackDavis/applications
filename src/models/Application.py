@@ -289,6 +289,7 @@ class Application(db.Model, ModelUtils, Serializer):
         return db.session.query(Application.id, func.sum(Answer.answer_weight * Question.weight).label("sum_values")) \
             .join(Answer) \
             .join(Question) \
+            .filter((Question.question_type == QuestionType.demographic) | (Question.question_type == QuestionType.university)) \
             .group_by(Application.id) \
             .subquery()
 

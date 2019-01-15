@@ -240,8 +240,6 @@ def export():
     if current_user.role != Role.admin:
         abort(401, 'User needs to be an admin to access this route')
 
-    Application.standardize_scores()
-
     ranked_applications = Application.rank_participants()
 
     Action.log_action(ActionType.export, current_user.id)

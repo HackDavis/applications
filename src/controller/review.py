@@ -51,8 +51,15 @@ def get_application():
         # no more applications to score
         return Response(status=204)
 
+    app = application.serialize()
+
+    if application.assigned_to:
+        app["assigned_to_user"] = {'email': application.assigned_to_user.email}
+    if application.locked_by:
+        app["locked_by_user"] = {'email': application.locked_by_user.email}
+
     answers = Answer.get_answers(application.id)
-    response = {'application': application, 'answers': answers}
+    response = {'application': app, 'answers': answers}
     return jsonify(Serializer.serialize_value(response))
 
 
@@ -71,8 +78,15 @@ def get_application_using_id(application_id_str):
     elif not is_authorized(application, True):
         abort(401, 'User is not authorized for this application')
 
+    app = application.serialize()
+
+    if application.assigned_to:
+        app["assigned_to_user"] = {'email': application.assigned_to_user.email}
+    if application.locked_by:
+        app["locked_by_user"] = {'email': application.locked_by_user.email}
+
     answers = Answer.get_answers(application.id)
-    response = {'application': application, 'answers': answers}
+    response = {'application': app, 'answers': answers}
     return jsonify(Serializer.serialize_value(response))
 
 

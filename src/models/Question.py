@@ -86,7 +86,7 @@ class Question(db.Model, ModelUtils, Serializer):
     
     @staticmethod
     def get_row_for_question(index, question, question_type):
-        row = db.session.query(Question).filter(Question.question == question).first()
+        row = db.session.query(Question).filter((Question.question == question) | (Question.index == index)).first()
         if row is None:
             row = Question.convert_question_to_row(index, question, question_type)
             Question.insert_rows([row])

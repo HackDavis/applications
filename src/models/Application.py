@@ -28,6 +28,7 @@ class Application(db.Model, ModelUtils, Serializer):
     feedback = db.Column(db.Text)
     date_added = db.Column(db.DateTime, nullable=False)
     answers = db.relationship('Answer', cascade='all, delete-orphan')
+    actions = db.relationship('Action') # null the foreign key
     last_modified = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
 
     @staticmethod

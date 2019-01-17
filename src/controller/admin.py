@@ -110,7 +110,8 @@ def load():
             start = time.perf_counter()
 
             csv_questions = Question.get_questions_from_csv(csv_file) # need to advance the csv_file reader
-            question_rows = Question.map_questions_to_question_rows(csv_questions)
+            question_types = Question.get_question_types_from_csv(csv_file)
+            question_rows = Question.map_questions_to_question_rows(csv_questions, question_types)
             
             Application.insert(csv_file, question_rows, True)
 

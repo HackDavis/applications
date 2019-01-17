@@ -37,11 +37,15 @@ class Application(db.Model, ModelUtils, Serializer):
 
         applications = Application.get_applications_from_csv(csv_file)
 
+        csv_file.seek(0)
+        Question.get_questions_from_csv(csv_file)
+        question_types = Question.get_question_types_from_csv(csv_file)
+
         email_index = None
         submit_date_index = None
 
-        for i in range(len(question_rows)):
-            question_type = question_rows[i].question_type
+        for i in range(len(question_types)):
+            question_type = QuestionType[question_types[i]]
             if question_type == QuestionType.email:
                 email_index = i
             elif question_type == QuestionType.submitDate:

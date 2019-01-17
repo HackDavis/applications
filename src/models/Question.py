@@ -85,6 +85,14 @@ class Question(db.Model, ModelUtils, Serializer):
         return weights
     
     @staticmethod
+    def get_row_for_question(question):
+        return db.session.query(Question).filter(Question.question == question).first()
+
+    @staticmethod
+    def map_questions_to_question_rows(questions):
+        return map(Question.get_row_for_question, questions)
+
+    @staticmethod
     def update_question_weights(question_weights):
         for weight in question_weights:
             db.session.query(Question) \

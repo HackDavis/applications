@@ -109,8 +109,9 @@ def load():
         try:
             start = time.perf_counter()
 
-            question_rows = Question.get_questions_from_db()
-            Question.get_questions_from_csv(csv_file) # need to advance the csv_file reader
+            csv_questions = Question.get_questions_from_csv(csv_file) # need to advance the csv_file reader
+            question_rows = Question.map_questions_to_question_rows(csv_questions)
+            
             Application.insert(csv_file, question_rows, True)
 
             op_time = time.perf_counter()

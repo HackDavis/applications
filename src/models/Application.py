@@ -46,11 +46,14 @@ class Application(db.Model, ModelUtils, Serializer):
         submit_date_index = None
 
         for i in range(len(question_types)):
-            question_type = QuestionType[question_types[i]]
-            if question_type == QuestionType.email:
-                email_index = i
-            elif question_type == QuestionType.submitDate:
-                submit_date_index = i
+            try:
+                question_type = QuestionType[question_types[i]]
+                if question_type == QuestionType.email:
+                    email_index = i
+                elif question_type == QuestionType.submitDate:
+                    submit_date_index = i
+            except KeyError as e:
+                print(e)
 
         if email_index is None or submit_date_index is None:
             raise ValueError("Submitted time and/or email not provided")

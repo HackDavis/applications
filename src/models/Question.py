@@ -13,7 +13,7 @@ db = Shared.db
 
 class Question(db.Model, ModelUtils, Serializer):
     id = db.Column(db.Integer, primary_key=True)
-    question = db.Column(db.Text, nullable=False)
+    question = db.Column(db.Text, nullable=False, length=512)
     question_type = db.Column(db.Enum(QuestionType), nullable=False)
     index = db.Column(db.Integer, nullable=False, unique=True, index=True)
     last_modified = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())

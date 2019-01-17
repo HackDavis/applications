@@ -68,17 +68,24 @@ export default {
     },
     created() {
         this.reloadStats();
-        this.$http.get("/api/admin/configure").then(response => {
-            this.answer_weights = response.body.answer_weights;
-            this.question_weights = response.body.question_weights;
-            this.orig = _.cloneDeep(response.body);
+        this.loadConfiguration().then(() => {
             bulmaAccordion.attach();
-        }, error => console.error(error));
+        })
     },
     methods: {
         reset() {
             this.answer_weights = _.cloneDeep(this.orig.answer_weights);
             this.question_weights = _.cloneDeep(this.orig.question_weights);
+        },
+        loadConfiguration() {
+            return new Promise((resolve, reject) => {
+                this.$http.get("/api/admin/configure").then(response => {
+                    this.answer_weights = response.body.answer_weights;
+                    this.question_weights = response.body.question_weights;
+                    this.orig = _.cloneDeep(response.body);
+                    resolve(response);
+                }, error => reject(error));
+            });
         },
         submit() {
             let new_question_weights = []
@@ -113,6 +120,7 @@ export default {
             this.$http.put("/api/admin/configure", update).then(success => {
                 console.log(success)
                 this.reloadStats();
+                this.loadConfiguration();
             }, error => console.error(error));
         },
         dummy() {},

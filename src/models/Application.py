@@ -160,6 +160,8 @@ class Application(db.Model, ModelUtils, Serializer):
             except Exception as e:
                 db.session.rollback()
                 raise e
+            
+            db.session.refresh(application)
 
         return application
 

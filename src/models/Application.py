@@ -306,13 +306,16 @@ class Application(db.Model, ModelUtils, Serializer):
             .group_by(Application.id) \
             .subquery()
 
-        results = db.session.query(Application.id, func.json_object_agg(Question.question, Answer.answer), scores.c.final_score) \
+        results_q = db.session.query(Application.id, func.json_object_agg(Question.question, Answer.answer), scores.c.final_score) \
             .join(scores, scores.c.id == Application.id) \
             .join(Answer) \
             .join(Question) \
             .group_by(Application.id, scores.c.final_score) \
-            .order_by(scores.c.final_score.desc().nullslast()) \
-            .all()
+            .order_by(scores.c.final_score.desc().nullslast())
+
+        # print(results_q)
+
+        results = results_q.all()
 
         return results
 
@@ -325,6 +328,7 @@ class Application(db.Model, ModelUtils, Serializer):
         answer_values = Application.question_answer_matrix_subquery()
 
         return db.session.query(Application.id, func.sum(answer_values.c.sum_values + Application.standardized_score)) \
+        .join(answer_values, answer_values.c.id == Application.id) \
         .filter(Application.score != 0) \
         .group_by(Application.id) \
         .order_by(func.sum(answer_values.c.sum_values + Application.standardized_score).desc().nullslast()) \
@@ -338,7 +342,7 @@ class Application(db.Model, ModelUtils, Serializer):
         answer_totals_q = db.session.query(func.count(Answer.id), Answer.answer, Question.question, Answer.question_id) \
         .join(Question) \
         .join(accepted) \
-        .filter(Question.question_type == QuestionType.demographic) \
+        .filter((Question.question_type == QuestionType.demographic) | (Question.question_type == QuestionType.university)) \
         .group_by(Answer.question_id, Question.question, Answer.answer) \
         .order_by(Answer.question_id)
         

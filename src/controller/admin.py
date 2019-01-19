@@ -209,10 +209,10 @@ def generate_csv(ranked_applications):
     settings = Settings.get_settings()
 
     first = ranked_applications[0]
-    questions = sorted(first[1].keys())
+    questions = sorted(first[6].keys())
 
     # write header
-    headers = questions + ['score', 'result']
+    headers = questions + ['date_added', 'feedback', 'user_score', 'standardized_user_score', 'overall_score', 'result']
     writer.writerow(headers)
     yield data.getvalue()
     data.seek(0)
@@ -228,8 +228,8 @@ def generate_csv(ranked_applications):
         elif rank + 1 < settings.accept_limit + settings.waitlist_limit:
             result = 'WAITLIST'
 
-        answers = [value for (key, value) in sorted(application[1].items())]
-        row = answers + [application[2], result]
+        answers = [value for (key, value) in sorted(application[6].items())]
+        row = answers + [application[1], application[2], application[3], application[4], application[5], result]
         writer.writerow(row)
         yield data.getvalue()
         data.seek(0)

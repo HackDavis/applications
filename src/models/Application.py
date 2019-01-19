@@ -314,7 +314,7 @@ class Application(db.Model, ModelUtils, Serializer):
             .group_by(Application.id) \
             .subquery()
 
-        results_q = db.session.query(Application.id, func.json_object_agg(Question.question, Answer.answer), scores.c.final_score) \
+        results_q = db.session.query(Application.id, Application.date_added, Application.feedback, Application.score, Application.standardized_score, scores.c.final_score, func.json_object_agg(Question.question, Answer.answer)) \
             .join(scores, scores.c.id == Application.id) \
             .join(Answer) \
             .join(Question) \

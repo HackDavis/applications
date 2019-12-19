@@ -173,7 +173,7 @@ export default {
     isValidScore: function() {
       return this.application.score >= 1 && this.application.score <= 5;
     },
-    hasNoMoreApplications: function(response) {
+    noMoreApplications: function(response) {
       return response.status == 204;
     },
     setData: function(data) {
@@ -181,8 +181,8 @@ export default {
       this.application = data.application;
     },
     handleResponseSuccess(response) {
-      if (this.hasNoMoreApplications(response)) {
-        alert("No more applications left!");
+      if (this.noMoreApplications(response)) {
+        alert("No more applications left for you at this time!");
         return;
       }
 

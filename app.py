@@ -19,6 +19,7 @@ from src.controller.admin import admin
 from src.controller.auth import auth
 from src.controller.review import review
 from src.controller.static_files import static_files
+from src.controller.typeform import typeform
 from src.controller.user import user
 from src.controller.logger import logger
 
@@ -26,6 +27,7 @@ from src.controller.logger import logger
 app.register_blueprint(admin)
 app.register_blueprint(auth)
 app.register_blueprint(review)
+app.register_blueprint(typeform)
 app.register_blueprint(static_files)
 app.register_blueprint(user)
 app.register_blueprint(logger)

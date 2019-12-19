@@ -39,6 +39,7 @@ DB_PASSWORD=<complete this>
 DB_NAME=<complete this>
 GOOGLE_CLIENT_ID=<complete this>
 GOOGLE_CLIENT_SECRET=<complete this>
+TYPEFORM_TOKEN=<complete this>
 ```
 
 ## Running

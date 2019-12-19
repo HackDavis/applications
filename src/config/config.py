@@ -14,6 +14,7 @@ class Config:
         'https://www.googleapis.com/auth/userinfo.profile'
     ]
     GOOGLE_USER_INFO_PATH = '/oauth2/v2/userinfo'
+    TYPEFORM_TOKEN = os.getenv('TYPEFORM_TOKEN')
     DOMAIN = 'hackdavis.io'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_DATABASE_URI = 'postgresql://{}:{}@{}:{}/{}'.format(DB_USER, DB_PASSWORD,

@@ -73,7 +73,7 @@
         <div class="columns is-mobile is-multiline is-gapless is-centered has-background-light">
           <div class="column is-narrow">
             <div v-if="resumeAnswer" class="column">
-              <a :href="resumeAnswer.answer" class="button is-primary is-medium">Resume</a>
+              <a :href="'/api/typeform/' + resumeAnswer.answer + '/download'" class="button is-primary is-medium" rel="noopener" target="_blank">Resume</a>
             </div>
           </div>
           <div v-for="linkAnswer in linkAnswers" :key="linkAnswer.id">

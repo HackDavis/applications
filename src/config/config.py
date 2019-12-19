@@ -11,7 +11,7 @@ class Config:
     GOOGLE_CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET')
     GOOGLE_SCOPES = [
         'https://www.googleapis.com/auth/userinfo.email',
-        'https://www.googleapis.com/auth/userinfo.profile'
+        'https://www.googleapis.com/auth/userinfo.profile', 'openid'
     ]
     GOOGLE_USER_INFO_PATH = '/oauth2/v2/userinfo'
     TYPEFORM_TOKEN = os.getenv('TYPEFORM_TOKEN')

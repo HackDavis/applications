@@ -4,10 +4,10 @@
       <div class="summary-left">
         <h1 class="subtitle is-4">Your Progress</h1>
         <progress class="progress is-primary" :value="progress.self.done" :max="progress.self.total"></progress>
-        <p class="progress-numbers">{{progress.self.done}} completed of {{progress.self.total}}</p>
+        <p class="progress-numbers">{{progress.self.done}} completed out of {{progress.self.total}}</p>
         <h2 class="subtitle is-4">Team Progress</h2>
         <progress class="progress is-primary" :value="progress.team.done" :max="progress.team.total"></progress>
-        <p class="progress-numbers">{{progress.team.done}} completed of {{progress.team.total}}</p>
+        <p class="progress-numbers">{{progress.team.done}} completed out of {{progress.team.total}}</p>
       </div>
       <div class="summary-right">
         <h1 v-if="isAdmin" class="title has-text-centered">Applications By User</h1>

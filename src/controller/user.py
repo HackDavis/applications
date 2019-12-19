@@ -46,7 +46,18 @@ def get_progress():
     .filter(Application.assigned_to == current_user.id, Application.score != 0) \
     .count()
 
-    return jsonify(Serializer.serialize_value({'team': {'done': team_scored, 'total': team_total}, 'self': {'done': user_scored, 'total': user_total}}))
+    return jsonify(
+        Serializer.serialize_value({
+            'team': {
+                'done': team_scored,
+                'total': team_total
+            },
+            'self': {
+                'done': user_scored,
+                'total': user_total
+            }
+        }))
+
 
 @user.route('/api/user/scores', methods=['GET'])
 @login_required
@@ -103,7 +114,7 @@ def get_scores():
     #        my_results.append(cur_row)
     #        cur_row = {}
     #        cur_row["id"] = int(row[0])
-#
+    #
     #    cur_row["score"] = int(row[1])
     #    cur_row[row[3].name] = row[2]
 

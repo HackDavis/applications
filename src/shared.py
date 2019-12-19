@@ -26,10 +26,9 @@ class Shared:
         with app.app_context():
             cls.db.create_all()
 
-        cls.google = make_google_blueprint(
-            client_id=app.config.get('GOOGLE_CLIENT_ID'),
-            client_secret=app.config.get('GOOGLE_CLIENT_SECRET'),
-            scope=app.config.get('GOOGLE_SCOPES'))
+        cls.google = make_google_blueprint(client_id=app.config.get('GOOGLE_CLIENT_ID'),
+                                           client_secret=app.config.get('GOOGLE_CLIENT_SECRET'),
+                                           scope=app.config.get('GOOGLE_SCOPES'))
         cls.google.backend = SQLAlchemyBackend(OAuth, cls.db.session, user=current_user)
         app.register_blueprint(cls.google)
 

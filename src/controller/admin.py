@@ -109,10 +109,11 @@ def load():
         try:
             start = time.perf_counter()
 
-            csv_questions = Question.get_questions_from_csv(csv_file) # need to advance the csv_file reader
+            csv_questions = Question.get_questions_from_csv(
+                csv_file)  # need to advance the csv_file reader
             question_types = Question.get_question_types_from_csv(csv_file)
             question_rows = Question.map_questions_to_question_rows(csv_questions, question_types)
-            
+
             Application.insert(csv_file, question_rows, True)
 
             op_time = time.perf_counter()
@@ -183,12 +184,13 @@ def configure_parameters():
 
     return jsonify(Serializer.serialize_value(res))
 
+
 @admin.route('/api/admin/configure', methods=["PUT"])
 @login_required
 def update_parameters():
     if current_user.role != Role.admin:
         abort(401, 'User needs to be an admin to access this route')
-    
+
     data = request.get_json()
     Question.update_question_weights(data['question_weights'])
     Answer.set_unique_answer_weights(data["answer_weights"])
@@ -212,7 +214,9 @@ def generate_csv(ranked_applications):
     questions = sorted(first[6].keys())
 
     # write header
-    headers = questions + ['date_added', 'feedback', 'user_score', 'standardized_user_score', 'overall_score', 'result']
+    headers = questions + [
+        'date_added', 'feedback', 'user_score', 'standardized_user_score', 'overall_score', 'result'
+    ]
     writer.writerow(headers)
     yield data.getvalue()
     data.seek(0)
@@ -229,7 +233,9 @@ def generate_csv(ranked_applications):
             result = 'WAITLIST'
 
         answers = [value for (key, value) in sorted(application[6].items())]
-        row = answers + [application[1], application[2], application[3], application[4], application[5], result]
+        row = answers + [
+            application[1], application[2], application[3], application[4], application[5], result
+        ]
         writer.writerow(row)
         yield data.getvalue()
         data.seek(0)
@@ -250,7 +256,9 @@ def export():
     headers.set('Content-Disposition', 'attachment', filename='export.csv')
 
     # stream the response as the data is generated
-    return Response(stream_with_context(generate_csv(ranked_applications)), mimetype='text/csv', headers=headers)
+    return Response(stream_with_context(generate_csv(ranked_applications)),
+                    mimetype='text/csv',
+                    headers=headers)
 
 
 @admin.route('/api/admin/settings', methods=["GET"])

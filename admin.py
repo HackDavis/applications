@@ -106,9 +106,11 @@ commands = {
 }
 
 parser = argparse.ArgumentParser(description='Administrate the Flask app')
-parser.add_argument(
-    '-c', '--command', default='make-admin', choices=list(commands.keys()),
-    type=str)  # optional, default is 'make-admin'
+parser.add_argument('-c',
+                    '--command',
+                    default='make-admin',
+                    choices=list(commands.keys()),
+                    type=str)  # optional, default is 'make-admin'
 
 if __name__ == '__main__':
     args = parser.parse_args()

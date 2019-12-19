@@ -155,7 +155,7 @@ export default {
         (app.score && app.score.toString().includes(searchTerm)) ||
         (isAdmin && app.assignedToEmail && app.assignedToEmail.toLowerCase().includes(searchTerm)) ||
         (app.lockedByEmail && app.lockedByEmail.toLowerCase().includes(searchTerm)));
-      })
+      });
     },
     paginatedItems: function() {
       return this.searchResults.slice(0, this.maxViewIndex);
@@ -169,7 +169,7 @@ export default {
         totalScored: 0,
         scoredLockedByAdmin: 0,
         scoredLockedAsAdmin: 0
-      }
+      };
 
       const applicationsByUser = this.applications.reduce((applicationsByUser, application) => {
         const assignedToEmail = application.assignedToEmail;

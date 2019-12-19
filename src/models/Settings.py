@@ -28,11 +28,10 @@ class Settings(db.Model, ModelUtils, Serializer):
                         waitlist_limit=100):
         """Insert new settings"""
 
-        settings = Settings(
-            name=name,
-            application_limit=application_limit,
-            accept_limit=accept_limit,
-            waitlist_limit=waitlist_limit)
+        settings = Settings(name=name,
+                            application_limit=application_limit,
+                            accept_limit=accept_limit,
+                            waitlist_limit=waitlist_limit)
         Settings.insert_rows([settings])
 
         return settings

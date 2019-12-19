@@ -14,8 +14,10 @@ db = Shared.db
 
 class Answer(db.Model, ModelUtils, Serializer):
     id = db.Column(db.Integer, primary_key=True)
-    application_id = db.Column(
-        db.Integer, db.ForeignKey('application.id'), nullable=False, index=True)
+    application_id = db.Column(db.Integer,
+                               db.ForeignKey('application.id'),
+                               nullable=False,
+                               index=True)
     application = db.relationship('Application', foreign_keys=application_id)
     question_id = db.Column(db.Integer, db.ForeignKey('question.id'), nullable=False, index=True)
     question = db.relationship('Question', foreign_keys=question_id)
@@ -50,20 +52,27 @@ class Answer(db.Model, ModelUtils, Serializer):
         .first()
         if is_duplicate is not None:
             return is_duplicate
-        
+
         return None
 
     @staticmethod
     def convert_applications_to_rows(question_rows, applications, application_rows):
         """Convert applications into rows to insert into database"""
-        rows = list(map(lambda application, application_row: Answer.convert_application_to_rows(question_rows, application, application_row), applications, application_rows))
+        rows = list(
+            map(
+                lambda application, application_row: Answer.convert_application_to_rows(
+                    question_rows, application, application_row), applications, application_rows))
         return list(itertools.chain(*rows))
 
     @staticmethod
     def convert_application_to_rows(question_rows, application, application_row):
         """Convert one application into rows to insert into database"""
         answers = Answer.get_answers_from_application(application)
-        return list(map(lambda question_row, answer: Answer(application_id=application_row.id, question_id=question_row.id, answer=answer), question_rows, answers))
+        return list(
+            map(
+                lambda question_row, answer: Answer(
+                    application_id=application_row.id, question_id=question_row.id, answer=answer),
+                question_rows, answers))
 
     @staticmethod
     def get_answers_from_application(application):
@@ -127,7 +136,7 @@ class Answer(db.Model, ModelUtils, Serializer):
             transformed.append(t)
 
         return transformed
-    
+
     @staticmethod
     def set_unique_answer_weights(answer_weights):
         for question in answer_weights:
@@ -135,10 +144,9 @@ class Answer(db.Model, ModelUtils, Serializer):
                 db.session.query(Answer) \
                 .filter(Answer.question_id == question[0], Answer.answer == weight["name"]) \
                 .update({"answer_weight": weight["weight"]})
-        
+
         try:
             db.session.commit()
         except Exception as e:
             db.session.rollback()
             print(e)
-    

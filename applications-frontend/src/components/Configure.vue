@@ -70,7 +70,7 @@ export default {
         this.reloadStats();
         this.loadConfiguration().then(() => {
             bulmaAccordion.attach();
-        })
+        });
     },
     methods: {
         reset() {
@@ -88,24 +88,24 @@ export default {
             });
         },
         submit() {
-            let new_question_weights = []
+            let new_question_weights = [];
             for(let i = 0; i < this.question_weights.length; i++){
                 if(this.question_weights[i][2] != this.orig.question_weights[i][2]) {
-                    new_question_weights.push(this.question_weights[i])
+                    new_question_weights.push(this.question_weights[i]);
                 }
             }
 
             let new_answer_weights = _.reduce(_.zip(this.answer_weights, this.orig.answer_weights), (acc, n) => {
-                console.log(n)
+                console.log(n);
                 let new_weights = _.reduce(_.zip(n[0][2], n[1][2]), (acc, m) => {
                     if(m[0].weight != m[1].weight) {
-                        acc.push(m[0])
-                        return acc
+                        acc.push(m[0]);
+                        return acc;
                     }
                     return acc;
                 }, []);
                 if(new_weights.length > 0) {
-                    acc.push([n[0][0], n[0][1], new_weights])
+                    acc.push([n[0][0], n[0][1], new_weights]);
                     return acc;
                 }
                 return acc;
@@ -115,10 +115,10 @@ export default {
             let update = {
                 answer_weights: new_answer_weights,
                 question_weights: new_question_weights
-            }
+            };
 
             this.$http.put("/api/admin/configure", update).then(success => {
-                console.log(success)
+                console.log(success);
                 this.reloadStats();
                 this.loadConfiguration();
             }, error => console.error(error));
@@ -132,8 +132,8 @@ export default {
                 if(answer_map[element[2]] === undefined) {
                     answer_map[element[2]] = [];
                 }
-                answer_map[element[2]].push(element)
-                })
+                answer_map[element[2]].push(element);
+                });
 
                 this.answers = answer_map;
             }, error => console.error(error));

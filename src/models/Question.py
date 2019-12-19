@@ -60,7 +60,11 @@ class Question(db.Model, ModelUtils, Serializer):
     def convert_questions_to_rows(questions, question_types):
         """Convert questions into rows to insert into database"""
         # question_tuple[0] is the counter, question_tuple[1] is the question
-        return list(map(lambda question_tuple, question_type: Question.convert_question_to_row(question_tuple[0] + 1, question_tuple[1], question_type), enumerate(questions), question_types))
+        return list(
+            map(
+                lambda question_tuple, question_type: Question.convert_question_to_row(
+                    question_tuple[0] + 1, question_tuple[1], question_type), enumerate(questions),
+                question_types))
 
     @staticmethod
     def convert_question_to_row(index, raw_question, raw_question_type_string):
@@ -83,10 +87,11 @@ class Question(db.Model, ModelUtils, Serializer):
         .filter((Question.question_type == QuestionType.demographic) | (Question.question_type == QuestionType.university)) \
         .all()
         return weights
-    
+
     @staticmethod
     def get_row_for_question(index, question, question_type):
-        row = db.session.query(Question).filter((Question.question == question) | (Question.index == index)).first()
+        row = db.session.query(Question).filter((Question.question == question)
+                                                | (Question.index == index)).first()
         if row is None:
             row = Question.convert_question_to_row(index, question, question_type)
             Question.insert_rows([row])
@@ -95,7 +100,11 @@ class Question(db.Model, ModelUtils, Serializer):
 
     @staticmethod
     def map_questions_to_question_rows(questions, question_types):
-        return list(map(lambda question_tuple, question_type: Question.get_row_for_question(question_tuple[0] + 1, question_tuple[1], question_type), enumerate(questions), question_types))
+        return list(
+            map(
+                lambda question_tuple, question_type: Question.get_row_for_question(
+                    question_tuple[0] + 1, question_tuple[1], question_type), enumerate(questions),
+                question_types))
 
     @staticmethod
     def update_question_weights(question_weights):
@@ -103,7 +112,7 @@ class Question(db.Model, ModelUtils, Serializer):
             db.session.query(Question) \
             .filter(Question.id == weight[0]) \
             .update({"weight": weight[2]})
-        
+
         try:
             db.session.commit()
         except Exception as e:

@@ -45,7 +45,7 @@ export default {
       isJoin: true,
       fileName: "",
       waiting: false
-    }
+    };
   },
   methods: {
     submit() {
@@ -53,12 +53,12 @@ export default {
       let theFile = document.getElementById("file");
       formdata.append("applicants", theFile.files[0]);
 
-      let route = ""
+      let route = "";
       if(this.isJoin) {
         route = '/api/admin/load';
       }
       else {
-        route = '/api/admin/reload'
+        route = '/api/admin/reload';
       }
 
       this.waiting = true;
@@ -78,7 +78,7 @@ export default {
       this.fileName = e.target.files[0].name;
     }
   }
-}
+};
 </script>
 
 <style>

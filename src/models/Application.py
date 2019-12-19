@@ -13,7 +13,6 @@ from src.models.lib.ModelUtils import ModelUtils
 from src.models.lib.Serializer import Serializer
 from src.shared import Shared
 
-
 db = Shared.db
 
 
@@ -28,7 +27,7 @@ class Application(db.Model, ModelUtils, Serializer):
     feedback = db.Column(db.Text)
     date_added = db.Column(db.DateTime, nullable=False)
     answers = db.relationship('Answer', cascade='all, delete-orphan')
-    actions = db.relationship('Action') # null the foreign key
+    actions = db.relationship('Action')  # null the foreign key
     last_modified = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
 
     @staticmethod
@@ -60,9 +59,16 @@ class Application(db.Model, ModelUtils, Serializer):
 
         # save last submitted application at each email
         date_format = "%Y-%m-%d %H:%M:%S"
-        sorted_applications = sorted(applications, key=lambda application: datetime.strptime(application[submit_date_index], date_format))
-        email_application_map = {application[email_index]: application for application in sorted_applications}
-        filtered_applications = [application for (email, application) in email_application_map.items()]
+        sorted_applications = sorted(
+            applications,
+            key=lambda application: datetime.strptime(application[submit_date_index], date_format))
+        email_application_map = {
+            application[email_index]: application
+            for application in sorted_applications
+        }
+        filtered_applications = [
+            application for (email, application) in email_application_map.items()
+        ]
 
         applications_to_insert = []
         rows_to_delete = []
@@ -72,7 +78,9 @@ class Application(db.Model, ModelUtils, Serializer):
                 duplicate = Answer.check_duplicate_email(application[email_index])
                 if duplicate:
                     new_time = datetime.strptime(application[submit_date_index], date_format)
-                    duplicate_time = db.session.query(Answer).filter(Answer.application_id == duplicate.application_id).join(Question).filter(Question.question_type == QuestionType.submitDate).first()
+                    duplicate_time = db.session.query(Answer).filter(
+                        Answer.application_id == duplicate.application_id).join(Question).filter(
+                            Question.question_type == QuestionType.submitDate).first()
                     old_time = datetime.strptime(duplicate_time.answer, date_format)
 
                     if old_time >= new_time:
@@ -83,7 +91,8 @@ class Application(db.Model, ModelUtils, Serializer):
         else:
             applications_to_insert = filtered_applications
 
-        rows_to_insert = Application.convert_applications_to_rows(applications_to_insert, datetime.now())
+        rows_to_insert = Application.convert_applications_to_rows(applications_to_insert,
+                                                                  datetime.now())
 
         processing_done_time = time.perf_counter()
         print("Applications processing time: ", processing_done_time - start)
@@ -122,7 +131,10 @@ class Application(db.Model, ModelUtils, Serializer):
     @staticmethod
     def convert_applications_to_rows(applications, date):
         """Convert applications into rows to insert into database"""
-        return [Application.convert_application_to_row(application, date) for application in applications]
+        return [
+            Application.convert_application_to_row(application, date)
+            for application in applications
+        ]
 
     @staticmethod
     def convert_application_to_row(application, date):
@@ -168,7 +180,7 @@ class Application(db.Model, ModelUtils, Serializer):
             except Exception as e:
                 db.session.rollback()
                 raise e
-            
+
             db.session.refresh(application)
 
         return application
@@ -200,7 +212,7 @@ class Application(db.Model, ModelUtils, Serializer):
     def count_applications():
         """Counts number of applications in database"""
         return db.session.query(func.count(Application.id)).scalar()
-    
+
     @staticmethod
     def count_scored():
         """Counts number of applications in database"""
@@ -286,7 +298,8 @@ class Application(db.Model, ModelUtils, Serializer):
             if stddev == 0 or stddev is None:
                 stddev = 1
             for application in scored_applications_per_user[user]:
-                Application.set_standardized_score(application, (application.score - stats[0]) / stddev)
+                Application.set_standardized_score(application,
+                                                   (application.score - stats[0]) / stddev)
 
         try:
             db.session.commit()
@@ -353,7 +366,7 @@ class Application(db.Model, ModelUtils, Serializer):
         .filter((Question.question_type == QuestionType.demographic) | (Question.question_type == QuestionType.university)) \
         .group_by(Answer.question_id, Question.question, Answer.answer) \
         .order_by(Answer.question_id)
-        
+
         answer_totals = answer_totals_q.all()
 
         return answer_totals

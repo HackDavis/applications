@@ -26,9 +26,8 @@ commands = {
 }
 
 parser = argparse.ArgumentParser(description='Manage the Flask App')
-parser.add_argument(
-    "-c", "--command", default="run", choices=list(commands.keys()),
-    type=str)  # optional, default is 'run'
+parser.add_argument("-c", "--command", default="run", choices=list(commands.keys()),
+                    type=str)  # optional, default is 'run'
 
 if __name__ == "__main__":
     args = parser.parse_args()

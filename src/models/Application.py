@@ -3,6 +3,7 @@ import time
 from datetime import datetime, timedelta, date
 from collections import defaultdict
 from sqlalchemy.sql.expression import func
+from sqlalchemy.orm import aliased
 
 from src.models.Answer import Answer
 from src.models.User import User
@@ -322,19 +323,30 @@ class Application(db.Model, ModelUtils, Serializer):
 
         answer_values = Application.question_answer_matrix_subquery()
 
-        scores = db.session.query(Application.id, func.sum(answer_values.c.sum_values + Application.standardized_score).label("final_score")) \
+        scores = db.session.query(Application.id, func.sum(answer_values.c.sum_values + Application.standardized_score).label('calculated_score')) \
             .join(answer_values, answer_values.c.id == Application.id) \
             .group_by(Application.id) \
             .subquery()
 
-        results_q = db.session.query(Application.id, Application.date_added, Application.feedback, Application.score, Application.standardized_score, scores.c.final_score, func.json_object_agg(Question.question, Answer.answer)) \
-            .join(scores, scores.c.id == Application.id) \
+        team_scores = db.session.query(Answer.answer, func.max(scores.c.calculated_score).label('team_score')) \
+            .join(scores, scores.c.id == Answer.application_id) \
+            .join(Question, Question.id == Answer.question_id) \
+            .filter(Question.question_type == QuestionType.teamEmail) \
+            .group_by(Answer.answer) \
+            .subquery()
+
+        teamQuestion = aliased(Question)
+        teamAnswer = aliased(Answer)
+
+        results_q = db.session.query(Application.id, Application.date_added, Application.feedback, Application.score, Application.standardized_score, team_scores.c.team_score, func.json_object_agg(Question.question, Answer.answer)) \
             .join(Answer) \
             .join(Question) \
-            .group_by(Application.id, scores.c.final_score) \
-            .order_by(scores.c.final_score.desc().nullslast())
-
-        # print(results_q)
+            .join(teamAnswer, teamAnswer.application_id == Application.id) \
+            .join(teamQuestion, teamQuestion.id == teamAnswer.question_id) \
+            .join(team_scores, team_scores.c.answer == teamAnswer.answer) \
+            .filter(teamQuestion.question_type == QuestionType.teamEmail) \
+            .group_by(Application.id, team_scores.c.team_score) \
+            .order_by(team_scores.c.team_score.desc().nullslast()) \
 
         results = results_q.all()
 

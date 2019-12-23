@@ -328,7 +328,7 @@ class Application(db.Model, ModelUtils, Serializer):
             .group_by(Application.id) \
             .subquery()
 
-        team_scores = db.session.query(Answer.answer, func.max(scores.c.calculated_score).label('team_score')) \
+        team_scores = db.session.query(Answer.answer, func.avg(scores.c.calculated_score).label('team_score')) \
             .join(scores, scores.c.id == Answer.application_id) \
             .join(Question, Question.id == Answer.question_id) \
             .filter(Question.question_type == QuestionType.teamEmail) \

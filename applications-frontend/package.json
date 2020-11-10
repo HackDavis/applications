@@ -28,7 +28,7 @@
     "eslint": "^5.11.1",
     "eslint-config-prettier": "3.0.1",
     "eslint-plugin-prettier": "2.6.2",
-    "node-sass": "^4.11.0",
+    "node-sass": "^4.13.1",
     "prettier": "1.14.2",
     "sass-loader": "^7.1.0",
     "vue-template-compiler": "^2.5.21",

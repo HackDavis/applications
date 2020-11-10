@@ -17,6 +17,7 @@ venv\Scripts\activate (Windows)
 source venv/bin/activate (Unix-like)
 cd applications-frontend
 npm install
+npm run build
 
 # Use "deactivate" to exit virtual environment
 ```

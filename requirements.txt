@@ -27,7 +27,7 @@ pluggy==0.6.0
 psycopg2==2.8.6
 py==1.5.3
 pycodestyle==2.4.0
-PyJWT==1.6.4
+PyJWT==2.4.0
 pykwalify==1.6.1
 pytest==3.6.2
 python-box==3.2.0
